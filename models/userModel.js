@@ -83,6 +83,11 @@ const userSchema = new mongoose.Schema(
     medicalDetails: [medicalRecordSchema],
     familyDetails: [familyMemberSchema],
     bankDetails: [bankDetailsSchema],
+
+    location: {
+      type: { type: String, default: "Point" },
+      coordinates: [Number],
+    },
   },
   { timestamps: true },
 );
@@ -112,9 +117,10 @@ export default User;
 async function createUser() {
   await User.create({
     firstname: "vipul",
-    email: "vipulgehlot@hotmail.com",
+    lastname: "gehlot",
+    email: "vipulgehlot43@gmail.com",
     password: "12345",
-    role: "employee",
+    role: "admin",
   });
   console.log("usercreated");
 }

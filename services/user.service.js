@@ -53,10 +53,7 @@ const userService = {
 
   changePassword: async ({ body, user }) => {
     const creds = body;
-    console.log("creds", creds);
-    if (!["admin", "operator"].includes(user.role))
-      throw createError("you have no acccess to perform this action", 401);
-
+   
     const exUser = await User.findById(user.id).select("+password");
     if (!exUser) throw createError("User not found", 404);
 

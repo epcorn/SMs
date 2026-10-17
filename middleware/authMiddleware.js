@@ -18,11 +18,11 @@ export const authentication = async (req, res, next) => {
 
 export const operatorAccess = async (req, res, next) => {
   const token = req.cookies.token;
-  if (!token) return next(new createError("Yout are not authorised", 401));
+  if (!token) throw createError("Yout are not authorised", 401);
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   if (!["operator", "admin"].includes(decoded.role)) {
-    return next(new createError("Yout dont have permission", 401));
+    throw createError("Yout dont have permission", 401);
   }
 
   req.user = decoded;
@@ -30,11 +30,11 @@ export const operatorAccess = async (req, res, next) => {
 };
 export const empAccess = async (req, res, next) => {
   const token = req.cookies.token;
-  if (!token) return next(new createError("Yout are not authorised", 401));
+  if (!token) throw createError("Yout are not authorised", 401);
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   if (!["operator", "admin", "employee"].includes(decoded.role)) {
-    return next(new createError("Yout dont have permission", 401));
+    throw createError("Yout dont have permission", 401);
   }
 
   req.user = decoded;

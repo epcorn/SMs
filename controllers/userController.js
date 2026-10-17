@@ -3,7 +3,7 @@ import userService from "../services/user.service.js";
 
 export const loginUser = async (req, res, next) => {
   try {
-    console.log(req.body);
+    console.log("login body", req.body);
     const { token, user } = await userService.loginUser(req.body);
     res.cookie("EMS_token", token, {
       httpOnly: true,
@@ -26,7 +26,6 @@ export const changePassword = async (req, res, next) => {
     const data = await userService.changePassword(req);
     return res.status(200).json({ ...data });
   } catch (error) {
-    console.log(error.msg);
     next(error);
   }
 };
@@ -74,7 +73,6 @@ export const editUser = async (req, res, next) => {
     next(error);
   }
 };
-
 
 export const uploadController = async (req, res, next) => {
   try {

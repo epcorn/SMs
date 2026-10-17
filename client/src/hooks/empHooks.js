@@ -34,7 +34,7 @@ export const useAssignAttendence = () => {
 
 export const useGetAttendenceQuery = (id = "") => {
   return useQuery({
-    queryKey: ["mark", "user","assign", id],
+    queryKey: ["mark", "user", "assign", id],
     queryFn: async () => {
       // if (id) return await fetchFn(`emp/attendence/${id}`);
 
@@ -50,7 +50,7 @@ export const useGetAllUsers = ({
   email = "",
 }) => {
   return useQuery({
-    queryKey: ["user","file-upload", { page, limit, name, email }],
+    queryKey: ["user", "file-upload", { page, limit, name, email }],
     queryFn: async () => {
       const data = await fetchFn(
         `user/all?page=${page}&limit=${limit}&name=${name}&email=${email}`,
@@ -103,7 +103,6 @@ export const useEditUser = () => {
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async ({ creds, id }) => {
-      console.log(creds, id);
       const data = await fetchFn(`user/edit/${id}`, {
         method: "POST",
         body: creds,
@@ -119,6 +118,22 @@ export const useEditUser = () => {
     onError: (error) => {
       console.error("Mutation failed", error?.message);
     },
+  });
+};
+
+export const useGetCoOrdinatesMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["coords", "user"],
+    mutationFn: async (coords) => {
+      const res = await fetchFn("emp/location/coords", {
+        method: "PATCH",
+        body: coords,
+      });
+      return res;
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["user", "coords"] }),
   });
 };
 

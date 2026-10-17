@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const connectDB = (url) => {
-  mongoose
-    .connect(url)
-    .then((conn) => {
-      console.log("mongoose connected with ", conn.connection.host);
-    })
-    .catch((err) => console.log("mongoose connection erorr", err));
+const connectDB = async (uri) => {
+  if (!uri) {
+    throw new Error("MONGO_URI is not configured", uri);
+  }
+
+  await mongoose.connect(uri);
+  console.log("MongoDB connected successfully");
 };
 
 export default connectDB;

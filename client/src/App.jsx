@@ -7,10 +7,41 @@ import Leave from "./pages/Leave";
 import Attendence from "./pages/Attendence";
 import Login from "./components/oth/Login";
 import GPS from "./pages/GPS";
+import useGpsStore from "./store/gpsStore";
 import { useEffect } from "react";
-import { userLocation } from "./utils/helperfn";
+import useAuthStore from "./store/authStore";
+import { useGetCoOrdinatesMutation } from "./hooks/empHooks";
 
 function App() {
+  const startTracking = useGpsStore((state) => state.startTracking);
+  const stopTracking = useGpsStore((state) => state.stopTracking);
+  const user = useAuthStore((state) => state.user);
+  const location = useGpsStore((state) => state.location);
+
+  const { mutateAsync: setCoords, isPending: settingCoords } =
+    useGetCoOrdinatesMutation();
+
+  useEffect(() => {
+    if (!location || !user?.user?.id) return;
+
+    const sendCoords = async () => {
+      try {
+        await setCoords({
+          coords: [location.longitude, location.latitude],
+          id: user?.user?.id,
+        });
+      } catch (err) {
+        console.error("Failed to update database coordinates:", err);
+      }
+    };
+
+    sendCoords();
+  }, [location, user?.user?.id, setCoords]);
+
+  useEffect(() => {
+    startTracking();
+    return () => stopTracking();
+  }, [startTracking, stopTracking]);
 
   return (
     <>

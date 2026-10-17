@@ -1,6 +1,5 @@
 import AddEmp from "@/components/employee/AddEmp";
 import EmpCard, { EmpDetails } from "@/components/employee/EmpCard";
-import MarkAttendence from "@/components/employee/MarkAttendence";
 import InputField from "@/components/form/InputField";
 import Search from "@/components/form/Search";
 import ModalButton from "@/components/oth/ModalButton";
@@ -172,7 +171,7 @@ function ChangePassword({ user }) {
       const res = await changePassword(data);
       setResp({ res, err: {} })
       toast.success("Password changed successfully");
-      document.getElementById(`cp-emp-modal-${user._id}`).close()
+      // document.getElementById(`cp-emp-modal-${user._id}`).close()
     } catch (err) {
       setResp({ err: err, res: {} });
       toast.error("Failed to change password");

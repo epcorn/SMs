@@ -36,7 +36,7 @@ export const useChangePassword = () => {
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async (creds) => {
-      await fetchFn("auth/cp", { method: "PATCH", body: creds });
+      await fetchFn("user/changepassword", { method: "POST", body: creds });
       return { msg: "User updated successfully" };
     },
   });

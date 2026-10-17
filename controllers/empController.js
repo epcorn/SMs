@@ -27,3 +27,14 @@ export const attendenceAssign = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCoordinates = async (req, res, next) => {
+
+  try {
+    const data = await empServices.getCoOrdinates(req.body);
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};

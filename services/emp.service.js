@@ -1,5 +1,5 @@
 import { createError } from "../middleware/errorMiddleware.js";
-import Attendence from "../models/attendencemodel.js";
+import Attendence from "../models/attendenceModel.js";
 import User from "../models/userModel.js";
 
 const empServices = {
@@ -106,12 +106,14 @@ const empServices = {
         options: { strictPopulate: false },
       },
     };
-    const singleUser = await User.findById(currentUser._id || currentUser.id)
+    const singleUser = await User.findById(currentUser.id)
       .populate(populateOptions)
       .select(
         "firstname middlename lastname attendence todayAttendence attendenceRecords updatedAt",
       );
 
+    console.log(currentUser, singleUser);
+    
     if (!singleUser) {
       throw createError("User not found", 404);
     }
@@ -127,6 +129,22 @@ const empServices = {
     }
 
     return { success: true, user: singleUser };
+  },
+
+  getCoOrdinates: async ({ coords, id }) => {
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        $set: { "location.coordinates": coords },
+      },
+      { runValidators: true, returnDocument: true },
+    );
+    if (!user) throw createError("user not found", 404);
+    return {
+      success: true,
+      location: user.location,
+      user: { id: user._id, name: `${user.firstname} ${user.lastname}` },
+    };
   },
 };
 

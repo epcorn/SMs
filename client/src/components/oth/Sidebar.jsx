@@ -85,7 +85,7 @@ function Sidebar({ children }) {
       </div>
 
       {/* Sidebar Drawer Container */}
-      <div className="drawer-side z-40">
+      <div className="drawer-side z-9999">
         <label
           htmlFor="my-drawer-4"
           aria-label="close sidebar"
@@ -119,7 +119,7 @@ function Sidebar({ children }) {
                       ${
                         isActive
                           ? "bg-rose-400/20 border-l-4 text-white border-l-rose-400 shadow-lg shadow-rose-300/10 scale-[1.02]"
-                          : "hover:bg-rose-800/70 hover:text-white"
+                          : "hover:bg-rose-400/30 hover:text-white"
                       }`}
                   >
                     {/* Keeps the icon matching text colors correctly */}

@@ -40,7 +40,7 @@ function ShowUserAttendence({ users }) {
 
   return (
     <>
-      <h3 className="text-2xl font-semibold ">Today's Employee's Attendance</h3>
+      <h3 className="text-2xl font-semibold my-5">Today's Employee's Attendance</h3>
       <table className="table outline outline-gray-400">
         <thead className="bg-accent ">
           <tr>

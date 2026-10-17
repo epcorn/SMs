@@ -10,6 +10,6 @@ const authRoute = Router();
 
 authRoute.post("/login", loginUser);
 authRoute.post("/logout", logout);
-authRoute.patch("/cp", operatorAccess, changePassword);
+// authRoute.patch("/cp", operatorAccess, changePassword);
 
 export default authRoute;

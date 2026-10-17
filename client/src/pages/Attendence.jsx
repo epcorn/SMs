@@ -1,8 +1,11 @@
+import AttendanceCalendar from "@/components/attendence/AttendenceCalendar";
 import ShowUserAttendence from "@/components/employee/ShowUserAttendence";
 import { useGetAttendenceQuery, useMarkAttandence } from "@/hooks/empHooks";
 import useAuthStore from "@/store/authStore";
-import { dateFormat } from "@/utils/helperfn";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "motion/react";
 
 const getStatusStyle = (val) => {
   switch (val) {
@@ -38,6 +41,7 @@ const getStatusStyle = (val) => {
 };
 
 function Attendence() {
+  const [toggle, setToggle] = useState(false);
   const { user } = useAuthStore((state) => state.user);
 
   const {
@@ -47,7 +51,7 @@ function Attendence() {
   } = useMarkAttandence();
 
   const { data: attendence, isFetching: loadingAttdnc } = useGetAttendenceQuery(
-    user?.id
+    user?.id,
   );
   const history = attendence?.user || {};
 
@@ -58,24 +62,55 @@ function Attendence() {
     } catch (error) {
       console.error(error);
       toast.error(
-        error?.response?.data?.msg || error?.message || "Internal server error"
+        error?.response?.data?.msg || error?.message || "Internal server error",
       );
     }
   };
 
   return (
-    <div className="relative p-6 md:p-8 bg-base-100 rounded-2xl shadow-xs border border-base-200/60 flex flex-col gap-10">
+    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col gap-10 h-full">
       {["admin", "operator"].includes(user?.role) && (
-        <ShowUserAttendence users={attendence?.users} />
+        <button
+          className={`btn btn-square btn-circle  btn-dash absolute top-1/2 -translate-y-1/2 ${toggle ? "" : "right-0"}`}
+          onClick={() => setToggle(!toggle)}
+        >
+          {toggle ? <ChevronRight /> : <ChevronLeft />}
+        </button>
       )}
 
-      <ShowEmpAttendence
-        data={data}
-        handleMark={handleMark}
-        isMarking={isMarking}
-        loadingAttdnc={loadingAttdnc}
-        history={history}
-      />
+      <AnimatePresence mode="wait">
+        {toggle ? (
+          ["admin", "operator"].includes(user?.role) && (
+            <motion.div
+              key="admin-view"
+              initial={{ opacity: 0, x: 70 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 80 }}
+              transition={{ duration: 0.4 }}
+              className="w-full h-full"
+            >
+              <ShowUserAttendence users={attendence?.users} />
+            </motion.div>
+          )
+        ) : (
+          <motion.div
+            key="emp-view"
+            initial={{ opacity: 0, x: 70 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+            transition={{ duration: 0.4 }}
+            className="w-full h-full"
+          >
+            <ShowEmpAttendence
+              data={data}
+              handleMark={handleMark}
+              isMarking={isMarking}
+              loadingAttdnc={loadingAttdnc}
+              history={history}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -85,7 +120,7 @@ export default Attendence;
 function ShowEmpAttendence({ handleMark, isMarking, loadingAttdnc, history }) {
   const statusConfig = getStatusStyle(history?.todayAttendence);
   const records = history?.attendenceRecords || [];
-console.log(records);
+  console.log(records);
   return (
     <div className="flex flex-col gap-10">
       {/* Header Section */}
@@ -127,77 +162,13 @@ console.log(records);
       </div>
 
       {/* History Log Section */}
-      <div className="flex flex-col gap-4 border-t border-base-200 pt-6">
-        <div className="flex justify-between items-center px-1">
-          <h3 className="font-bold text-xs uppercase tracking-widest text-base-content/60">
-            Recent Logs
-          </h3>
-          <span className="badge badge-neutral badge-sm font-semibold px-3 py-2.5">
-            {records.length} {records.length === 1 ? "Day" : "Days"}
-          </span>
+      {loadingAttdnc ? (
+        <div className="flex justify-center items-center py-2">
+          <span className="loading loading-spinner text-accent loading-md"></span>
         </div>
-
-        {loadingAttdnc ? (
-          <div className="flex justify-center items-center py-12">
-            <span className="loading loading-spinner text-accent loading-md"></span>
-          </div>
-        ) : records.length === 0 ? (
-          <div className="text-center py-10 border border-dashed border-base-300 rounded-2xl bg-base-200/20">
-            <p className="text-sm font-medium text-base-content/50">
-              No attendance logs recorded yet.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 max-h-72 overflow-y-auto pr-1">
-            {records.map((att) => {
-              const statusLower = att?.history?.at(-1)?.status?.toLowerCase();
-              const isPresent = statusLower === "present";
-              const isAbsent = statusLower === "absent";
-
-              return (
-                <div
-                  key={att?._id}
-                  className="group flex flex-col items-center justify-between gap-3.5 p-4 rounded-2xl border border-base-300/80 bg-base-100 hover:border-base-content/20 hover:shadow-md transition-all duration-200"
-                >
-                  {/* Date & Status Dot */}
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        isPresent
-                          ? "bg-emerald-500 ring-4 ring-emerald-500/15"
-                          : isAbsent
-                            ? "bg-rose-500 ring-4 ring-rose-500/15"
-                            : "bg-amber-500 ring-4 ring-amber-500/15"
-                      }`}
-                    />
-                    <span className="text-sm font-bold text-base-content/90">
-                      {dateFormat(att?.createdAt).date}
-                    </span>
-                  </div>
-
-                  {/* Status Pill */}
-                  <span
-                    className={`badge badge-sm font-semibold tracking-wide px-3 py-2.5 border-none text-white ${
-                      isPresent
-                        ? "bg-emerald-600"
-                        : isAbsent
-                          ? "bg-rose-600"
-                          : "bg-amber-500"
-                    }`}
-                  >
-                    {att?.history?.at(-1)?.status || "Marked"}
-                  </span>
-
-                  {/* Timestamp */}
-                  <span className="text-xs font-medium text-base-content/50 group-hover:text-base-content/80 transition-colors">
-                    {dateFormat(att?.createdAt).time}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      ) : (
+        <AttendanceCalendar records={records} />
+      )}
     </div>
   );
 }
