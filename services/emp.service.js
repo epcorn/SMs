@@ -15,8 +15,11 @@ const empServices = {
 
     const existAtt = await Attendence.findOne({
       user: id,
-      date: { $gte: startOfDay, $lte: endOfDay },
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
     });
+    if (!existAtt.active) {
+      throw createError("User is not active", 400);
+    }
 
     if (existAtt) throw createError("Already attendence marked for Today", 400);
   },
@@ -36,6 +39,7 @@ const empServices = {
     const targetUserId = isPrivileged && id ? id : user.id;
 
     const targetUser = await User.findById(targetUserId);
+    if (!targetUser.active) throw createError("User not Active", 400);
     if (!targetUser) throw createError("User not found", 404);
 
     const startOfDay = new Date();
@@ -44,7 +48,7 @@ const empServices = {
     // 1. Check if an attendance record already exists for today
     const existingAttendance = await Attendence.findOne({
       user: targetUser._id,
-      date: { $gte: startOfDay },
+      createdAt: { $gte: startOfDay },
     });
 
     let updatedAttendance;
@@ -53,14 +57,14 @@ const empServices = {
       updatedAttendance = await Attendence.create({
         user: targetUser._id,
         status: status,
-        date: new Date(),
+        createdAt: new Date(),
         history: [{ status: status, date: new Date(), changedBy: user.id }],
       });
-      targetUser.todayAttendence = status;
     } else {
       updatedAttendance = await Attendence.findOneAndUpdate(
         { _id: existingAttendance._id },
         {
+          $set: { status },
           $push: {
             history: {
               status: status,
@@ -69,32 +73,42 @@ const empServices = {
             },
           },
         },
-        { new: true },
+        { new: true, upsert: true, runValidators: true },
       );
-      targetUser.todayAttendence = status;
     }
 
     await targetUser.save();
 
-    console.log(targetUser.todayAttendence);
     return { msg: `${targetUser?.firstname} is marked ${status}`, targetUser };
   },
 
   markAttendance: async function ({ body, user }) {
     await this.existAttendence(user.id, null);
 
-    const [att, curruser] = await Promise.all([
-      Attendence.create({
-        user: user.id,
-        status: "Present",
-        history: [{ status: "Present", changedBy: user.id }],
-      }),
-      User.findByIdAndUpdate(user.id, {
-        $set: { todayAttendence: "Present" },
-      }),
-    ]);
-    console.log(att, curruser);
+    const att = await Attendence.create({
+      user: user.id,
+      status: "Present",
+      history: [{ status: "Present", changedBy: user.id }],
+    });
     return { msg: `marked ${att.status}` };
+  },
+
+  markActive: async function ({ params, user, body }) {
+    const isActive = typeof body.status === "boolean" ? body.status : body;
+
+    const exUser = await User.findByIdAndUpdate(
+      params.id,
+      {
+        $set: { active: isActive },
+      },
+      { new: true, returnDocument: "after", runValidators: true },
+    );
+    if (!exUser) throw createError("User not found", 404);
+
+    return {
+      msg: `${exUser.firstname} has marked ${exUser.active ? "Active" : "InActive"}`,
+      user: exUser.active,
+    };
   },
 
   getAttendence: async (currentUser) => {
@@ -109,11 +123,11 @@ const empServices = {
     const singleUser = await User.findById(currentUser.id)
       .populate(populateOptions)
       .select(
-        "firstname middlename lastname attendence todayAttendence attendenceRecords updatedAt",
+        "firstname middlename lastname attendence attendenceRecords updatedAt",
       );
 
     console.log(currentUser, singleUser);
-    
+
     if (!singleUser) {
       throw createError("User not found", 404);
     }
@@ -122,7 +136,7 @@ const empServices = {
       const allUsers = await User.find({})
         .populate(populateOptions)
         .select(
-          "firstname middlename lastname todayAttendence attendence attendenceRecords updatedAt",
+          "firstname middlename lastname attendence attendenceRecords updatedAt",
         );
 
       return { success: true, user: singleUser, users: allUsers };

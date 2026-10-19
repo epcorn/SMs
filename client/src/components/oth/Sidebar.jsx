@@ -79,7 +79,7 @@ function Sidebar({ children }) {
         </nav>
 
         {/* Main Page Content rendered here */}
-        <main className="flex-1 overflow-y-auto p-6 w-full bg-slate-50">
+        <main className="flex-1 overflow-y-auto p-2 w-full bg-slate-50">
           {children}
         </main>
       </div>
@@ -115,7 +115,7 @@ function Sidebar({ children }) {
                 <li key={li.link}>
                   <Link
                     to={li.link}
-                    className={`flex items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm
+                    className={`flex focus-within:bg-rose-400/20 focus:text-white items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm
                       ${
                         isActive
                           ? "bg-rose-400/20 border-l-4 text-white border-l-rose-400 shadow-lg shadow-rose-300/10 scale-[1.02]"

@@ -25,6 +25,8 @@ export const dateCompare = (a, b) => {
   return convertIsoDate(a) === convertIsoDate(b);
 };
 
+
+
 export const userLocation = () => {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(

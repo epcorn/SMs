@@ -50,7 +50,13 @@ export const useGetAllUsers = ({
   email = "",
 }) => {
   return useQuery({
-    queryKey: ["user", "file-upload", { page, limit, name, email }],
+    queryKey: [
+      "user",
+      "active",
+      "file-upload",
+      "active",
+      { page, limit, name, email },
+    ],
     queryFn: async () => {
       const data = await fetchFn(
         `user/all?page=${page}&limit=${limit}&name=${name}&email=${email}`,
@@ -117,6 +123,24 @@ export const useEditUser = () => {
     },
     onError: (error) => {
       console.error("Mutation failed", error?.message);
+    },
+  });
+};
+
+export const useMarkActiveMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ["active"],
+    mutationFn: async ({ status, id }) => {
+      const data = await fetchFn(`emp/active/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: { status },
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user", "active"] });
     },
   });
 };

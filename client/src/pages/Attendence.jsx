@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "motion/react";
+import { dateCompare } from "@/utils/helperfn";
 
 const getStatusStyle = (val) => {
   switch (val) {
@@ -68,7 +69,7 @@ function Attendence() {
   };
 
   return (
-    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col gap-10 h-full">
+    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col gap-10 h-full px-3">
       {["admin", "operator"].includes(user?.role) && (
         <button
           className={`btn btn-square btn-circle  btn-dash absolute top-1/2 -translate-y-1/2 ${toggle ? "" : "right-0"}`}
@@ -118,9 +119,10 @@ function Attendence() {
 export default Attendence;
 
 function ShowEmpAttendence({ handleMark, isMarking, loadingAttdnc, history }) {
-  const statusConfig = getStatusStyle(history?.todayAttendence);
   const records = history?.attendenceRecords || [];
-  console.log(records);
+  const todays = history?.attendenceRecords?.find(a => dateCompare(a?.createdAt, new Date()))
+  const statusConfig = getStatusStyle(todays?.status || "N/A");
+
   return (
     <div className="flex flex-col gap-10">
       {/* Header Section */}

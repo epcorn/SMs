@@ -52,18 +52,17 @@ const userSchema = new mongoose.Schema(
     bloodGroup: { type: String, default: "N/A" },
 
     attendence: { type: mongoose.Schema.Types.ObjectId, ref: "Attendence" },
-
-    todayAttendence: {
-      type: String,
-      enum: ["Present", "Absent", "Half-day", "N/A"],
-      default: "N/A",
-      get: function (val) {
-        if (!this.updatedAt || val === "N/A") return "N/A";
-        const today = new Date().setHours(0, 0, 0, 0);
-        const lastUpdated = new Date(this.updatedAt).setHours(0, 0, 0, 0);
-        return lastUpdated === today ? val : "N/A";
-      },
-    },
+    // todayAttendence: {
+    //   type: String,
+    //   enum: ["Present", "Absent", "Half-day", "N/A"],
+    //   default: "N/A",
+    //   get: function (val) {
+    //     if (!this.updatedAt || val === "N/A") return "N/A";
+    //     const today = new Date().setHours(0, 0, 0, 0);
+    //     const lastUpdated = new Date(this.updatedAt).setHours(0, 0, 0, 0);
+    //     return lastUpdated === today ? val : "N/A";
+    //   },
+    // },
 
     salaryDetails: {
       currentSalary: { type: String, default: 0 },

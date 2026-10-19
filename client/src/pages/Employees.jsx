@@ -2,9 +2,10 @@ import AddEmp from "@/components/employee/AddEmp";
 import EmpCard, { EmpDetails } from "@/components/employee/EmpCard";
 import InputField from "@/components/form/InputField";
 import Search from "@/components/form/Search";
+import AddSite from "@/components/oth/AddSite";
 import ModalButton from "@/components/oth/ModalButton";
 import { useChangePassword } from "@/hooks/authHooks";
-import { useAddUser, useEditUser, useGetAllUsers } from "@/hooks/empHooks";
+import { useAddUser, useEditUser, useGetAllUsers, useMarkActiveMutation } from "@/hooks/empHooks";
 import { LockKeyholeOpenIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -31,6 +32,7 @@ function Employees() {
 
   const { mutateAsync: addUser, isFetching: addingUser } = useAddUser();
   const { mutateAsync: editUser, isFetching: editingUser } = useEditUser();
+  const { mutateAsync: markActive } = useMarkActiveMutation();
 
   const {
     register,
@@ -45,9 +47,12 @@ function Employees() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-semibold">Employees</h3>
+      <div className="flex justify-end items-center gap-3 mb-4">
+        <h3 className="text-2xl font-semibold mr-auto">Employees</h3>
         <AddEmp type="add" onSubmitEmp={addUser} loading={addingUser} />
+        <ModalButton id="addSiteModal" title={'+ Add Site'} >
+          <AddSite />
+        </ModalButton>
       </div>
       <div className="mb-4">
         <Search
@@ -95,7 +100,7 @@ function Employees() {
               </tr>
             ) : (
               users?.map((user, i) => (
-                <tr key={user?._id} className="relative">
+                <tr key={user?._id} className={`relative ${user.active ? "" : "opacity-40"}`}>
                   <td>{i + 1}</td>
                   <td>
                     {user.firstname} {user.middlename} {user.lastname}
@@ -137,6 +142,15 @@ function Employees() {
                       )}
                     </ModalButton>
 
+                    <input type="checkbox" checked={!!user?.active} className="toggle toggle-success" onChange={async (e) => {
+                      console.log(user.active)
+                      try {
+                        const res = await markActive({ id: user._id, status: !user?.active })
+                        toast.success(res.msg)
+                      } catch (error) {
+                        toast.error(error.message)
+                      }
+                    }} />
                     {/* <MarkAttendence user={user} /> */}
                   </td>
                 </tr>

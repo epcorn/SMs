@@ -21,27 +21,28 @@ function App() {
   const { mutateAsync: setCoords, isPending: settingCoords } =
     useGetCoOrdinatesMutation();
 
-  useEffect(() => {
-    if (!location || !user?.user?.id) return;
+  // useEffect(() => {
+  //   if (!location || !user?.user?.id) return;
 
-    const sendCoords = async () => {
-      try {
-        await setCoords({
-          coords: [location.longitude, location.latitude],
-          id: user?.user?.id,
-        });
-      } catch (err) {
-        console.error("Failed to update database coordinates:", err);
-      }
-    };
+  //   const sendCoords = async () => {
+  //     try {
+  //       await setCoords({
+  //         coords: [location.longitude, location.latitude],
+  //         id: user?.user?.id,
+  //       });
+  //     } catch (err) {
+  //       console.error("Failed to update database coordinates:", err);
+  //     }
+  //   };
 
-    sendCoords();
-  }, [location, user?.user?.id, setCoords]);
+  //   sendCoords();
+  // }, [location, user?.user?.id, setCoords]);
 
   useEffect(() => {
     startTracking();
     return () => stopTracking();
   }, [startTracking, stopTracking]);
+  
 
   return (
     <>

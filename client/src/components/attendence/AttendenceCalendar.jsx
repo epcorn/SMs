@@ -35,7 +35,7 @@ function AttendanceCalendar({ records = [] }) {
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="flex flex-col p-3 max-w-5xl w-full shadow-lg shadow-gray-400 mx-auto gap-4 border-t rounded-2xl [corner-shape-bevel] border-base-400 pt-6 bg-gray-200">
+    <div className="flex flex-col p-3 max-w-5xl w-full mx-auto gap-4 rounded-2xl [corner-shape-bevel] border-base-400 pt-6 bg-gray-200">
       {/* Calendar Header & Month Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ function AttendanceCalendar({ records = [] }) {
         {weekDays.map((day) => (
           <div
             key={day}
-            className="text-xs font-bold uppercase tracking-wider text-base-content/50 py-1"
+            className="text-xs font-bold uppercase tracking-wider text-black py-1"
           >
             {day}
           </div>
