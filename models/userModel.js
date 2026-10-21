@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema(
     firstname: { type: String },
     middlename: { type: String },
     lastname: { type: String },
+    gender: { type: String },
     email: { type: String, unique: true },
     password: { type: String, select: false },
     role: {
@@ -51,18 +52,8 @@ const userSchema = new mongoose.Schema(
     residAddress: { type: String, default: "" },
     bloodGroup: { type: String, default: "N/A" },
 
+    site: { type: mongoose.Schema.Types.ObjectId, ref: "Site" },
     attendence: { type: mongoose.Schema.Types.ObjectId, ref: "Attendence" },
-    // todayAttendence: {
-    //   type: String,
-    //   enum: ["Present", "Absent", "Half-day", "N/A"],
-    //   default: "N/A",
-    //   get: function (val) {
-    //     if (!this.updatedAt || val === "N/A") return "N/A";
-    //     const today = new Date().setHours(0, 0, 0, 0);
-    //     const lastUpdated = new Date(this.updatedAt).setHours(0, 0, 0, 0);
-    //     return lastUpdated === today ? val : "N/A";
-    //   },
-    // },
 
     salaryDetails: {
       currentSalary: { type: String, default: 0 },

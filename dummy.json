@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Republic Day",
+    "date": "2026-01-26T00:00:00.000Z",
+    "type": "Public",
+    "description": "National holiday celebrating the Constitution of India."
+  },
+  {
+    "title": "Holi",
+    "date": "2026-03-03T00:00:00.000Z",
+    "type": "Public",
+    "description": "Festival of colors."
+  },
+  {
+    "title": "Good Friday",
+    "date": "2026-04-03T00:00:00.000Z",
+    "type": "Public",
+    "description": "Christian holiday commemorating the crucifixion of Jesus."
+  },
+  {
+    "title": "Independence Day",
+    "date": "2026-08-15T00:00:00.000Z",
+    "type": "Public",
+    "description": "National holiday celebrating independence from British rule."
+  },
+  {
+    "title": "Mahatma Gandhi Jayanti",
+    "date": "2026-10-02T00:00:00.000Z",
+    "type": "Public",
+    "description": "National holiday celebrating the birth anniversary of Mahatma Gandhi."
+  },
+  {
+    "title": "Dussehra",
+    "date": "2026-10-20T00:00:00.000Z",
+    "type": "Public",
+    "description": "Festival marking the victory of good over evil."
+  },
+  {
+    "title": "Diwali",
+    "date": "2026-11-08T00:00:00.000Z",
+    "type": "Public",
+    "description": "Festival of lights."
+  },
+  {
+    "title": "Christmas Day",
+    "date": "2026-12-25T00:00:00.000Z",
+    "type": "Public",
+    "description": "Annual festival commemorating the birth of Jesus Christ."
+  }
+]

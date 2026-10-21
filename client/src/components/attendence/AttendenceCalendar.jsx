@@ -1,13 +1,18 @@
+import { useGetHolidaysQuery } from "@/hooks/empHooks";
 import { dateFormat } from "@/utils/helperfn";
 import { useState, useMemo } from "react";
 
 function AttendanceCalendar({ records = [] }) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  const { data: holidaysData } = useGetHolidaysQuery();
+  // Safe fallback to an empty array while query is loading
+  const holidays = holidaysData || [];
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // Map records by "YYYY-MM-DD" for instant O(1) lookup
+  // 1. Map records by "YYYY-MM-DD" for instant O(1) lookup
   const recordsByDate = useMemo(() => {
     const map = {};
     records.forEach((rec) => {
@@ -18,6 +23,18 @@ function AttendanceCalendar({ records = [] }) {
     });
     return map;
   }, [records]);
+
+  // 2. Map holidays by "YYYY-MM-DD" for instant O(1) lookup
+  const holidaysByDate = useMemo(() => {
+    const map = {};
+    holidays.forEach((hol) => {
+      if (!hol?.date) return;
+      const d = new Date(hol.date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      map[key] = hol;
+    });
+    return map;
+  }, [holidays]);
 
   // Calculate month grid days
   const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 (Sun) - 6 (Sat)
@@ -74,14 +91,17 @@ function AttendanceCalendar({ records = [] }) {
 
       {/* Days of Week Header */}
       <div className="grid grid-cols-7 gap-2 text-center">
-        {weekDays.map((day) => (
-          <div
-            key={day}
-            className="text-xs font-bold uppercase tracking-wider text-black py-1"
-          >
-            {day}
-          </div>
-        ))}
+        {weekDays.map((day) => {
+          const isHolidayHeader = day === "Sun";
+          return (
+            <div
+              key={day}
+              className={`text-xs font-bold uppercase tracking-wider text-black py-1 ${isHolidayHeader ? "bg-red-300 rounded-md" : ""}`}
+            >
+              {day}
+            </div>
+          );
+        })}
       </div>
 
       {/* Calendar Days Grid */}
@@ -99,13 +119,17 @@ function AttendanceCalendar({ records = [] }) {
           const dayNum = idx + 1;
           const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
           const record = recordsByDate[dateKey];
+          const holiday = holidaysByDate[dateKey]; // Fast O(1) lookup
 
           const statusLower = record?.status?.toLowerCase();
           const isPresent = statusLower === "present";
           const isAbsent = statusLower === "absent";
           const isHalfDay = statusLower === "half-day";
-
           const now = new Date();
+
+          const currentLoopDate = new Date(year, month, dayNum);
+          const isSunday = currentLoopDate.getDay() === 0;
+
           const isToday =
             now.getFullYear() === year &&
             now.getMonth() === month &&
@@ -114,56 +138,62 @@ function AttendanceCalendar({ records = [] }) {
           return (
             <div
               key={dateKey}
-              className={`h-20 p-2 rounded-xl border flex flex-col justify-between transition-all ${
-                isPresent
-                  ? "bg-emerald-500/10 border-emerald-500/30"
-                  : isAbsent
-                    ? "bg-rose-500/10 border-rose-500/30"
-                    : isHalfDay
-                      ? "bg-amber-500/10 border-amber-500/30"
-                      : "bg-base-100 border-base-200/80 hover:border-base-300"
-              } ${isToday ? "ring-2 ring-accent ring-offset-1" : ""}`}
+              className={`h-20 p-2 rounded-xl border flex flex-col justify-between transition-all ${holiday || isSunday
+                  ? "bg-red-700/40 border-red-500"
+                  : isPresent
+                    ? "bg-emerald-500/10 border-emerald-500/30"
+                    : isAbsent
+                      ? "bg-rose-500/10 border-rose-500/30"
+                      : isHalfDay
+                        ? "bg-amber-500/10 border-amber-500/30"
+                        : "bg-base-100 border-base-200/80 hover:border-base-300"
+                } ${isToday ? "ring-2 ring-accent ring-offset-1" : ""}`}
             >
               {/* Top row: Day Number & Dot */}
               <div className="flex items-center justify-between">
                 <span
-                  className={`text-xs font-bold ${
-                    isToday ? "text-accent" : "text-base-content/80"
-                  }`}
+                  className={`text-xs font-bold ${isToday ? "text-accent" : holiday || isSunday ? "text-red-900" : "text-base-content/80"
+                    }`}
                 >
                   {dayNum}
                 </span>
                 {record && (
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      isPresent
+                    className={`w-2 h-2 rounded-full ${isPresent
                         ? "bg-emerald-500"
                         : isAbsent
                           ? "bg-rose-500"
                           : "bg-amber-500"
-                    }`}
+                      }`}
                   />
                 )}
               </div>
 
-              {/* Bottom row: Status Badge & Time */}
-              {record ? (
+              {/* Bottom row: Holiday Name, Attendance Record, or Sunday Badge */}
+              {holiday ? (
+                <span className="tooltip" data-tip={holiday.title}>
+                  <span className="badge badge-xs badge-error font-semibold truncate max-w-full text-left text-[10px]">
+                    {holiday?.title}
+                  </span>
+                </span>
+              ) : record ? (
                 <div className="flex flex-col items-start gap-0.5">
                   <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded text-white leading-none ${
-                      isPresent
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded text-white leading-none ${isPresent
                         ? "bg-emerald-600"
                         : isAbsent
                           ? "bg-rose-600"
                           : "bg-amber-500"
-                    }`}
+                      }`}
                   >
-                    {record.status}
+                    {record?.status}
                   </span>
                   <span className="text-[10px] font-medium text-base-content/60">
                     {dateFormat(record.createdAt).time}
                   </span>
                 </div>
+              ) : isSunday ? (
+                <span className="badge badge-sm badge-dash font-semibold">Week Off</span>
               ) : (
                 <span className="text-[10px] text-base-content/30">—</span>
               )}

@@ -16,6 +16,7 @@ import { authentication } from "./middleware/authMiddleware.js";
 import fileUpload from "express-fileupload";
 import { v2 as cloudinary } from "cloudinary";
 import empRouter from "./routes/empRoutes.js";
+import siteRouter from "./routes/siteRoutes.js";
 
 const app = express();
 const PORT = 8000;
@@ -51,6 +52,7 @@ connectDB(mongouri);
 app.use("/api/auth", authRoute);
 app.use("/api/user", authentication, userRouter);
 app.use("/api/emp", authentication, empRouter);
+app.use("/api/site", authentication, siteRouter);
 
 app.use(errorMiddleware);
 

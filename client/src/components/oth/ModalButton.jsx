@@ -1,11 +1,11 @@
 
 
-function ModalButton({ id = "my-modal-1", title, children, onClick }) {
+function ModalButton({ id = "my-modal-1", title, children, onClick, btn }) {
   return (
     <>
       {/* Trigger Button */}
       {title && (
-        <button className="btn btn-primary" popoverTarget={id} onClick={onClick}>
+        <button className={`btn btn-primary ${btn} flex items-center *:flex *:items-center gap-2 *:gap-2`} popoverTarget={id} onClick={onClick}>
           {title}
         </button>
       )}
@@ -22,7 +22,7 @@ function ModalButton({ id = "my-modal-1", title, children, onClick }) {
           <button
             popoverTarget={id}
             popoverTargetAction="hide"
-            className="btn btn-sm btn-circle btn-error absolute right-3 top-3 text-base-content/70 hover:text-base-content z-10"
+            className="btn btn-sm btn-circle btn-error absolute right-3 top-3 text-white z-10"
           >
             ✕
           </button>

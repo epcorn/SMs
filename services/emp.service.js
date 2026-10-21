@@ -1,6 +1,7 @@
 import { createError } from "../middleware/errorMiddleware.js";
 import Attendence from "../models/attendenceModel.js";
 import User from "../models/userModel.js";
+import { getDistanceInMeteres } from "../utils/helperFunction.js";
 
 const empServices = {
   existAttendence: async (id) => {
@@ -17,7 +18,9 @@ const empServices = {
       user: id,
       createdAt: { $gte: startOfDay, $lte: endOfDay },
     });
-    if (!existAtt.active) {
+    const user = await User.findById(id).select("active");
+
+    if (user.active === false) {
       throw createError("User is not active", 400);
     }
 
@@ -38,9 +41,10 @@ const empServices = {
 
     const targetUserId = isPrivileged && id ? id : user.id;
 
-    const targetUser = await User.findById(targetUserId);
-    if (!targetUser.active) throw createError("User not Active", 400);
+    const targetUser =
+      await User.findById(targetUserId).select("firstname active");
     if (!targetUser) throw createError("User not found", 404);
+    if (!targetUser.active) throw createError("User not Active", 400);
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -84,6 +88,21 @@ const empServices = {
 
   markAttendance: async function ({ body, user }) {
     await this.existAttendence(user.id, null);
+    const me = await User.findById(user.id)
+      .select("location site")
+      .populate("site");
+
+    console.log("User Location (GeoJSON):", me.location);
+    console.log("Site Location (GeoJSON):", me.site.location);
+    const lat1 = me.location.coordinates[1],
+      lon1 = me.location.coordinates[0],
+      lat2 = me.site.location.coordinates[1],
+      lon2 = me.site.location.coordinates[0];
+
+    const distance = getDistanceInMeteres(lat1, lon1, lat2, lon2);
+    const allowedRadius = me.site.radius || 100;
+    if (distance > allowedRadius)
+      throw createError("You are too far from office Location", 400);
 
     const att = await Attendence.create({
       user: user.id,

@@ -1,4 +1,16 @@
+import { createError } from "../middleware/errorMiddleware.js";
+import Holiday from "../models/holidayModel.js";
 import empServices from "../services/emp.service.js";
+
+export const getHolidays = async (req, res, next) => {
+  try {
+    const holidays = await Holiday.find().lean();
+    if (!holidays) throw createError("holidays not found", 404);
+    res.status(200).json(holidays);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getAttendence = async (req, res, next) => {
   try {
@@ -25,6 +37,7 @@ export const markAttendence = async (req, res, next) => {
     const data = await empServices.markAttendance(req);
     return res.status(200).json(data);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };

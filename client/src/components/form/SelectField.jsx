@@ -1,9 +1,8 @@
-import React from 'react'
 
 function SelectField({ options, label = '', name = '', register, error, validation = {} }) {
   const fieldId = name || label.toLowerCase().replace(/\s+/g, '-');
 
-  // Support both single field error (errors.policeVerification) or full errors object (errors)
+  
   const fieldError = error?.[name] || (error?.message ? error : null);
 
   return (
@@ -17,7 +16,7 @@ function SelectField({ options, label = '', name = '', register, error, validati
         {...(register ? register(name, validation) : {})}
       >
         <option value="" disabled>Select {label}</option>
-        {options.map(option => (
+        {options?.map(option => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>

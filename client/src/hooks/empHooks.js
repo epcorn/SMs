@@ -1,12 +1,26 @@
 import { fetchFn } from "@/utils/queryClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+export const useGetHolidaysQuery = () => {
+  return useQuery({
+    queryKey: ['holiday'],
+    queryFn: async () => {
+      const res = await fetchFn("emp/holidays");
+      return res;
+    },
+  });
+};
+
 export const useMarkAttandence = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["mark", "user"],
     mutationFn: async (data) => {
-      const att = await fetchFn("emp/mark", { method: "POST", body: data });
+      const att = await fetchFn("emp/mark", {
+        method: "POST",
+        body: data,
+        headers: { "Content-Type": "application/json" },
+      });
       return att;
     },
     onSuccess: () => {

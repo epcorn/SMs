@@ -130,7 +130,7 @@ const userService = {
     const skip = (page - 1) * limit;
 
     const [users, totalUsers] = await Promise.all([
-      User.find(query).populate("attendenceRecords").skip(skip).limit(limit),
+      User.find(query).populate("attendenceRecords site").skip(skip).limit(limit),
       User.countDocuments(),
     ]);
 

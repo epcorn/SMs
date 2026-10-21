@@ -7,6 +7,8 @@ import L from "leaflet";
 // ✅ 1. Standard production bundle asset fix for missing Leaflet graphics
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { useCreateSiteMutation } from "@/hooks/siteHooks";
+import toast from "react-hot-toast";
 const DefaultIcon = L.icon({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
@@ -28,11 +30,20 @@ function MapRecenter({ coords }) {
 
 function AddSite() {
   const [coordinates, setCoordinates] = useState({ lat: 19.1136, lng: 72.8697 });
-  const { register, formState: { errors }, handleSubmit } = useForm({
+  const { mutateAsync: addSite, isPending: addingSite } = useCreateSiteMutation()
+
+
+  const { register, formState: { errors }, handleSubmit, setValue } = useForm({
     defaultValues: {
       coords: { latitude: coordinates.lat, longitude: coordinates.lng }
     }
   }); // Added setValue to update form values if needed later
+
+
+  useEffect(() => {
+    setValue("coords.latitude", coordinates.lat);
+    setValue("coords.longitude", coordinates.lng);
+  }, [coordinates, setValue]);
 
   const handleAutoLocate = () => {
     navigator.geolocation.getCurrentPosition(
@@ -44,20 +55,45 @@ function AddSite() {
         setCoordinates(newCoords);
       },
       (error) => alert(`Could not fetch location permissions: ${error.message}`),
-      { enableHighAccuracy: true, timeout: 5000 } // Added safety performance parameters
+      { enableHighAccuracy: true, timeout: 10000 } // Added safety performance parameters
     );
   };
-  const submit = (data) => { console.log(data) }
 
+  // console.log(coordinates)
+  const submit = async (data) => {
+    const payload = {
+      name: data?.name,
+      contractNumber: data?.contractNumber,
+      address: data?.address,
+      location: {
+        type: "Point",
+        coordinates: [
+          parseFloat(coordinates.lng), // Longitude first
+          parseFloat(coordinates.lat)   // Latitude second
+        ]
+      }
+    };
+
+    try {
+      const res = await addSite(payload);
+
+      // Close the modal popover
+      document.getElementById("addSiteModal")?.hidePopover();
+
+      toast.success(res?.msg || "Site added successfully!");
+    } catch (error) {
+      toast.error(error?.response?.data?.msg || error?.message || "Error encountered");
+    }
+  };
 
   return (
     <>
-      <h3 className="text-2xl font-semibold m-3 my-5 underline text-center">Add a New Site</h3>
+      <h3 className="text-2xl font-semibold m-3 mt-5 underline text-center ">Add a New Site</h3>
       <form action="" onSubmit={handleSubmit(submit)}>
-        <div className="w-2xl p-5 grid gap-x-5">
+        <div className="w-2xl p-5 pt-0 grid ">
           <InputField label='Site Name ' error={errors} name={'name'} register={register} />
           <InputField label='Address' error={errors} name={'address'} register={register} />
-          <InputField label='Location' error={errors} name={'location'} register={register} />
+          {/* <InputField label='Location' error={errors} name={'location.coords'} register={register} /> */}
           <InputField label='Contract Number' error={errors} name={'contractNumber'} register={register} />
 
           <div className="outline outline-gray-500 p-1 rounded-md row-span-4">
@@ -93,7 +129,7 @@ function AddSite() {
             </div>
           </div>
         </div>
-        <button className="btn btn-block btn-info mt-4">Add</button>
+        <button className="btn btn-block btn-info mt-4" disabled={addingSite}>{addingSite ? "Adding..." : "Add"}</button>
       </form>
     </>
   )

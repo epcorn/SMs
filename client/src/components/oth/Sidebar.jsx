@@ -95,11 +95,12 @@ function Sidebar({ children }) {
         {/* Left Side Navigation Board - Upgraded to Premium Dark Slate Theme */}
         <div className="flex min-h-full flex-col items-start bg-slate-900 w-64 border-r border-slate-800 text-slate-300">
           {/* Sidebar Header Title */}
-          <div className="px-6 py-5 border-b border-slate-800 w-full">
-            <h3 className="font-extrabold text-2xl text-rose-300 tracking-wide">
+          <div className="px-6 py-5 border-b border-slate-800 w-full grid grid-cols-3 items-center">
+            <img src="src/assets/logo.png" alt="" className=""/>
+            <h3 className="col-span-2 font-extrabold text-2xl text-rose-300 tracking-wide">
               SMs
             </h3>
-            <p className="text-xs text-slate-400 mt-1 hidden lg:block">
+            <p className="col-span-full text-xs text-slate-400 mt-1 hidden lg:block">
               Squad Management System
             </p>
           </div>
@@ -116,10 +117,9 @@ function Sidebar({ children }) {
                   <Link
                     to={li.link}
                     className={`flex focus-within:bg-rose-400/20 focus:text-white items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm
-                      ${
-                        isActive
-                          ? "bg-rose-400/20 border-l-4 text-white border-l-rose-400 shadow-lg shadow-rose-300/10 scale-[1.02]"
-                          : "hover:bg-rose-400/30 hover:text-white"
+                      ${isActive
+                        ? "bg-rose-400/20 border-l-4 text-white border-l-rose-400 shadow-lg shadow-rose-300/10 scale-[1.02]"
+                        : "hover:bg-rose-400/30 hover:text-white"
                       }`}
                   >
                     {/* Keeps the icon matching text colors correctly */}
@@ -132,6 +132,9 @@ function Sidebar({ children }) {
               );
             })}
 
+            <li className="">
+              
+            </li>
             {/* Logout Action */}
             <li className="mt-auto mb-6">
               <button

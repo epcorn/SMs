@@ -42,7 +42,7 @@ function ShowUserAttendence({ users }) {
   ];
 
   return (
-    <div className="w-full px-4 md:px-6">
+    <div className="w-full ">
       <h3 className="text-2xl font-semibold my-5">Today's Employee's Attendance</h3>
 
       <div className="overflow-x-auto pb-20">
