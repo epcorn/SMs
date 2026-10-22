@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import InputFile from "../form/InputFile";
 import { useUploadFile } from "@/hooks/empHooks";
 import { useGetSiteQuery } from "@/hooks/siteHooks";
+import { Pencil } from "lucide-react";
 
 const PVoptions = [
   { label: "Done", value: "done" },
@@ -36,7 +37,7 @@ const getDefaults = (user) => ({
   photo: user?.photo || "",
   gender: user?.gender || "",
   password: user?.password || "",
-  site: user?.site || "",
+  site: user?.site?._id || undefined,
   userType: user?.userType || "trainee",
   dob: formatDateForInput(user?.dob),
   residAddress: user?.residAddress || "",
@@ -110,7 +111,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
     console.log(formData)
     try {
       const responseData = await onSubmitEmp({
-        creds: formData,
+        ...formData,
         id: user?._id,
       });
 
@@ -157,12 +158,12 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
         type="button"
         className={
           type === "edit"
-            ? "btn btn-outline btn-md btn-info"
+            ? "btn btn-outline btn-sm btn-info"
             : "btn btn-primary btn-md text-[1rem]"
         }
         onClick={() => document.getElementById(modalId).showModal()}
       >
-        {type === "edit" ? "Edit" : "+ Add Employee"}
+        {type === "edit" ? <Pencil className="h-4" /> : "+ Add Employee"}
       </button>
 
       <dialog id={modalId} className="modal">
@@ -192,7 +193,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
             <div className="flex-1 overflow-y-auto p-1">
               {/* Basic info */}
               <div className="grid grid-cols-3 gap-x-4">
-                <InputField label="First Name" name="firstname" register={register} />
+                <InputField label="First Name" name="firstname" register={register} required={true} />
                 <InputField label="Middle Name" name="middlename" register={register} />
                 <InputField label="Last Name" name="lastname" register={register} />
                 <InputField label="Email" name="email" type="email" register={register} />

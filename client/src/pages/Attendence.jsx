@@ -124,48 +124,71 @@ function ShowEmpAttendence({ handleMark, isMarking, loadingAttdnc, history }) {
   const statusConfig = getStatusStyle(todays?.status || "N/A");
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-2 md:gap-10">
       {/* Header Section */}
-      <div className="text-center space-y-1.5">
-        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-base-content">
-          Work Attendance
-        </h2>
-        <p className="text-sm text-base-content/60">
-          Check-in daily to record your work log
-        </p>
-      </div>
 
-      {/* Interactive Action Button with Decorative Ring */}
-      <div className="flex flex-col items-center justify-center py-2">
-        <div className="relative flex items-center justify-center">
-          <div
-            className={`absolute -inset-3 rounded-full blur-md transition-all duration-300 ${statusConfig.ring}`}
-          />
-          <button
-            type="button"
-            onClick={handleMark}
-            disabled={isMarking}
-            className={`relative btn ${statusConfig.btn} btn-circle w-40 h-40 text-sm font-bold tracking-wide shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border-none flex flex-col items-center justify-center gap-2 text-white`}
-          >
-            {isMarking ? (
-              <span className="loading loading-spinner loading-lg"></span>
-            ) : (
-              <>
-                <span className="text-3xl drop-shadow-xs">
-                  {statusConfig.icon}
-                </span>
-                <span className="px-3 text-center leading-snug">
-                  {statusConfig.label}
-                </span>
-              </>
-            )}
-          </button>
+      <div className="grid grid-cols-2 items-center md:block">
+        <div className="text-center space-y-1.5">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-base-content">
+              Work Attendance
+            </h2>
+            <p className="text-sm text-base-content/60">
+              Check-in daily to record your work log
+            </p>
+          </div>
+          <div className="flex flex-wrap md:hidden gap-4 justify-center *:flex *:items-center *:gap-2 text-sm font-medium">
+            <div>
+              <div aria-label="success" className="status status-lg status-success"></div>
+              <span>Present</span>
+            </div>
+            <div>
+              <div aria-label="warning" className="status status-lg status-warning"></div>
+              <span>Half-day</span>
+            </div>
+            <div>
+              <div aria-label="warning" className="status status-lg status-error"></div>
+              <span>Absent</span>
+            </div>
+            <div>
+              <div aria-label="error" className="status status-lg status-info"></div>
+              <span>Holidays</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive Action Button with Decorative Ring */}
+        <div className="flex flex-col items-center justify-center py-2">
+          <div className="relative flex items-center justify-center">
+            <div
+              className={`absolute -inset-3 rounded-full blur-md transition-all duration-300 ${statusConfig.ring}`}
+            />
+            <button
+              type="button"
+              onClick={handleMark}
+              disabled={isMarking}
+              className={`relative btn ${statusConfig.btn} btn-circle w-40 h-40 text-sm font-bold tracking-wide shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border-none flex flex-col items-center justify-center gap-2 text-white`}
+            >
+              {isMarking ? (
+                <span className="loading loading-spinner loading-lg"></span>
+              ) : (
+                <>
+                  <span className="text-3xl drop-shadow-xs">
+                    {statusConfig.icon}
+                  </span>
+                  <span className="px-3 text-center leading-snug">
+                    {statusConfig.label}
+                  </span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* History Log Section */}
       {loadingAttdnc ? (
-        <div className="flex justify-center items-center py-2">
+        <div className="flex justify-center items-center py-">
           <span className="loading loading-spinner text-accent loading-md"></span>
         </div>
       ) : (

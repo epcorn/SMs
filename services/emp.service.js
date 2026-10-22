@@ -92,13 +92,11 @@ const empServices = {
       .select("location site")
       .populate("site");
 
-    console.log("User Location (GeoJSON):", me.location);
-    console.log("Site Location (GeoJSON):", me.site.location);
     const lat1 = me.location.coordinates[1],
       lon1 = me.location.coordinates[0],
       lat2 = me.site.location.coordinates[1],
       lon2 = me.site.location.coordinates[0];
-
+    console.log(lat1, lon1, lat2, lon2);
     const distance = getDistanceInMeteres(lat1, lon1, lat2, lon2);
     const allowedRadius = me.site.radius || 100;
     if (distance > allowedRadius)
@@ -144,8 +142,6 @@ const empServices = {
       .select(
         "firstname middlename lastname attendence attendenceRecords updatedAt",
       );
-
-    console.log(currentUser, singleUser);
 
     if (!singleUser) {
       throw createError("User not found", 404);

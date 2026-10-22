@@ -5,13 +5,12 @@ import {
   FaceGrinning,
   Highlighter,
   LayoutDashboard,
-  Library,
-  LogOutIcon,
-  Users,
+  Library, LogOutIcon,
+  MapPin,
+  Users
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-// Updated icon color definitions to sit cleanly inside the dark slate palette
 const classes = "w-5 h-5 text-slate-400 transition-colors";
 const links = [
   {
@@ -38,16 +37,16 @@ const links = [
     icon: <Highlighter className={classes} />,
     role: ["admin", "operator", "employee"],
   },
-  {
-    label: "Advance",
-    link: "advance",
-    icon: <CircleDollarSign className={classes} />,
-    role: ["admin", "operator", "employee"],
-  },
+  // {
+  //   label: "Advance",
+  //   link: "advance",
+  //   icon: <CircleDollarSign className={classes} />,
+  //   role: ["admin", "operator", "employee"],
+  // },
   {
     label: "GPS",
     link: "gps",
-    icon: <CircleDollarSign className={classes} />,
+    icon: <MapPin  className={classes} />,
     role: ["admin"],
   },
 ];

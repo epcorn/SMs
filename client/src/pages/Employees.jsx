@@ -1,5 +1,5 @@
 import { Eye } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import AddEmp from "@/components/employee/AddEmp";
@@ -11,6 +11,9 @@ import { useAddUser, useGetAllUsers } from "@/hooks/empHooks";
 import EmployeeList from "@/components/employee/EmployeeList";
 
 function Employees() {
+  useEffect(() => {
+    document.title = "SMs | Employees"
+  }, [])
 
   const [empData, setEmpData] = useState({
     name: "",
@@ -34,7 +37,6 @@ function Employees() {
   } = useForm();
 
   const search = (data) => {
-    console.log(data);
     setEmpData((prev) => ({ ...prev, ...data, page: 1 }));
   };
 

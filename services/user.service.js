@@ -31,7 +31,8 @@ const userService = {
   },
 
   createUser: async (creds) => {
-    if (!creds?.user && !creds.email && !creds.password)
+    console.log(creds.firstname);
+    if (!creds.firstname && !creds?.email && !creds?.password)
       throw createError("No info provided", 400);
     const user = await User.findOne({ email: creds.email });
     if (user) throw createError("Employee already exists with this email", 409);
@@ -53,7 +54,7 @@ const userService = {
 
   changePassword: async ({ body, user }) => {
     const creds = body;
-   
+
     const exUser = await User.findById(user.id).select("+password");
     if (!exUser) throw createError("User not found", 404);
 
@@ -66,9 +67,21 @@ const userService = {
     return { msg: "Password updated successfully" };
   },
 
-  editUser: async (creds, id) => {
+  editUser: async (creds, id, reqUser) => {
+    if (creds.advance) {
+      const { advance: _, ...advanceData } = creds;
+      const newAdvanceEntry = { ...advanceData, givenBy: reqUser.id };
+      const emp = await User.findByIdAndUpdate(
+        id,
+        {
+          $push: { advance: newAdvanceEntry },
+        },
+        { returnDocument: "after", runValidators: true },
+      );
+      return { msg: `Succeed by ${reqUser.id}` };
+    }
     if (!creds || (!creds?.user && !creds.email))
-      throw createError("please info provided", 400);
+      throw createError("Info not provide", 400);
     const user = await User.findById(id);
 
     if (!user) {
@@ -110,6 +123,7 @@ const userService = {
       user: updatedUser,
     };
   },
+  addAdvance: async ({ data, id }) => {},
 
   getAllUsers: async (data = {}) => {
     const query = {};
@@ -118,7 +132,7 @@ const userService = {
     if (name || email) {
       query.$or = [];
       if (name) {
-        query.$or.push({ name: { $regex: name, $options: "i" } });
+        query.$or.push({ firstname: { $regex: name, $options: "i" } });
       }
       if (email) {
         query.$or.push({ email: { $regex: email, $options: "i" } });
@@ -130,7 +144,17 @@ const userService = {
     const skip = (page - 1) * limit;
 
     const [users, totalUsers] = await Promise.all([
-      User.find(query).populate("attendenceRecords site").skip(skip).limit(limit),
+      User.find(query)
+        .populate([
+          { path: "attendenceRecords" },
+          { path: "site" },
+          {
+            path: "advance.givenBy",
+            select: "firstname lastname email role",
+          },
+        ])
+        .skip(skip)
+        .limit(limit),
       User.countDocuments(),
     ]);
 

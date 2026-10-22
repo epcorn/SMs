@@ -55,8 +55,8 @@ export const getAllUsers = async (req, res, next) => {
 
 export const createUser = async (req, res, next) => {
   try {
-    const { data } = await userService.createUser(req.body);
-    return res.status(200).json(data);
+    const { user, msg } = await userService.createUser(req.body);
+    return res.status(200).json({ user, msg });
   } catch (error) {
     console.log("error creating user", error);
     next(error);
@@ -65,8 +65,7 @@ export const createUser = async (req, res, next) => {
 
 export const editUser = async (req, res, next) => {
   try {
-    console.log(req.body);
-    const msg = await userService.editUser(req.body, req.params.id);
+    const msg = await userService.editUser(req.body, req.params.id, req.user);
     return res.status(200).json(msg);
   } catch (error) {
     console.log("error creating user", error);

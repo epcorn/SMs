@@ -126,7 +126,6 @@ function ShowUserAttendence({ users }) {
           </tbody>
         </table>
       </div>
-
       <UserHistory user={selectedUser} />
     </div>
   );
@@ -169,9 +168,9 @@ function UserHistory({ user }) {
 
   return (
     <dialog id="UserHistory" className="modal">
-      <div className="modal-box md:min-w-4xl">
+      <div className="modal-box md:min-w-4xl p-0 px-1 py-2">
         <div className="modal-action m-0 flex justify-between items-start">
-          <h3 className="my-4 text-2xl font-semibold">
+          <h3 className="my-4 ml-3 text-2xl font-semibold">
             {user.firstname} {user.middlename} {user.lastname}
           </h3>
           <form method="dialog">

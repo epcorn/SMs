@@ -11,8 +11,12 @@ import useGpsStore from "./store/gpsStore";
 import { useEffect } from "react";
 import useAuthStore from "./store/authStore";
 import { useGetCoOrdinatesMutation } from "./hooks/empHooks";
+import Advance from "./pages/Advance";
+import useDocumentTitle from "./hooks/useDocumentTitle";
 
 function App() {
+  useDocumentTitle()
+
   const startTracking = useGpsStore((state) => state.startTracking);
   const stopTracking = useGpsStore((state) => state.stopTracking);
   const user = useAuthStore((state) => state.user);
@@ -60,7 +64,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/leave" element={<Leave />} />
             <Route path="/attendence" element={<Attendence />} />
-            <Route path="/advance" element={<Attendence />} />
+            <Route path="/advance" element={<Advance />} />
           </Route>
         </Route>
       </Routes>

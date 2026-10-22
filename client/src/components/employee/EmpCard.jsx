@@ -247,7 +247,6 @@ export function EmpDetails({ user = {}, setToggle }) {
 }
 
 export function EmpCard({ user = {}, setToggle }) {
-console.log('first')
 
   const defaultPhoto = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE90TDdHxK9BwLoldB7X6SHDKEUKsMOfsaIsLb2ghnqg&s";
   const emergencyContact = user?.familyDetails?.find((f) => f?.emergency) || user?.familyDetails?.[0];
@@ -317,11 +316,10 @@ console.log('first')
 
           <div className="col-span-2">
             <span className="text-xs text-slate-500 uppercase font-bold tracking-wide block mb-0.5">Police Verification</span>
-            <span className={`badge badge-sm font-bold tracking-wide px-2.5 py-2 ${
-              user?.policeVerification === "notDone" 
-                ? "bg-rose-100 text-rose-700 border border-rose-300" 
+            <span className={`badge badge-sm font-bold tracking-wide px-2.5 py-2 ${user?.policeVerification === "notDone"
+                ? "bg-rose-100 text-rose-700 border border-rose-300"
                 : "bg-emerald-100 text-emerald-800 border border-emerald-300"
-            }`}>
+              }`}>
               {user?.policeVerification === "notDone" ? "Verification Pending" : "Verified & Validated"}
             </span>
           </div>
@@ -342,9 +340,9 @@ console.log('first')
 
       {/* Card Action Footer */}
       <div className="card-actions bg-slate-100 px-6 py-4 border-t border-slate-200 flex justify-end items-center">
-        <button 
-          type="button" 
-          className="btn btn-md btn-neutral w-full font-bold shadow-md hover:scale-[1.01] active:scale-95 transition-all text-sm" 
+        <button
+          type="button"
+          className="btn btn-md btn-neutral w-full font-bold shadow-md hover:scale-[1.01] active:scale-95 transition-all text-sm"
           onClick={() => setToggle(true)}
         >
           View Full Details →

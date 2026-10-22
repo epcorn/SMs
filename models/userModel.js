@@ -28,6 +28,12 @@ const medicalRecordSchema = new mongoose.Schema({
   file: { type: String, default: "N/A" },
 });
 
+const advanceSchema = new mongoose.Schema({
+  amount: { type: String },
+  givenBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  date: { type: Date, default: Date.now },
+});
+
 const userSchema = new mongoose.Schema(
   {
     firstname: { type: String },
@@ -47,7 +53,7 @@ const userSchema = new mongoose.Schema(
 
     userType: { type: String, default: "" },
     dob: { type: Date },
-
+    advance: [advanceSchema],
     currAddress: { type: String, default: "" },
     residAddress: { type: String, default: "" },
     bloodGroup: { type: String, default: "N/A" },

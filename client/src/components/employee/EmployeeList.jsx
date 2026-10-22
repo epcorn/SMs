@@ -1,12 +1,17 @@
-import { useChangePassword, useEditUser, useMarkActiveMutation } from '@/hooks/empHooks';
-import { useState } from 'react';
-import InputField from '../form/InputField';
-import AddEmp from './AddEmp';
-import ModalButton from '../oth/ModalButton';
-import EmpCard, { EmpDetails } from './EmpCard';
-import { LockKeyholeOpenIcon } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { useForm } from 'react-hook-form';
+import {
+  useChangePassword,
+  useEditUser,
+  useMarkActiveMutation,
+} from "@/hooks/empHooks";
+import { useState } from "react";
+import InputField from "../form/InputField";
+import AddEmp from "./AddEmp";
+import ModalButton from "../oth/ModalButton";
+import EmpCard, { EmpDetails } from "./EmpCard";
+import { Eye, IndianRupee, LockKeyholeOpenIcon } from "lucide-react";
+import toast from "react-hot-toast";
+import { useForm } from "react-hook-form";
+import { dateFormat } from "@/utils/helperfn";
 
 function EmployeeList({ response, responding }) {
   const [selecteduser, setSelecteduser] = useState({});
@@ -58,7 +63,9 @@ function EmployeeList({ response, responding }) {
               </tr>
             ) : (
               users?.map((user, i) => (
-                <tr key={user?._id} className={`relative ${user.active ? "" : "opacity-40"}`}>
+                <tr
+                  key={user?._id}
+                  className={`relative ${user.active ? "" : "opacity-40"}`}>
                   <td>{i + 1}</td>
                   <td>
                     {user.firstname} {user.middlename} {user.lastname}
@@ -69,8 +76,7 @@ function EmployeeList({ response, responding }) {
                     className="flex items-center gap-3 overflow-visible"
                     onClick={(e) => {
                       e.stopPropagation();
-                    }}
-                  >
+                    }}>
                     <AddEmp
                       type="edit"
                       user={user}
@@ -79,12 +85,12 @@ function EmployeeList({ response, responding }) {
                     />
                     <ModalButton
                       id={`view-emp-modal-${user._id}`}
-                      title="Details"
+                      btn="btn-secondary btn-sm"
+                      title={<Eye className="h-5" />}
                       onClick={() => {
                         setSelecteduser(user);
                         setToggle(false);
-                      }}
-                    >
+                      }}>
                       {selecteduser?._id === user?._id && !toggle ? (
                         <EmpCard user={selecteduser} setToggle={setToggle} />
                       ) : (
@@ -93,24 +99,37 @@ function EmployeeList({ response, responding }) {
                     </ModalButton>
                     <ModalButton
                       id={`cp-emp-modal-${user._id}`}
-                      title={<LockKeyholeOpenIcon />}
-                      onClick={() => setSelecteduser(user)}
-                    >
+                      title={<LockKeyholeOpenIcon className="h-4"/>}
+                      btn="btn-accent btn-sm"
+                      onClick={() => setSelecteduser(user)}>
                       {selecteduser?._id === user?._id && (
-                        <ChangePassword user={user} />
+                        <ChangePassword user={selecteduser} />
                       )}
                     </ModalButton>
 
-                    <input type="checkbox" checked={!!user?.active} className="toggle toggle-success" onChange={async () => {
-                      console.log(user.active)
-                      try {
-                        const res = await markActive({ id: user._id, status: !user?.active })
-                        toast.success(res.msg)
-                      } catch (error) {
-                        toast.error(error.message)
+                    <ModalButton id={`advance-emp-modal-${user._id}`} btn="btn-success btn-sm" title={<IndianRupee className="h-4"/>} onClick={() => setSelecteduser(user)}>
+                      {selecteduser?._id === user?._id &&
+                        <AdvanceForm emp={selecteduser} editUser={editUser} />
                       }
-                    }} />
-                    {/* <MarkAttendence user={user} /> */}
+                    </ModalButton>
+
+                    <input
+                      type="checkbox"
+                      checked={!!user?.active}
+                      className="toggle toggle-success"
+                      onChange={async () => {
+
+                        try {
+                          const res = await markActive({
+                            id: user._id,
+                            status: !user?.active,
+                          });
+                          toast.success(res.msg);
+                        } catch (error) {
+                          toast.error(error.message);
+                        }
+                      }}
+                    />
                   </td>
                 </tr>
               ))
@@ -119,14 +138,13 @@ function EmployeeList({ response, responding }) {
         </table>
       </div>
     </div>
-  )
+  );
 }
 
-export default EmployeeList
-
+export default EmployeeList;
 
 function ChangePassword({ user }) {
-  const [resp, setResp] = useState({ res: {}, err: {} })
+  const [resp, setResp] = useState({ res: {}, err: {} });
   const { mutateAsync: changePassword } = useChangePassword();
   const {
     register,
@@ -143,7 +161,7 @@ function ChangePassword({ user }) {
   const submit = async (data) => {
     try {
       const res = await changePassword(data);
-      setResp({ res, err: {} })
+      setResp({ res, err: {} });
       toast.success("Password changed successfully");
       // document.getElementById(`cp-emp-modal-${user._id}`).close()
     } catch (err) {
@@ -183,7 +201,8 @@ function ChangePassword({ user }) {
           />
 
           {message && (
-            <p className={`col-span-full badge mx-auto ${isError ? "badge-error" : "badge-success"}`}>
+            <p
+              className={`col-span-full badge mx-auto ${isError ? "badge-error" : "badge-success"}`}>
               {message}
             </p>
           )}
@@ -196,3 +215,78 @@ function ChangePassword({ user }) {
   );
 }
 
+function AdvanceForm({ emp, editUser }) {
+  const { register, handleSubmit, } = useForm();
+
+  const submit = async (data) => {
+    data.advance = true
+    const payload = { creds: data, id: emp._id }
+    console.log(payload)
+    const res = await editUser(payload)
+    console.log(res)
+  };
+
+  const fullName = [emp?.firstname, emp?.middlename, emp?.lastname].filter(Boolean).join(" ");
+
+  return (
+    <div className="card bg-base-100 max-w-2xl min-w-xl w-full p-6 shadow-xl border border-base-300">
+      <h3 className="font-bold text-2xl mb-3">Advance Details</h3>
+      <p className="text-sm text-base-content font-bold mb-4">
+        Employee: <span className="font-semibold text-base-content/80">{fullName || "N/A"}</span>
+      </p>
+
+      {/* Table Section */}
+      <div className="overflow-x-auto scrollbar-none max-h-72 rounded-lg border border-base-300 mb-6">
+        <table className="table table-pin-rows w-full">
+          <thead className="[&_th]:bg-gray-700 text-white">
+            <tr>
+              <th>Date</th>
+              <th>Given By</th>
+              <th className="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!emp?.advance?.length ? (
+              <tr>
+                <td colSpan={3} className="text-center text-base-content/50 py-6">
+                  No advance taken
+                </td>
+              </tr>
+            ) : (
+              emp.advance.map((ad) => (
+                <tr key={ad._id}>
+                  <td>{dateFormat(ad.date)?.fullDateAndTime || "N/A"}</td>
+                  <td>
+                    {ad.givenBy?.firstname
+                      ? `${ad.givenBy.firstname} ${ad.givenBy.lastname || ""}`
+                      : "System"}
+                  </td>
+                  <td className="font-semibold text-right">{ad.amount} ₹</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Form Section */}
+      <form onSubmit={handleSubmit(submit)} className="flex flex-col sm:flex-row gap-3 items-end">
+        <div className="form-control w-full">
+          <label className="input input-lg pb-1 border border-black ">
+            <IndianRupee className="w-5 h-5" />
+            <input
+              type="number"
+              required
+              placeholder="Amount in Rupees..."
+              className="placeholder:text-gray-600 text-xl w-full"
+              {...register("amount", { required: true })}
+            />
+          </label>
+        </div>
+        <button type="submit" className="btn btn-primary w-full sm:w-auto mt-auto">
+          Give Advance
+        </button>
+      </form>
+    </div>
+  );
+}
