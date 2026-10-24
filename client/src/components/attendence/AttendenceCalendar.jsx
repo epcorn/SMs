@@ -68,10 +68,14 @@ function AttendanceCalendar({ records = [] }) {
           </div>
           <div>
             <div aria-label="warning" className="status status-lg status-warning"></div>
+            <span>Half-day</span>
+          </div>
+          <div>
+            <div aria-label="warning" className="status status-lg status-error"></div>
             <span>Absent</span>
           </div>
           <div>
-            <div aria-label="error" className="status status-lg status-error"></div>
+            <div aria-label="error" className="status status-lg status-info"></div>
             <span>Holidays</span>
           </div>
         </div>

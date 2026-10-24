@@ -2,7 +2,7 @@ import useAuthStore from "@/store/authStore";
 import { fetchFn } from "@/utils/queryClient";
 import { useMutation } from "@tanstack/react-query";
 
-export const useLoginMutation = () => {
+const useLoginMutation = () => {
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async (creds) => {
@@ -18,7 +18,7 @@ export const useLoginMutation = () => {
   });
 };
 
-export const useLogout = () => {
+const useLogout = () => {
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async () => {
@@ -32,7 +32,7 @@ export const useLogout = () => {
   });
 };
 
-export const useChangePassword = () => {
+const useChangePassword = () => {
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async (creds) => {
@@ -41,3 +41,5 @@ export const useChangePassword = () => {
     },
   });
 };
+
+export { useLoginMutation, useLogout, useChangePassword };

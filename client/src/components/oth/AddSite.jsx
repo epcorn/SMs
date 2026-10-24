@@ -90,11 +90,11 @@ function AddSite() {
     <>
       <h3 className="text-2xl font-semibold m-3 mt-5 underline text-center ">Add a New Site</h3>
       <form action="" onSubmit={handleSubmit(submit)}>
-        <div className="w-2xl p-5 pt-0 grid ">
+        <div className="w-full md:w-2xl p-5 pt-0 grid ">
           <InputField label='Site Name ' error={errors} name={'name'} register={register} />
-          <InputField label='Address' error={errors} name={'address'} register={register} />
-          {/* <InputField label='Location' error={errors} name={'location.coords'} register={register} /> */}
           <InputField label='Contract Number' error={errors} name={'contractNumber'} register={register} />
+          {/* <InputField label='Location' error={errors} name={'location.coords'} register={register} /> */}
+          <InputField label='Address' error={errors} name={'address'} register={register} />
 
           <div className="outline outline-gray-500 p-1 rounded-md row-span-4">
             <div className="grid grid-cols-2 gap-2 ">

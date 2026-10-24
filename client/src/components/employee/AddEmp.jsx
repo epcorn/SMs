@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import InputFile from "../form/InputFile";
 import { useUploadFile } from "@/hooks/empHooks";
 import { useGetSiteQuery } from "@/hooks/siteHooks";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 const PVoptions = [
   { label: "Done", value: "done" },
@@ -28,13 +28,13 @@ const formatDateForInput = (dateString) => {
   return isNaN(date.getTime()) ? "" : date.toISOString().split("T")[0];
 };
 
-// One place for default values (used by useForm and reset)
 const getDefaults = (user) => ({
   firstname: user?.firstname || "",
   middlename: user?.middlename || "",
   lastname: user?.lastname || "",
   email: user?.email || "",
   photo: user?.photo || "",
+  department: user?.department || "",
   gender: user?.gender || "",
   password: user?.password || "",
   site: user?.site?._id || undefined,
@@ -62,16 +62,18 @@ const getDefaults = (user) => ({
     PT: user?.salaryDetails?.PT ?? "",
     ESIC: user?.salaryDetails?.ESIC ?? "",
     UAN: user?.salaryDetails?.UAN ?? "",
+    allowance: user?.salaryDetails?.allowance?.length
+      ? user?.salaryDetails?.allowance
+      : [{ name: "", amount: "" }],
   },
 });
 
 function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
-
   const [uploading, setUploading] = useState(false);
   const { mutateAsync: uploadFileMutation } = useUploadFile();
-  const { data: sites } = useGetSiteQuery()
+  const { data: sites } = useGetSiteQuery();
 
-  const sitesOptions = sites?.map(s => ({ value: s._id, label: s.name }))
+  const sitesOptions = sites?.map((s) => ({ value: s._id, label: s.name }));
   const modalId =
     type === "edit" && user?._id ? `modal_emp_${user._id}` : "modal_add_emp";
 
@@ -107,16 +109,19 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
     remove: removeMedical,
   } = useFieldArray({ control, name: "medicalDetails" });
 
+  const {
+    fields: allowanceFields,
+    append: appendAllowance,
+    remove: removeAllowance,
+  } = useFieldArray({ control, name: "salaryDetails.allowance" });
+
   const onSubmit = async (formData) => {
-    console.log(formData)
+    const payload = { creds: formData, id: user?._id };
     try {
-      const responseData = await onSubmitEmp({
-        ...formData,
-        id: user?._id,
-      });
+      const responseData = await onSubmitEmp(payload);
 
       toast.success(
-        responseData?.msg || (type === "edit" ? "User Edited" : "User Created")
+        responseData?.msg || (type === "edit" ? "User Edited" : "User Created"),
       );
       document.getElementById(modalId)?.close();
     } catch (error) {
@@ -124,7 +129,6 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
     }
   };
 
-  // Uploads the file, then stores the returned URL in the form field
   const handleFileUpload = async (e, fieldName, successMessage) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -144,7 +148,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
       console.log(error);
       toast.error("File upload failed");
     } finally {
-      e.target.value = ""; // allow selecting the same file again
+      e.target.value = "";
       setUploading(false);
     }
   };
@@ -159,77 +163,111 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
         className={
           type === "edit"
             ? "btn btn-outline btn-sm btn-info"
-            : "btn btn-primary btn-md text-[1rem]"
+            : "btn btn-primary btn-md text-base"
         }
-        onClick={() => document.getElementById(modalId).showModal()}
-      >
-        {type === "edit" ? <Pencil className="h-4" /> : "+ Add Employee"}
+        onClick={() => document.getElementById(modalId).showModal()}>
+        {type === "edit" ? <Pencil className="h-4 w-4" /> : "+ Add Employee"}
       </button>
 
       <dialog id={modalId} className="modal">
-
-        <div className="modal-box max-w-4xl bg-neutral-200 max-h-[90vh] overflow-y-auto">
-          <div className="sticky flex flex-row-reverse justify-between px-5 top-0 z-10 bg-gray-200 pt-5 pb-2">
-
+        <div className="modal-box max-w-4xl max-h-[90vh] bg-base-100 flex flex-col p-0">
+          {/* Modal Header */}
+          <div className="sticky top-0 z-20 bg-base-100 navbar px-6 border-b border-base-300">
+            <div className="flex-1 gap-4">
+              <h3 className="font-bold text-xl capitalize">
+                {type === "edit" ? "Edit Employee" : "Add New Employee"}
+              </h3>
+              {user && (
+                <span
+                  className={`badge badge-${user.active ? "success" : "ghost"
+                    }`}>
+                  {user.active ? "Active" : "Inactive"}
+                </span>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => document.getElementById(modalId)?.close()}
-              className="btn btn-sm btn-circle btn-error "
-            >
+              className="btn btn-sm btn-circle btn-ghost">
               ✕
             </button>
-
-            <h3 className="font-bold text-xl capitalize flex-1 pr-5 flex justify-center gap-20 ">
-              <span>
-                {type === "edit" ? "Edit Employee" : "Add New Employee"}
-              </span>
-              {user &&
-                <span className={`badge badge-${user.active ? "success" : 'secondary'} `}>{user.active ? "active" : "inactive"}</span>
-              }
-            </h3>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
-            <div className="flex-1 overflow-y-auto p-1">
-              {/* Basic info */}
-              <div className="grid grid-cols-3 gap-x-4">
-                <InputField label="First Name" name="firstname" register={register} required={true} />
-                <InputField label="Middle Name" name="middlename" register={register} />
-                <InputField label="Last Name" name="lastname" register={register} />
-                <InputField label="Email" name="email" type="email" register={register} />
+          {/* Form Body */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col flex-1 overflow-y-auto p-6 gap-6">
+            {/* Basic Info Card */}
+            <div className="card bg-base-200 outline outline-gray-400 shadow-sm p-4">
+              <h4 className="font-semibold text-lg mb-4">Basic Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <InputField
+                  label="First Name"
+                  name="firstname"
+                  register={register}
+                  required={true}
+                />
+                <InputField
+                  label="Middle Name"
+                  name="middlename"
+                  register={register}
+                />
+                <InputField
+                  label="Last Name"
+                  name="lastname"
+                  register={register}
+                />
+
+                <InputField
+                  label="Email"
+                  name="email"
+                  type="email"
+                  register={register}
+                />
 
                 <SelectField
                   error={errors}
                   options={genderOptions}
                   register={register}
-                  validation={{ required: false }}
                   name="gender"
-                  label="User Gender"
+                  label="Gender"
                 />
 
-                {/* Photo */}
-                <div className="flex flex-col gap-1">
+                <InputField
+                  label="Department"
+                  name="department"
+                  type="text"
+                  register={register}
+                />
+
+                {/* Photo Upload */}
+                <div className="form-control gap-1">
                   <input type="hidden" {...register("photo")} />
                   <InputFile
                     id="photo"
                     label="Employee Photo"
                     allowed="image/*"
                     onChange={(e) =>
-                      handleFileUpload(e, "photo", "Photo uploaded successfully!")
+                      handleFileUpload(
+                        e,
+                        "photo",
+                        "Photo uploaded successfully!",
+                      )
                     }
                   />
                   {photo && (
-                    <div className="mt-2 flex items-center gap-2">
+                    <div className="flex items-center gap-2 mt-2">
                       <img
                         src={photo}
                         alt="Preview"
-                        className="h-16 w-16 object-contain rounded-md border"
+                        className="h-12 w-12 object-cover rounded-box border border-base-300"
                       />
                       <button
                         type="button"
                         className="btn btn-xs btn-outline btn-error"
-                        onClick={() => setValue("photo", "", { shouldDirty: true })}
-                      >
+                        onClick={() =>
+                          setValue("photo", "", { shouldDirty: true })
+                        }>
                         Remove
                       </button>
                     </div>
@@ -238,7 +276,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
 
                 {type === "add" && (
                   <InputField
-                    label="password"
+                    label="Password"
                     name="password"
                     type="password"
                     register={register}
@@ -249,7 +287,6 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   error={errors}
                   options={sitesOptions}
                   register={register}
-                  validation={{ required: false }}
                   name="site"
                   label="Select Site"
                 />
@@ -258,38 +295,44 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   error={errors}
                   options={UToptions}
                   register={register}
-                  validation={{ required: false }}
                   name="userType"
                   label="User Type"
                 />
-                <InputField label="DOB" name="dob" type="date" register={register} />
+
+                <InputField
+                  label="DOB"
+                  name="dob"
+                  type="date"
+                  register={register}
+                />
                 <InputField
                   label="Residential Address"
                   name="residAddress"
-                  type="text"
                   register={register}
                 />
                 <InputField
                   label="Current Address"
                   name="currAddress"
-                  type="text"
                   register={register}
                 />
                 <InputField
                   label="Blood Group"
                   name="bloodGroup"
-                  type="text"
                   register={register}
                 />
 
-                {/* Resume */}
-                <div>
+                {/* Resume Upload */}
+                <div className="form-control gap-1">
                   <input type="hidden" {...register("resume")} />
                   <InputFile
                     id="resume"
                     label="Resume"
                     onChange={(e) =>
-                      handleFileUpload(e, "resume", "Resume uploaded successfully!")
+                      handleFileUpload(
+                        e,
+                        "resume",
+                        "Resume uploaded successfully!",
+                      )
                     }
                   />
                   {resume && (
@@ -297,8 +340,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                       href={resume}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 underline"
-                    >
+                      className="link link-primary text-xs mt-1">
                       View Resume
                     </a>
                   )}
@@ -314,48 +356,51 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   error={errors}
                   options={PVoptions}
                   register={register}
-                  validation={{ required: false }}
                   name="policeVerification"
                   label="Police Verification"
                 />
               </div>
+            </div>
 
-              {/* Government ID */}
-              <div className="grid grid-cols-2 gap-3 outline p-3 m-2 rounded-lg outline-gray-400 bg-gray-100 shadow-md">
-                <h3 className="col-span-2 text-md font-bold">Government ID</h3>
+            {/* Government ID Card */}
+            <div className="card bg-base-200 shadow-sm outline outline-gray-400 p-4">
+              <h4 className="font-semibold text-lg mb-4">Government ID</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField
-                  label="Id Number"
+                  label="ID Number"
                   name="govtIds.id"
-                  type="text"
+                  placeholder="e.g. Aadhaar / PAN"
                   register={register}
-                  placeholder="eg: adhaar card/pan Card, etc."
                 />
                 <InputField
-                  label="Id Name"
+                  label="ID Name"
                   name="govtIds.name"
-                  type="text"
                   register={register}
                 />
               </div>
+            </div>
 
-              {/* Certificates */}
-              <div className="border border-gray-400 p-4 rounded-lg m-2 bg-gray-100 shadow-md">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-md font-bold">Certificate Details</h4>
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-outline btn-primary"
-                    onClick={() => appendMedical({ name: "", number: "", file: "" })}
-                  >
-                    + Add Certificate
-                  </button>
-                </div>
+            {/* Certificate Details Card */}
+            <div className="card bg-base-200 shadow-sm outline outline-gray-400 p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-semibold text-lg">Certificate Details</h4>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline btn-primary"
+                  onClick={() =>
+                    appendMedical({ name: "", number: "", file: "" })
+                  }>
+                  + Add Certificate
+                </button>
+              </div>
 
+              <div className="flex flex-col gap-3">
                 {medicalFields.map((field, index) => {
                   const fileValue = watch(`medicalDetails.${index}.file`);
-
                   return (
-                    <div key={field.id} className="grid grid-cols-3 gap-2 items-end mb-3">
+                    <div
+                      key={field.id}
+                      className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-base-100 p-3 rounded-box">
                       <InputField
                         label={`Certificate ${index + 1} Name`}
                         name={`medicalDetails.${index}.name`}
@@ -366,57 +411,52 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                         name={`medicalDetails.${index}.number`}
                         register={register}
                       />
-
-                      <div className="flex gap-2 items-end">
+                      <div className="flex gap-2 items-center">
                         <div className="flex-1">
                           <input
                             type="hidden"
                             {...register(`medicalDetails.${index}.file`)}
                           />
                           {fileValue ? (
-                            <div className="flex items-center gap-2 mt-2 p-2 bg-white rounded-md border border-gray-300">
+                            <div className="flex items-center justify-between bg-base-200 rounded-box">
                               <a
                                 href={fileValue}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-blue-600 underline"
-                              >
+                                className="link link-primary text-xs">
                                 View File
                               </a>
                               <button
                                 type="button"
-                                className="btn btn-xs btn-outline btn-error ml-auto"
+                                className="btn btn-xs btn-outline btn-error"
                                 onClick={() =>
                                   setValue(`medicalDetails.${index}.file`, "", {
                                     shouldDirty: true,
                                   })
-                                }
-                              >
+                                }>
                                 Change
                               </button>
                             </div>
                           ) : (
                             <InputFile
                               id={`medical-file-${index}`}
-                              label="File(.pdf, image, .docx)"
+                              label="File (.pdf, image)"
                               onChange={(e) =>
                                 handleFileUpload(
                                   e,
                                   `medicalDetails.${index}.file`,
-                                  "Certificate uploaded successfully!"
+                                  "Certificate uploaded successfully!",
                                 )
                               }
                             />
                           )}
                         </div>
-
                         {medicalFields.length > 1 && (
                           <button
                             type="button"
-                            className="btn btn-error btn-square btn-sm"
-                            onClick={() => removeMedical(index)}
-                          >
-                            ✕
+                            className="btn btn-square btn-error btn-sm"
+                            onClick={() => removeMedical(index)}>
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         )}
                       </div>
@@ -424,46 +464,44 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   );
                 })}
               </div>
+            </div>
 
-              {/* Family */}
-              <div className="border border-gray-400 p-1 rounded-lg m-2 bg-gray-100 shadow-md">
-                <div className="flex justify-between items-center p-3 mb-3">
-                  <h4 className="text-md font-bold">Family Details</h4>
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-outline btn-primary"
-                    onClick={() =>
-                      appendFamily({
-                        emergency: false,
-                        name: "",
-                        relation: "",
-                        phone: "",
-                        email: "",
-                      })
-                    }
-                  >
-                    + Add Family Member
-                  </button>
-                </div>
+            {/* Family Details Card */}
+            <div className="card bg-base-200 outline outline-gray-400 shadow-sm p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-semibold text-lg">Family Details</h4>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline btn-primary"
+                  onClick={() =>
+                    appendFamily({
+                      emergency: false,
+                      name: "",
+                      relation: "",
+                      phone: "",
+                      email: "",
+                    })
+                  }>
+                  + Add Member
+                </button>
+              </div>
 
+              <div className="flex flex-col gap-3">
                 {familyFields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="grid grid-cols-[2fr_1fr_2fr_2fr] gap-2 items-end mb-3 bg-white shadow-md px-3 py-2 rounded-md"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="tooltip tooltip-info tooltip-right"
-                        data-tip="Mark Emergency"
-                      >
+                    className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center bg-base-100 p-1 rounded-box">
+                    <div className="flex items-center gap-2">
+                      <label className="label flex flex-col cursor-pointer gap-3">
+                        <span className="label-text font-semibold text-black text-sm">Emergency</span>
                         <input
                           type="checkbox"
                           {...register(`familyDetails.${index}.emergency`)}
-                          className="checkbox"
+                          className="checkbox checkbox-primary checkbox-sm"
                         />
-                      </div>
+                      </label>
                       <InputField
-                        label={`Member ${index + 1} Name`}
+                        label="Name"
                         name={`familyDetails.${index}.name`}
                         register={register}
                       />
@@ -478,7 +516,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                       name={`familyDetails.${index}.email`}
                       register={register}
                     />
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-end">
                       <div className="flex-1">
                         <InputField
                           label="Phone"
@@ -489,32 +527,36 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                       {familyFields.length > 1 && (
                         <button
                           type="button"
-                          className="btn btn-error btn-square btn-sm"
-                          onClick={() => removeFamily(index)}
-                        >
-                          ✕
+                          className="btn btn-square btn-error btn-sm"
+                          onClick={() => removeFamily(index)}>
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
+            </div>
 
-              {/* Bank */}
-              <div className="border border-gray-600 p-4 rounded-lg m-2 bg-gray-100 shadow-md">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-md font-bold">Bank Details</h4>
-                  <button
-                    type="button"
-                    className="btn btn-xs btn-outline btn-primary"
-                    onClick={() => appendBank({ name: "", number: "", IFSC: "" })}
-                  >
-                    + Add Bank Account
-                  </button>
-                </div>
+            {/* Bank Details Card */}
+            <div className="card bg-base-200 outline outline-gray-400 shadow-sm p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-semibold text-lg">Bank Details</h4>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline btn-primary"
+                  onClick={() =>
+                    appendBank({ name: "", number: "", IFSC: "" })
+                  }>
+                  + Add Account
+                </button>
+              </div>
 
+              <div className="flex flex-col gap-3">
                 {bankFields.map((field, index) => (
-                  <div key={field.id} className="grid grid-cols-3 gap-2 items-end mb-3">
+                  <div
+                    key={field.id}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-base-100 p-3 rounded-box">
                     <InputField
                       label="Account Holder Name"
                       name={`bankDetails.${index}.name`}
@@ -536,22 +578,21 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                       {bankFields.length > 1 && (
                         <button
                           type="button"
-                          className="btn btn-error btn-square btn-sm"
-                          onClick={() => removeBank(index)}
-                        >
-                          ✕
+                          className="btn btn-square btn-error btn-sm"
+                          onClick={() => removeBank(index)}>
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
+            </div>
 
-              {/* Salary */}
-              <div className="outline outline-gray-400 m-3 p-3 rounded-md grid grid-cols-5 gap-x-4 bg-gray-100 shadow-md">
-                <h3 className="text-lg font-bold capitalize col-span-full">
-                  salary information
-                </h3>
+            {/* Salary Information Card */}
+            <div className="card bg-base-200 outline outline-gray-400 shadow-sm p-4">
+              <h4 className="font-semibold text-lg mb-4">Salary Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
                 <InputField
                   register={register}
                   error={errors}
@@ -561,36 +602,79 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                 <InputField
                   register={register}
                   error={errors}
-                  //  label="Basic Salary"
+                  label="Basic Salary"
                   name="salaryDetails.basicPay"
                 />
                 <InputField
                   register={register}
                   error={errors}
-                  //  label="Professional tax"
+                  label="Professional Tax"
                   name="salaryDetails.PT"
                 />
                 <InputField
                   register={register}
                   error={errors}
-                  //  label="ESIC"
+                  label="ESIC"
                   name="salaryDetails.ESIC"
                 />
                 <InputField
                   register={register}
                   error={errors}
-                  //  label="UAN number"
+                  label="UAN Number"
                   name="salaryDetails.UAN"
                 />
               </div>
+
+              {/* Allowances Sub-section */}
+              <div className="bg-base-100 p-1 rounded-box">
+                <div className="flex justify-between items-center mb-3">
+                  <h5 className="font-medium">Allowances</h5>
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-outline btn-primary"
+                    onClick={() => appendAllowance({ name: "", amount: "" })}>
+                    + Add Allowance
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {allowanceFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex gap-2 items-center bg-base-200 rounded-box outline p-1">
+                      <div className="flex gap-2 flex-1">
+                        <InputField
+                          name={`salaryDetails.allowance.${index}.name`}
+                          register={register}
+                          error={errors}
+                          label={"Allowance Type"}
+                        />
+                        <InputField
+                          name={`salaryDetails.allowance.${index}.amount`}
+                          register={register}
+                          error={errors}
+                          label={"Allowance Amount"}
+                        />
+                      </div>
+                      {allowanceFields.length > 1 && (
+                        <button
+                          type="button"
+                          className="btn btn-square btn-error btn-xs"
+                          onClick={() => removeAllowance(index)}>
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="modal-action">
+            {/* Modal Actions */}
+            <div className="modal-action mt-4">
               <button
                 type="submit"
                 disabled={loading || uploading}
-                className="btn btn-accent w-full disabled:opacity-65"
-              >
+                className="btn btn-accent w-full">
                 {uploading
                   ? "Uploading file..."
                   : type === "edit"

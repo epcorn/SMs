@@ -22,6 +22,12 @@ const salaryRecordSchema = new mongoose.Schema({
   reason: { type: String, default: "Annual Revision" },
 });
 
+const allowanceSchema = new mongoose.Schema({
+  name: { type: String },
+  amount: { type: Number },
+  date: { type: Date, default: Date.now },
+});
+
 const medicalRecordSchema = new mongoose.Schema({
   name: { type: String, default: "N/A" },
   number: { type: String, default: "N/A" },
@@ -49,6 +55,7 @@ const userSchema = new mongoose.Schema(
     },
     photo: { type: String, default: "" },
 
+    department: { type: String, default: "" },
     active: { type: Boolean, default: true },
 
     userType: { type: String, default: "" },
@@ -67,6 +74,7 @@ const userSchema = new mongoose.Schema(
       PT: { type: String, default: 0 },
       ESIC: { type: String, default: "" },
       UAN: { type: String, default: "" },
+      allowance: [allowanceSchema],
     },
 
     salaryHistory: [salaryRecordSchema],

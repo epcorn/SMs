@@ -1,4 +1,4 @@
-import { Eye } from "lucide-react";
+import { Eye, SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -11,6 +11,7 @@ import { useAddUser, useGetAllUsers } from "@/hooks/empHooks";
 import EmployeeList from "@/components/employee/EmployeeList";
 
 function Employees() {
+  const [toggle, setToggle] = useState(false)
   useEffect(() => {
     document.title = "SMs | Employees"
   }, [])
@@ -42,23 +43,30 @@ function Employees() {
 
   return (
     <>
-      <div className="flex justify-end items-center gap-3 mb-4">
+      <div className="flex justify-end items-center flex-col md:flex-row gap-3 mb-4">
         <h3 className="text-2xl font-semibold mr-auto">Employees</h3>
-        <AddEmp type="add" onSubmitEmp={addUser} loading={addingUser} />
-        <ModalButton id="showSiteModal" title={<span><Eye /> Show Sites</span>} btn="btn-secondary">
-          <ShowSites />
-        </ModalButton>
-        <ModalButton id="addSiteModal" title={'+ Add Site'} >
-          <AddSite />
-        </ModalButton>
-      </div>
-      <div className="mb-4">
+        <div className="flex ml-auto items-center gap-3">
+          <button className="btn btn-neutral btn-square" onClick={() => setToggle(!toggle)}>
+            <SearchIcon />
+          </button>
+
+          <AddEmp type="add" onSubmitEmp={addUser} loading={addingUser} />
+          <ModalButton id="showSiteModal" title={<span><Eye /> Show Sites</span>} btn="btn-secondary">
+            <ShowSites />
+          </ModalButton>
+          <ModalButton id="addSiteModal" title={'+ Add Site'} >
+            <AddSite />
+          </ModalButton>
+
+        </div>
+      </div >
+      {toggle && <div className="mb-4">
         <Search
           register={register}
           errors={errors}
           onSubmit={handleSubmit(search)}
         />
-      </div>
+      </div>}
       {/* Added min-h-[350px] or padding-bottom to give room for dropdowns */}
       <EmployeeList response={response} responding={responding} />
     </>

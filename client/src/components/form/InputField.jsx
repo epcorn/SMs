@@ -1,5 +1,6 @@
 function InputField({
   label,
+  showLabel = true,
   required = false,
   disabled = false,
   type = "text",
@@ -16,19 +17,19 @@ function InputField({
 
   return (
     <div>
-      <fieldset className="fieldset">
-        <label
+      <fieldset className="fieldset gap-0">
+        {showLabel && <label
           className={`label font-semibold capitalize text-base text-gray-700 ${label ? "" : "hidden"}`}
           htmlFor={fieldId}
         >
           {label}{required && <span className="text-red-600">*</span>}
-        </label>
+        </label>}
 
         <input
           type={type}
           disabled={disabled}
           id={fieldId}
-          className={`input w-full text-black ${fieldError ? 'input-error border-error' : 'border-success'}`}
+          className={`input w-full text-black ${fieldError ? 'input-error border-error' : 'border-success'} placeholder:text-gray-600 placeholder:font-semibold `}
           placeholder={placeholder || label}
           {...(register
             ? register(name, {

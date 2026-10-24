@@ -2,7 +2,6 @@ import { createError } from "../middleware/errorMiddleware.js";
 import User from "../models/userModel.js";
 import { createToken, uploadToCloud } from "../utils/helperFunction.js";
 import path from "path";
-import fs from "fs/promises";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +12,7 @@ const userService = {
     const extUser = await User.findOne({ email: creds.email }).select(
       "+password",
     );
+
     if (!extUser) throw createError("User not found", 404);
 
     const validateUser = await extUser.comparePassword(creds.password);
@@ -26,6 +26,7 @@ const userService = {
         name: extUser.name,
         email: extUser.email,
         role: extUser.role,
+        photo: extUser.photo,
       },
     };
   },
@@ -82,38 +83,13 @@ const userService = {
     }
     if (!creds || (!creds?.user && !creds.email))
       throw createError("Info not provide", 400);
-    const user = await User.findById(id);
 
-    if (!user) {
-      throw createError("User not found", 404);
-    }
     const { password, ...data } = creds;
     const updatedUser = await User.findByIdAndUpdate(
       id,
+      { $set: creds },
       {
-        $set: {
-          firstname: creds.name,
-          middlename: creds.middlename,
-          lastname: creds.lastname,
-          email: creds.email,
-          dob: creds.dob,
-          residAddress: creds.residAddress,
-          currAddress: creds.currAddress,
-          bloodGroup: creds.bloodGroup,
-          resume: creds.resume,
-          govtIds: creds.govtIds,
-          joiningDate: creds.JoiningDate,
-          policeVerification: creds.policeVerification,
-          currentSalary: creds.currentSalary,
-
-          // IMPORTANT
-          familyDetails: creds.familyDetails || [],
-          bankDetails: creds.bankDetails || [],
-          ...data,
-        },
-      },
-      {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     );
@@ -123,12 +99,26 @@ const userService = {
       user: updatedUser,
     };
   },
-  addAdvance: async ({ data, id }) => {},
 
-  getAllUsers: async (data = {}) => {
+  getAllUsers: async (data = {}, me) => {
+    const { name, email } = data;
+
+    if (me.role === "employee") {
+      const user = await User.findById(me.id).populate([
+        { path: "attendenceRecords" },
+        { path: "site" },
+        {
+          path: "advance.givenBy",
+          select: "firstname lastname email role",
+        },
+      ]);
+      if (!user) throw createError("User not found", 404);
+
+      return user;
+    }
+
     const query = {};
 
-    const { name, email } = data;
     if (name || email) {
       query.$or = [];
       if (name) {
@@ -143,7 +133,7 @@ const userService = {
 
     const skip = (page - 1) * limit;
 
-    const [users, totalUsers] = await Promise.all([
+    const [users, user, totalUsers] = await Promise.all([
       User.find(query)
         .populate([
           { path: "attendenceRecords" },
@@ -155,6 +145,7 @@ const userService = {
         ])
         .skip(skip)
         .limit(limit),
+      User.findById(me.id),
       User.countDocuments(),
     ]);
 
@@ -170,6 +161,7 @@ const userService = {
         prev: page > 1,
         totalUsers,
       },
+      user,
       data: users,
     };
   },

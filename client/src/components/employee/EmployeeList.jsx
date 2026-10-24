@@ -1,8 +1,4 @@
-import {
-  useChangePassword,
-  useEditUser,
-  useMarkActiveMutation,
-} from "@/hooks/empHooks";
+import { useChangePassword, useEditUser, useMarkActiveMutation, } from "@/hooks/empHooks";
 import { useState } from "react";
 import InputField from "../form/InputField";
 import AddEmp from "./AddEmp";
@@ -25,8 +21,8 @@ function EmployeeList({ response, responding }) {
   return (
     <div>
       <div className="overflow-x-auto">
-        <table className="table">
-          <thead className="bg-gray-200 rounded-md">
+        <table className="table min-w-4xl">
+          <thead className="bg-gray-200 rounded-md text-center">
             <tr>
               <th>#</th>
               <th>Name</th>
@@ -99,7 +95,7 @@ function EmployeeList({ response, responding }) {
                     </ModalButton>
                     <ModalButton
                       id={`cp-emp-modal-${user._id}`}
-                      title={<LockKeyholeOpenIcon className="h-4"/>}
+                      title={<LockKeyholeOpenIcon className="h-4" />}
                       btn="btn-accent btn-sm"
                       onClick={() => setSelecteduser(user)}>
                       {selecteduser?._id === user?._id && (
@@ -107,7 +103,7 @@ function EmployeeList({ response, responding }) {
                       )}
                     </ModalButton>
 
-                    <ModalButton id={`advance-emp-modal-${user._id}`} btn="btn-success btn-sm" title={<IndianRupee className="h-4"/>} onClick={() => setSelecteduser(user)}>
+                    <ModalButton id={`advance-emp-modal-${user._id}`} btn="btn-success btn-sm" title={<IndianRupee className="h-4" />} onClick={() => setSelecteduser(user)}>
                       {selecteduser?._id === user?._id &&
                         <AdvanceForm emp={selecteduser} editUser={editUser} />
                       }

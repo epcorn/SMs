@@ -28,7 +28,7 @@ const empServices = {
   },
 
   attendenceAssign: async function ({ body, user }) {
-    const { id, status = "Present" } = body;
+    const { id, status = "Present", reason } = body;
     const privilegedRoles = ["operator", "admin"];
     const isPrivileged = privilegedRoles.includes(user.role);
 
@@ -48,7 +48,6 @@ const empServices = {
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
-
     // 1. Check if an attendance record already exists for today
     const existingAttendance = await Attendence.findOne({
       user: targetUser._id,
@@ -62,7 +61,9 @@ const empServices = {
         user: targetUser._id,
         status: status,
         createdAt: new Date(),
-        history: [{ status: status, date: new Date(), changedBy: user.id }],
+        history: [
+          { status: status, date: new Date(), changedBy: user.id, reason },
+        ],
       });
     } else {
       updatedAttendance = await Attendence.findOneAndUpdate(
@@ -74,6 +75,7 @@ const empServices = {
               status: status,
               date: new Date(),
               changedBy: user.id,
+              reason,
             },
           },
         },
@@ -105,7 +107,9 @@ const empServices = {
     const att = await Attendence.create({
       user: user.id,
       status: "Present",
-      history: [{ status: "Present", changedBy: user.id }],
+      history: [
+        { status: "Present", changedBy: user.id, reason: "User marked" },
+      ],
     });
     return { msg: `marked ${att.status}` };
   },

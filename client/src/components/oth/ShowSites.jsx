@@ -21,7 +21,7 @@ function ShowSites() {
   }, [refetch]);
 
   return (
-    <div className='p-4 max-w-5xl min-h-[70dvh] mx-auto'>
+    <div className='p-4 max-w-5xl min-h-[70dvh] w-full mx-auto'>
       <h3 className='font-bold text-2xl mb-4 text-base-content'>Show Sites</h3>
 
       {/* daisyUI Card container with border */}

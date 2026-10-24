@@ -1,7 +1,7 @@
 import { createError } from "../middleware/errorMiddleware.js";
 import userService from "../services/user.service.js";
 
-export const loginUser = async (req, res, next) => {
+const loginUser = async (req, res, next) => {
   try {
     console.log("login body", req.body);
     const { token, user } = await userService.loginUser(req.body);
@@ -21,7 +21,7 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
-export const changePassword = async (req, res, next) => {
+const changePassword = async (req, res, next) => {
   try {
     const data = await userService.changePassword(req);
     return res.status(200).json({ ...data });
@@ -30,7 +30,7 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
-export const logout = async (req, res, next) => {
+const logout = async (req, res, next) => {
   try {
     res.clearCookie("EMS_token", {
       httpOnly: true,
@@ -44,16 +44,16 @@ export const logout = async (req, res, next) => {
   }
 };
 
-export const getAllUsers = async (req, res, next) => {
+const getAllUsers = async (req, res, next) => {
   try {
-    const data = await userService.getAllUsers(req.query);
+    const data = await userService.getAllUsers(req.query, req.user);
     return res.status(200).json(data);
   } catch (error) {
     next(error);
   }
 };
 
-export const createUser = async (req, res, next) => {
+const createUser = async (req, res, next) => {
   try {
     const { user, msg } = await userService.createUser(req.body);
     return res.status(200).json({ user, msg });
@@ -63,7 +63,7 @@ export const createUser = async (req, res, next) => {
   }
 };
 
-export const editUser = async (req, res, next) => {
+const editUser = async (req, res, next) => {
   try {
     const msg = await userService.editUser(req.body, req.params.id, req.user);
     return res.status(200).json(msg);
@@ -73,7 +73,7 @@ export const editUser = async (req, res, next) => {
   }
 };
 
-export const uploadController = async (req, res, next) => {
+const uploadController = async (req, res, next) => {
   try {
     if (!req.files || Object.keys(req.files).length === 0) {
       throw createError("No files were uploaded", 400);
@@ -96,4 +96,14 @@ export const uploadController = async (req, res, next) => {
   }
 };
 
-export const b = async (req, res, next) => {};
+const b = async (req, res, next) => {};
+
+export {
+  loginUser,
+  changePassword,
+  logout,
+  getAllUsers,
+  createUser,
+  editUser,
+  uploadController,
+};

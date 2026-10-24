@@ -15,6 +15,10 @@ const attendenceHitorySchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  reason: {
+    type: String,
+    required: true,
+  },
 });
 
 const attendenceSchema = new mongoose.Schema(

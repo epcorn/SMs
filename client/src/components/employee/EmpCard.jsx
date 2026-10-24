@@ -61,29 +61,29 @@ export function EmpDetails({ user = {}, setToggle }) {
         <h4 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Employment & Personal Details</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-lg border border-slate-200 text-sm">
           <div>
-            <span className="text-xs text-slate-400 block font-medium uppercase">Date of Birth</span>
+            <span className="text-xs block font-medium uppercase">Date of Birth</span>
             <span className="font-semibold text-slate-700">{user?.dob ? user.dob.split("T")[0] : "N/A"}</span>
           </div>
           <div>
-            <span className="text-xs text-slate-400 block font-medium uppercase">Joining Date</span>
+            <span className="text-xs block font-medium uppercase">Joining Date</span>
             <span className="font-semibold text-slate-700">{user?.joiningDate ? user.joiningDate.split("T")[0] : "N/A"}</span>
           </div>
           <div>
-            <span className="text-xs text-slate-400 block font-medium uppercase">Blood Group</span>
+            <span className="text-xs block font-medium uppercase">Blood Group</span>
             <span className="font-semibold text-slate-700">{user?.bloodGroup || "N/A"}</span>
           </div>
           <div>
-            <span className="text-xs text-slate-400 block font-medium uppercase">Police Verification</span>
+            <span className="text-xs block font-medium uppercase">Police Verification</span>
             <span className={`font-semibold ${user?.policeVerification === "done" ? "text-emerald-600" : "text-amber-600"}`}>
               {user?.policeVerification === "done" ? "Verified Done" : "Pending Review"}
             </span>
           </div>
           <div>
-            <span className="text-xs text-slate-400 block font-medium uppercase">Govt ID ({user?.govtIds?.name || "ID"})</span>
+            <span className="text-xs block font-medium uppercase">Govt ID ({user?.govtIds?.name || "ID"})</span>
             <span className="font-semibold text-slate-700">{user?.govtIds?.id || "N/A"}</span>
           </div>
           <div>
-            <span className="text-xs text-slate-400 block font-medium uppercase">Resume Document</span>
+            <span className="text-xs block font-medium uppercase">Resume Document</span>
             {user?.resume ? (
               <a href={user?.resume} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
                 View File ↗
@@ -93,11 +93,11 @@ export function EmpDetails({ user = {}, setToggle }) {
             )}
           </div>
           <div className="md:col-span-3 pt-2 border-t border-slate-200">
-            <span className="text-xs text-slate-400 block font-medium uppercase mb-1">Residential Address</span>
+            <span className="text-xs block font-medium uppercase mb-1">Residential Address</span>
             <span className="font-medium text-slate-700">{user?.residAddress || "N/A"}</span>
           </div>
           <div className="md:col-span-3">
-            <span className="text-xs text-slate-400 block font-medium uppercase mb-1">Current Address</span>
+            <span className="text-xs block font-medium uppercase mb-1">Current Address</span>
             <span className="font-medium text-slate-700">{user?.currAddress || "N/A"}</span>
           </div>
         </div>
@@ -106,26 +106,36 @@ export function EmpDetails({ user = {}, setToggle }) {
       {/* Salary Structure Section */}
       <div className="mb-8">
         <h4 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Compensation & Statutory Info</h4>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-lg border border-slate-200 text-center text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 bg-slate-300 p-4 rounded-lg border border-slate-200 text-center text-sm">
           <div className="bg-white p-3 rounded border border-slate-200">
-            <span className="text-[11px] text-slate-400 block uppercase font-semibold">Current Salary</span>
+            <span className="text-[11px] block uppercase font-semibold">Current Salary</span>
             <span className="font-bold text-slate-800">{user?.salaryDetails?.currentSalary ? `₹${user.salaryDetails.currentSalary}` : "N/A"}</span>
           </div>
           <div className="bg-white p-3 rounded border border-slate-200">
-            <span className="text-[11px] text-slate-400 block uppercase font-semibold">Basic Pay</span>
+            <span className="text-[11px] block uppercase font-semibold">Basic Pay</span>
             <span className="font-bold text-slate-800">{user?.salaryDetails?.basicPay ? `₹${user.salaryDetails.basicPay}` : "N/A"}</span>
           </div>
           <div className="bg-white p-3 rounded border border-slate-200">
-            <span className="text-[11px] text-slate-400 block uppercase font-semibold">Professional Tax</span>
+            <span className="text-[11px] block uppercase font-semibold">Professional Tax</span>
             <span className="font-bold text-slate-800">{user?.salaryDetails?.PT ? `₹${user.salaryDetails.PT}` : "N/A"}</span>
           </div>
           <div className="bg-white p-3 rounded border border-slate-200">
-            <span className="text-[11px] text-slate-400 block uppercase font-semibold">ESIC</span>
+            <span className="text-[11px] block uppercase font-semibold">ESIC</span>
             <span className="font-bold text-slate-800">{user?.salaryDetails?.ESIC ? `₹${user.salaryDetails.ESIC}` : "N/A"}</span>
           </div>
           <div className="bg-white p-3 rounded border border-slate-200 col-span-2 md:col-span-1">
-            <span className="text-[11px] text-slate-400 block uppercase font-semibold">UAN Number</span>
+            <span className="text-[11px] block uppercase font-semibold">UAN Number</span>
             <span className="font-bold text-slate-800">{user?.salaryDetails?.UAN || "N/A"}</span>
+          </div>
+
+          <div className='col-span-full grid grid-cols-3'>
+            <h3 className='col-span-full text-left font-semibold text-base capitalize '>allowance Details</h3>
+            {user?.salaryDetails?.allowance?.map(al => (
+              <div key={al?.name} className="bg-white p-3 rounded border">
+                <span className="text-[11px]  block uppercase font-semibold">{al.name}</span>
+                <span className="font-bold text-slate-800">{al.amount}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -134,10 +144,10 @@ export function EmpDetails({ user = {}, setToggle }) {
       <div className="mb-8">
         <h4 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Professional Certificates</h4>
         {medicalList?.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="overflow-x-auto rounded-lg border border-slate-400">
             <table className="table w-full bg-white text-sm">
               <thead>
-                <tr className="bg-slate-100 text-slate-600 font-semibold">
+                <tr className="bg-slate-300 text-slate-600 font-semibold">
                   <th>Certificate Title</th>
                   <th>Registration No.</th>
                   <th>Attachment</th>
@@ -171,10 +181,10 @@ export function EmpDetails({ user = {}, setToggle }) {
       <div className="mb-8">
         <h4 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Family & Emergency Contacts</h4>
         {familyList?.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="overflow-x-auto rounded-lg border border-slate-400">
             <table className="table w-full bg-white text-sm">
               <thead>
-                <tr className="bg-slate-100 text-slate-600 font-semibold">
+                <tr className="bg-slate-300 text-slate-600 font-semibold">
                   <th>Dependent Name</th>
                   <th>Relation</th>
                   <th>Contact Number</th>
@@ -208,10 +218,10 @@ export function EmpDetails({ user = {}, setToggle }) {
       <div className="mb-6">
         <h4 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">Bank Account Information</h4>
         {bankList?.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="overflow-x-auto rounded-lg border border-slate-400">
             <table className="table w-full bg-white text-sm">
               <thead>
-                <tr className="bg-slate-100 text-slate-600 font-semibold">
+                <tr className="bg-slate-300 text-slate-600 font-semibold">
                   <th>Account Holder</th>
                   <th>Account Number</th>
                   <th>IFSC Code</th>
@@ -317,8 +327,8 @@ export function EmpCard({ user = {}, setToggle }) {
           <div className="col-span-2">
             <span className="text-xs text-slate-500 uppercase font-bold tracking-wide block mb-0.5">Police Verification</span>
             <span className={`badge badge-sm font-bold tracking-wide px-2.5 py-2 ${user?.policeVerification === "notDone"
-                ? "bg-rose-100 text-rose-700 border border-rose-300"
-                : "bg-emerald-100 text-emerald-800 border border-emerald-300"
+              ? "bg-rose-100 text-rose-700 border border-rose-300"
+              : "bg-emerald-100 text-emerald-800 border border-emerald-300"
               }`}>
               {user?.policeVerification === "notDone" ? "Verification Pending" : "Verified & Validated"}
             </span>

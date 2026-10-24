@@ -6,51 +6,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "motion/react";
-import { dateCompare } from "@/utils/helperfn";
+import { dateCompare, getStatusStyle } from "@/utils/helperfn";
 
-const getStatusStyle = (val) => {
-  switch (val) {
-    case "Present":
-      return {
-        btn: "btn-accent shadow-emerald-500/30 hover:shadow-emerald-500/50",
-        ring: "bg-emerald-500/15",
-        icon: "✓",
-        label: "Marked (Present)",
-      };
-    case "Absent":
-      return {
-        btn: "btn-error shadow-rose-500/30 hover:shadow-rose-500/50",
-        ring: "bg-rose-500/15",
-        icon: "✘",
-        label: "Marked (Absent)",
-      };
-    case "Half-day":
-      return {
-        btn: "btn-warning shadow-amber-500/30 hover:shadow-amber-500/50",
-        ring: "bg-amber-500/15",
-        icon: "½",
-        label: "Marked (Half-Day)",
-      };
-    default:
-      return {
-        btn: "btn-primary shadow-primary/30 hover:shadow-primary/50",
-        ring: "bg-primary/15",
-        icon: "👆",
-        label: "Tap to Check-In",
-      };
-  }
-};
+
 
 function Attendence() {
   const [toggle, setToggle] = useState(false);
   const { user } = useAuthStore((state) => state.user);
 
-  const {
-    mutateAsync: marking,
-    isPending: isMarking,
-    data,
-  } = useMarkAttandence();
-
+  const { mutateAsync: marking, isPending: isMarking, data, } = useMarkAttandence();
   const { data: attendence, isFetching: loadingAttdnc } = useGetAttendenceQuery(
     user?.id,
   );
@@ -73,7 +37,7 @@ function Attendence() {
       {["admin", "operator"].includes(user?.role) && (
         <button
           className={`btn btn-square btn-circle  btn-dash absolute top-1/2 -translate-y-1/2 ${toggle ? "" : "right-0"}`}
-          onClick={() => setToggle(!toggle)}
+          onClick={(e) => { e.stopPropagation(); setToggle(!toggle) }}
         >
           {toggle ? <ChevronRight /> : <ChevronLeft />}
         </button>
@@ -104,6 +68,7 @@ function Attendence() {
           >
             <ShowEmpAttendence
               data={data}
+              user={user}
               handleMark={handleMark}
               isMarking={isMarking}
               loadingAttdnc={loadingAttdnc}
@@ -118,26 +83,27 @@ function Attendence() {
 
 export default Attendence;
 
-function ShowEmpAttendence({ handleMark, isMarking, loadingAttdnc, history }) {
+function ShowEmpAttendence({ handleMark, isMarking, user, loadingAttdnc, history }) {
   const records = history?.attendenceRecords || [];
   const todays = history?.attendenceRecords?.find(a => dateCompare(a?.createdAt, new Date()))
   const statusConfig = getStatusStyle(todays?.status || "N/A");
+  const isAdmins = !['admin', 'operator'].includes(user?.role)
 
+  console.log(todays)
   return (
     <div className="flex flex-col gap-2 md:gap-10">
       {/* Header Section */}
-
-      <div className="grid grid-cols-2 items-center md:block">
-        <div className="text-center space-y-1.5">
+      <div className="grid grid-cols-2 items-center md:block ">
+        <div className="text-center flex flex-col justify-around h-full  space-y-1.5">
           <div>
-            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-base-content">
+            <h2 className="text-2xl md:text-3xl mt-5 font-extrabold tracking-tight text-base-content">
               Work Attendance
             </h2>
             <p className="text-sm text-base-content/60">
               Check-in daily to record your work log
             </p>
           </div>
-          <div className="flex flex-wrap md:hidden gap-4 justify-center *:flex *:items-center *:gap-2 text-sm font-medium">
+          {isAdmins ? "" : <div className="flex flex-wrap md:hidden gap-x-4 justify-center *:flex *:items-center *:gap-2 text-sm font-medium">
             <div>
               <div aria-label="success" className="status status-lg status-success"></div>
               <span>Present</span>
@@ -155,10 +121,10 @@ function ShowEmpAttendence({ handleMark, isMarking, loadingAttdnc, history }) {
               <span>Holidays</span>
             </div>
           </div>
+          }
         </div>
-
         {/* Interactive Action Button with Decorative Ring */}
-        <div className="flex flex-col items-center justify-center py-2">
+        <div className={`flex flex-col ${isAdmins ? "mt-20" : ""} items-center justify-center py-2`}>
           <div className="relative flex items-center justify-center">
             <div
               className={`absolute -inset-3 rounded-full blur-md transition-all duration-300 ${statusConfig.ring}`}
@@ -167,7 +133,7 @@ function ShowEmpAttendence({ handleMark, isMarking, loadingAttdnc, history }) {
               type="button"
               onClick={handleMark}
               disabled={isMarking}
-              className={`relative btn ${statusConfig.btn} btn-circle w-40 h-40 text-sm font-bold tracking-wide shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border-none flex flex-col items-center justify-center gap-2 text-white`}
+              className={`relative btn ${statusConfig.btn} btn-circle ${!isAdmins ? "w-40 h-40" : "w-80 h-80"} btn-square text-sm font-bold tracking-wide shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border-none flex flex-col items-center justify-center gap-2 text-white`}
             >
               {isMarking ? (
                 <span className="loading loading-spinner loading-lg"></span>
@@ -187,7 +153,7 @@ function ShowEmpAttendence({ handleMark, isMarking, loadingAttdnc, history }) {
       </div>
 
       {/* History Log Section */}
-      {loadingAttdnc ? (
+      {isAdmins ? "" : loadingAttdnc ? (
         <div className="flex justify-center items-center py-">
           <span className="loading loading-spinner text-accent loading-md"></span>
         </div>

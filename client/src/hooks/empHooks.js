@@ -1,9 +1,9 @@
 import { fetchFn } from "@/utils/queryClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useGetHolidaysQuery = () => {
+const useGetHolidaysQuery = () => {
   return useQuery({
-    queryKey: ['holiday'],
+    queryKey: ["holiday"],
     queryFn: async () => {
       const res = await fetchFn("emp/holidays");
       return res;
@@ -11,7 +11,7 @@ export const useGetHolidaysQuery = () => {
   });
 };
 
-export const useMarkAttandence = () => {
+const useMarkAttandence = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["mark", "user"],
@@ -29,7 +29,7 @@ export const useMarkAttandence = () => {
   });
 };
 
-export const useAssignAttendence = () => {
+const useAssignAttendence = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["mark", "user", "assign"],
@@ -46,7 +46,7 @@ export const useAssignAttendence = () => {
   });
 };
 
-export const useGetAttendenceQuery = (id = "") => {
+const useGetAttendenceQuery = (id = "") => {
   return useQuery({
     queryKey: ["mark", "user", "assign", id],
     queryFn: async () => {
@@ -57,31 +57,24 @@ export const useGetAttendenceQuery = (id = "") => {
   });
 };
 
-export const useGetAllUsers = ({
-  page = 1,
-  limit = 12,
-  name = "",
-  email = "",
-}) => {
+const useGetAllUsers = ({ page = 1, limit = 12, name = "", email = "" }) => {
+  const params = Object.fromEntries(
+    Object.entries({ page, limit, name, email }).filter(
+      ([_, v]) => v !== undefined,
+    ),
+  );
+  const query = new URLSearchParams(params).toString();
   return useQuery({
-    queryKey: [
-      "user",
-      "active",
-      "file-upload",
-      "active",
-      { page, limit, name, email },
-    ],
+    queryKey: ["user", "active", "file-upload", "active", params],
     queryFn: async () => {
-      const data = await fetchFn(
-        `user/all?page=${page}&limit=${limit}&name=${name}&email=${email}`,
-      );
+      const data = await fetchFn(`user/all?${query ? query : ""}`);
       return data;
     },
     placeholderData: (previousData) => previousData,
   });
 };
 
-export const useAddUser = () => {
+const useAddUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["user"],
@@ -101,7 +94,7 @@ export const useAddUser = () => {
   });
 };
 
-export const useChangePassword = () => {
+const useChangePassword = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: [],
@@ -118,7 +111,7 @@ export const useChangePassword = () => {
   });
 };
 
-export const useEditUser = () => {
+const useEditUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["user"],
@@ -141,7 +134,7 @@ export const useEditUser = () => {
   });
 };
 
-export const useMarkActiveMutation = () => {
+const useMarkActiveMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["active"],
@@ -159,7 +152,7 @@ export const useMarkActiveMutation = () => {
   });
 };
 
-export const useGetCoOrdinatesMutation = () => {
+const useGetCoOrdinatesMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["coords", "user"],
@@ -175,7 +168,7 @@ export const useGetCoOrdinatesMutation = () => {
   });
 };
 
-export const useUploadFile = () => {
+const useUploadFile = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["file-upload"],
@@ -187,4 +180,18 @@ export const useUploadFile = () => {
       queryClient.invalidateQueries({ queryKey: ["file-upload"] });
     },
   });
+};
+
+export {
+  useGetHolidaysQuery,
+  useMarkAttandence,
+  useAssignAttendence,
+  useGetAttendenceQuery,
+  useGetAllUsers,
+  useAddUser,
+  useChangePassword,
+  useEditUser,
+  useMarkActiveMutation,
+  useGetCoOrdinatesMutation,
+  useUploadFile,
 };

@@ -37,16 +37,16 @@ const links = [
     icon: <Highlighter className={classes} />,
     role: ["admin", "operator", "employee"],
   },
-  // {
-  //   label: "Advance",
-  //   link: "advance",
-  //   icon: <CircleDollarSign className={classes} />,
-  //   role: ["admin", "operator", "employee"],
-  // },
+  {
+    label: "Advance",
+    link: "advance",
+    icon: <CircleDollarSign className={classes} />,
+    role: ["admin", "operator", "employee"],
+  },
   {
     label: "GPS",
     link: "gps",
-    icon: <MapPin  className={classes} />,
+    icon: <MapPin className={classes} />,
     role: ["admin"],
   },
 ];
@@ -95,7 +95,7 @@ function Sidebar({ children }) {
         <div className="flex min-h-full flex-col items-start bg-slate-900 w-64 border-r border-slate-800 text-slate-300">
           {/* Sidebar Header Title */}
           <div className="px-6 py-5 border-b border-slate-800 w-full grid grid-cols-3 items-center">
-            <img src="src/assets/logo.png" alt="" className=""/>
+            <img src="src/assets/logo.png" alt="" className="" />
             <h3 className="col-span-2 font-extrabold text-2xl text-rose-300 tracking-wide">
               SMs
             </h3>
@@ -132,10 +132,11 @@ function Sidebar({ children }) {
             })}
 
             <li className="">
-              
+
             </li>
             {/* Logout Action */}
             <li className="mt-auto mb-6">
+              <img src="" alt="" />
               <button
                 onClick={logout}
                 disabled={loggingOut}
