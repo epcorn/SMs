@@ -1,6 +1,6 @@
 function Dashboard() {
   return (
-    <div>
+    <div className="p-2">
       dashboard
     </div>
   )

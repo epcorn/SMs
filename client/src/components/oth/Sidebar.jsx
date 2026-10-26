@@ -10,6 +10,7 @@ import {
   Users
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import logo from '../../assets/logo.png'
 
 const classes = "w-5 h-5 text-slate-400 transition-colors";
 const links = [
@@ -95,7 +96,7 @@ function Sidebar({ children }) {
         <div className="flex min-h-full flex-col items-start bg-slate-900 w-64 border-r border-slate-800 text-slate-300">
           {/* Sidebar Header Title */}
           <div className="px-6 py-5 border-b border-slate-800 w-full grid grid-cols-3 items-center">
-            <img src="src/assets/logo.png" alt="" className="" />
+            <img src={logo} alt="" className="" />
             <h3 className="col-span-2 font-extrabold text-2xl text-rose-300 tracking-wide">
               SMs
             </h3>

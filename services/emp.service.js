@@ -24,7 +24,7 @@ const empServices = {
       throw createError("User is not active", 400);
     }
 
-    if (existAtt) throw createError("Already attendence marked for Today", 400);
+    return existAtt;
   },
 
   attendenceAssign: async function ({ body, user }) {
@@ -48,7 +48,7 @@ const empServices = {
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
-    // 1. Check if an attendance record already exists for today
+    // 1. Check if an attendance record already existAtt for today
     const existingAttendance = await Attendence.findOne({
       user: targetUser._id,
       createdAt: { $gte: startOfDay },
@@ -88,30 +88,78 @@ const empServices = {
     return { msg: `${targetUser?.firstname} is marked ${status}`, targetUser };
   },
 
-  markAttendance: async function ({ body, user }) {
-    await this.existAttendence(user.id, null);
+  getcoords: async (user) => {
     const me = await User.findById(user.id)
       .select("location site")
       .populate("site");
+
+    if (["admin"].includes(user.role)) return true;
 
     const lat1 = me.location.coordinates[1],
       lon1 = me.location.coordinates[0],
       lat2 = me.site.location.coordinates[1],
       lon2 = me.site.location.coordinates[0];
     console.log(lat1, lon1, lat2, lon2);
+
     const distance = getDistanceInMeteres(lat1, lon1, lat2, lon2);
     const allowedRadius = me.site.radius || 100;
+
     if (distance > allowedRadius)
       throw createError("You are too far from office Location", 400);
+  },
 
-    const att = await Attendence.create({
-      user: user.id,
-      status: "Present",
-      history: [
-        { status: "Present", changedBy: user.id, reason: "User marked" },
-      ],
-    });
-    return { msg: `marked ${att.status}` };
+  markAttendance: async function ({ body, user }) {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const now = new Date();
+
+    const action = body.action;
+
+    const existAtt = await this.existAttendence(user.id, null);
+    await this.getcoords(user);
+
+    if (action === "CHECK_OUT" && existAtt) {
+      if (!existAtt.checkInTime)
+        throw createError("Invalid Attandence Action", 404);
+
+      if (existAtt.totalWorkingHours)
+        throw createError("Already Marked Out", 400);
+
+      const diffMs = now - new Date(existAtt.checkInTime);
+      const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
+
+      existAtt.checkOutTime = now;
+      existAtt.totalWorkingHours = totalHours;
+
+      existAtt.history.push({
+        action,
+        date: now,
+        changedBy: user.id,
+        reason: "User CheckOut",
+      });
+
+      await existAtt.save();
+
+      return { msg: "Marked Out" };
+    }
+    if (action === "CHECK_IN") {
+      if (existAtt)
+        throw createError("Already attendence marked for Today", 400);
+      const att = await Attendence.create({
+        user: user.id,
+        status: "Present",
+        checkInTime: now,
+        history: [
+          {
+            status: "Present",
+            action,
+            changedBy: user.id,
+            reason: "User CheckIn",
+          },
+        ],
+      });
+      return { msg: `marked ${att.status}` };
+    }
   },
 
   markActive: async function ({ params, user, body }) {

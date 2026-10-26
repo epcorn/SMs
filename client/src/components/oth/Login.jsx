@@ -7,11 +7,23 @@ function Login() {
   const navigate = useNavigate();
   const [status, setStatus] = useState(null);
   const { mutateAsync: login, isPending: logginIn } = useLoginMutation();
-  const user = useAuthStore((state) => state.user);
+  const authState = useAuthStore((state) => state.user);
+
+
+  const currentUser = authState?.user || authState;
 
   useEffect(() => {
-    if (user) navigate("/dashboard", { replace: true });
-  }, [user, navigate]);
+    // ONLY redirect if a user session actively exists!
+    if (currentUser && currentUser.role) {
+      if (currentUser.role === 'employee') {
+        navigate("/attendence", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [currentUser, navigate]);
+
+  console.log(currentUser)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,6 +34,9 @@ function Login() {
       const res = await login(formData);
       console.log(res);
       setStatus(res.msg);
+      if (res.user.role === "employee") {
+        navigate("/attendence");
+      }
       navigate("/dashboard");
     } catch (error) {
       setStatus(error?.msg || error?.message || "Login failed");

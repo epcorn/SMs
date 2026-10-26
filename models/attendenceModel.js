@@ -6,6 +6,7 @@ const attendenceHitorySchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  action: { type: String, enum: ["CHECK_IN", "CHECK_OUT", "STATUS_CHANGE"] },
   status: {
     type: String,
     enum: ["Present", "Absent", "Half-day"],
@@ -33,7 +34,10 @@ const attendenceSchema = new mongoose.Schema(
       enum: ["Present", "Absent", "Half-day"],
       default: "Present",
     },
-    history: [attendenceHitorySchema], // Sub-document array for tracking updates
+    checkInTime: { type: Date, default: null },
+    checkOutTime: { type: Date, default: null },
+    totalWorkingHours: { type: Number, default: 0 },
+    history: [attendenceHitorySchema],
   },
   { timestamps: true },
 );

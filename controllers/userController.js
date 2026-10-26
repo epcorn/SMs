@@ -55,6 +55,7 @@ const getAllUsers = async (req, res, next) => {
 
 const createUser = async (req, res, next) => {
   try {
+    console.log(req.body);
     const { user, msg } = await userService.createUser(req.body);
     return res.status(200).json({ user, msg });
   } catch (error) {

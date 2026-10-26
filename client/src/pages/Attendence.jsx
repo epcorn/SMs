@@ -8,21 +8,20 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "motion/react";
 import { dateCompare, getStatusStyle } from "@/utils/helperfn";
 
-
-
 function Attendence() {
   const [toggle, setToggle] = useState(false);
   const { user } = useAuthStore((state) => state.user);
 
-  const { mutateAsync: marking, isPending: isMarking, data, } = useMarkAttandence();
+  const { mutateAsync: marking, isPending: isMarking } = useMarkAttandence();
   const { data: attendence, isFetching: loadingAttdnc } = useGetAttendenceQuery(
     user?.id,
   );
   const history = attendence?.user || {};
 
-  const handleMark = async () => {
+  const handleMark = async (action) => {
+
     try {
-      const res = await marking();
+      const res = await marking({ action: action === "in" ? "CHECK_IN" : "CHECK_OUT" });
       toast.success(res?.msg || "Attendance marked successfully");
     } catch (error) {
       console.error(error);
@@ -32,31 +31,31 @@ function Attendence() {
     }
   };
 
+  const isPrivilegedUser = ["admin", "operator"].includes(user?.role);
+
   return (
-    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col gap-10 h-full p-2 px-3">
-      {["admin", "operator"].includes(user?.role) && (
+    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col h-full p-2 px-3 overflow-hidden">
+      {isPrivilegedUser && (
         <button
-          className={`btn btn-square btn-circle  btn-dash absolute top-1/2 -translate-y-1/2 ${toggle ? "" : "right-0"}`}
-          onClick={(e) => { e.stopPropagation(); setToggle(!toggle) }}
+          className={`z-20 btn btn-square btn-circle btn-dash absolute top-1/2 -translate-y-1/2 ${toggle ? "" : "right-0"}`}
+          onClick={(e) => { e.stopPropagation(); setToggle(!toggle); }}
         >
           {toggle ? <ChevronRight /> : <ChevronLeft />}
         </button>
       )}
 
       <AnimatePresence mode="wait">
-        {toggle ? (
-          ["admin", "operator"].includes(user?.role) && (
-            <motion.div
-              key="admin-view"
-              initial={{ opacity: 0, x: 70 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 80 }}
-              transition={{ duration: 0.4 }}
-              className="w-full h-full"
-            >
-              <ShowUserAttendence users={attendence?.users} />
-            </motion.div>
-          )
+        {toggle && isPrivilegedUser ? (
+          <motion.div
+            key="admin-view"
+            initial={{ opacity: 0, x: 70 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 80 }}
+            transition={{ duration: 0.4 }}
+            className="w-full h-full flex flex-col overflow-y-auto min-h-0"
+          >
+            <ShowUserAttendence users={attendence?.users} />
+          </motion.div>
         ) : (
           <motion.div
             key="emp-view"
@@ -64,10 +63,9 @@ function Attendence() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 80 }}
             transition={{ duration: 0.4 }}
-            className="w-full h-full"
+            className="w-full h-full flex flex-col overflow-y-auto min-h-0"
           >
             <ShowEmpAttendence
-              data={data}
               user={user}
               handleMark={handleMark}
               isMarking={isMarking}
@@ -85,81 +83,97 @@ export default Attendence;
 
 function ShowEmpAttendence({ handleMark, isMarking, user, loadingAttdnc, history }) {
   const records = history?.attendenceRecords || [];
-  const todays = history?.attendenceRecords?.find(a => dateCompare(a?.createdAt, new Date()))
-  const statusConfig = getStatusStyle(todays?.status || "N/A");
-  const isAdmins = !['admin', 'operator'].includes(user?.role)
+  const todays = records.find(a => dateCompare(a?.createdAt, new Date()));
 
-  console.log(todays)
+  const isCheckedIn = Boolean(todays?.checkInTime);
+  const isCheckedOut = Boolean(todays?.checkOutTime || todays?.totalWorkingHours);
+
+  const isAdmin = user.role === "admin"
+  const statusConfig = getStatusStyle(todays?.status || "N/A");
+
   return (
-    <div className="flex flex-col gap-2 md:gap-10">
-      {/* Header Section */}
-      <div className="grid grid-cols-2 items-center md:block ">
-        <div className="text-center flex flex-col justify-around h-full  space-y-1.5">
-          <div>
-            <h2 className="text-2xl md:text-3xl mt-5 font-extrabold tracking-tight text-base-content">
-              Work Attendance
-            </h2>
-            <p className="text-sm text-base-content/60">
-              Check-in daily to record your work log
-            </p>
-          </div>
-          {isAdmins ? "" : <div className="flex flex-wrap md:hidden gap-x-4 justify-center *:flex *:items-center *:gap-2 text-sm font-medium">
-            <div>
-              <div aria-label="success" className="status status-lg status-success"></div>
-              <span>Present</span>
-            </div>
-            <div>
-              <div aria-label="warning" className="status status-lg status-warning"></div>
-              <span>Half-day</span>
-            </div>
-            <div>
-              <div aria-label="warning" className="status status-lg status-error"></div>
-              <span>Absent</span>
-            </div>
-            <div>
-              <div aria-label="error" className="status status-lg status-info"></div>
-              <span>Holidays</span>
-            </div>
-          </div>
-          }
-        </div>
-        {/* Interactive Action Button with Decorative Ring */}
-        <div className={`flex flex-col ${isAdmins ? "mt-20" : ""} items-center justify-center py-2`}>
-          <div className="relative flex items-center justify-center">
-            <div
-              className={`absolute -inset-3 rounded-full blur-md transition-all duration-300 ${statusConfig.ring}`}
-            />
-            <button
-              type="button"
-              onClick={handleMark}
-              disabled={isMarking}
-              className={`relative btn ${statusConfig.btn} btn-circle ${!isAdmins ? "w-40 h-40" : "w-80 h-80"} btn-square text-sm font-bold tracking-wide shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 border-none flex flex-col items-center justify-center gap-2 text-white`}
-            >
-              {isMarking ? (
-                <span className="loading loading-spinner loading-lg"></span>
-              ) : (
-                <>
-                  <span className="text-3xl drop-shadow-xs">
-                    {statusConfig.icon}
-                  </span>
-                  <span className="px-3 text-center leading-snug">
-                    {statusConfig.label}
-                  </span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+    <div className="flex flex-col h-full gap-6 pb-6 pt-4 items-center justify-center">
+      {/* Title & Subtitle */}
+      <div className="text-center space-y-1 hidden">
+        <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-base-content">
+          Work Attendance
+        </h2>
+        <p className="text-sm text-base-content/60">
+          Check-in and check-out to record your daily working hours
+        </p>
       </div>
 
-      {/* History Log Section */}
-      {isAdmins ? "" : loadingAttdnc ? (
-        <div className="flex justify-center items-center py-">
-          <span className="loading loading-spinner text-accent loading-md"></span>
-        </div>
-      ) : (
-        <AttendanceCalendar records={records} />
-      )}
+      {/* Main Interactive Action Container */}
+      <div className="flex flex-col items-center justify-center gap-6 py-4">
+
+        {/* 1. Show Check-In Button if not yet checked in */}
+        {!isCheckedIn && (
+          <button
+            type="button"
+            onClick={() => handleMark("in")}
+            disabled={isMarking}
+            className="btn btn-circle w-52 h-52 md:w-64 md:h-64 btn-success shadow-2xl text-white font-bold text-xl hover:scale-105 active:scale-95 transition-all duration-200 flex flex-col items-center justify-center gap-2 border-none"
+          >
+            {isMarking ? (
+              <span className="loading loading-spinner loading-lg"></span>
+            ) : (
+              <>
+                <span className="text-4xl">✓</span>
+                <span>Check In</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* 2. Show Mark Out Button if Checked In but Not Checked Out */}
+        {isCheckedIn && !isCheckedOut && (
+          <button
+            type="button"
+            onClick={() => {
+              const confirm = window.confirm("Are you sure want to Mark Out ")
+              if (confirm) {
+                handleMark("out")
+              }
+            }}
+            disabled={isMarking}
+            className="btn btn-circle w-52 h-52 md:w-64 md:h-64 btn-error shadow-2xl text-white font-bold text-xl hover:scale-105 active:scale-95 transition-all duration-200 flex flex-col items-center justify-center gap-2 border-none"
+          >
+            {isMarking ? (
+              <span className="loading loading-spinner loading-lg"></span>
+            ) : (
+              <>
+                <span className="text-4xl">✕</span>
+                <span>Mark Out</span>
+              </>
+            )}
+          </button>
+        )}
+
+        {/* 3. Show Completed State & Total Working Hours when finished for the day */}
+        {isCheckedOut && (
+          <div className="flex flex-col items-center gap-4 bg-base-200/60 p-6 rounded-2xl border border-base-300 shadow-sm text-center">
+            <div className="badge badge-success badge-lg font-semibold px-4 py-3 text-white">
+              Shift Completed for Today ✓
+            </div>
+            {todays?.totalWorkingHours && (
+              <div className="text-base font-medium text-base-content/80">
+                Total Working Hours: <span className="font-bold text-primary">{todays.totalWorkingHours} hrs</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Employee Personal History Calendar (Only visible for employee view if needed, or structured below) */}
+      {isAdmin && <div className="w-full max-w-2xl mt-4">
+        {loadingAttdnc ? (
+          <div className="flex justify-center items-center py-4">
+            <span className="loading loading-spinner text-accent loading-md"></span>
+          </div>
+        ) : (
+          <AttendanceCalendar records={records} />
+        )}
+      </div>}
     </div>
   );
 }

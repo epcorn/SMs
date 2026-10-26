@@ -56,13 +56,19 @@ function App() {
           <Route element={<ProtectedRoutes role={["admin", "operator"]} />}>
             <Route path="/employee" element={<Employees />} />
           </Route>
+
           <Route element={<ProtectedRoutes role={["admin"]} />}>
             <Route path="/gps" element={<GPS />} />
           </Route>
 
-          <Route element={<ProtectedRoutes />}>
+          <Route element={<ProtectedRoutes role={["admin", "operator"]} />}>
+            <Route path="/employee" element={<Employees />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/leave" element={<Leave />} />
+          </Route>
+
+
+          <Route element={<ProtectedRoutes role={["admin", "operator", "employee"]} />}>
             <Route path="/attendence" element={<Attendence />} />
             <Route path="/advance" element={<Advance />} />
           </Route>

@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import useAuthStore from "@/store/authStore";
 
 // Guaranteed visible marker icon (fixes Vite/Next.js broken image bug)
 const customIcon = new L.Icon({
@@ -25,17 +26,18 @@ function getLatLng(coords) {
 }
 
 function AdminMap({ users = [] }) {
-  const validUsers = users
-    .map((u) => ({
-      ...u,
-      latLng: getLatLng(u?.location?.coordinates || u?.coords),
-    }))
+  const user = useAuthStore(state => state.user)
+  const validUsers = users?.map((u) => ({
+    ...u,
+    latLng: getLatLng(u?.location?.coordinates),
+  }))
     .filter((u) => u.latLng !== null);
 
+  console.log(validUsers)
   return (
     <div className="w-full h-[80vh] z-1 rounded-2xl overflow-hidden border border-base-300 shadow-xs">
       <MapContainer
-        center={validUsers[0]?.latLng || [19.248, 72.863]} // Centers on first user or Dahisar/Mumbai
+        center={validUsers?.find(v => v?._id === user.user.id)?.latLng || [19.087253265137363, 72.83664052157714]}
         zoom={15}
         style={{ height: "100%", width: "100%" }}
       >

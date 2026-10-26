@@ -75,7 +75,7 @@ function AttendanceCalendar({ records = [] }) {
             <span>Absent</span>
           </div>
           <div>
-            <div aria-label="error" className="status status-lg status-info"></div>
+            <div aria-label="error" className="status status-lg bg-red-700"></div>
             <span>Holidays</span>
           </div>
         </div>
@@ -160,7 +160,7 @@ function AttendanceCalendar({ records = [] }) {
                   : isAbsent
                     ? "bg-rose-500/10 border-rose-500/30"
                     : isHalfDay
-                      ? "bg-amber-500/10 border-amber-500/30"
+                      ? "bg-amber-200 border-amber-500"
                       : "bg-base-100 border-base-200/80 hover:border-base-300"
                 } ${isToday ? "ring-2 ring-accent ring-offset-1" : ""}`}
             >
@@ -191,7 +191,7 @@ function AttendanceCalendar({ records = [] }) {
               {/* Bottom row: Clean Content (No text labels repeating status) */}
               {holiday ? (
                 <span className="tooltip" data-tip={holiday.title}>
-                  <span className="badge badge-xs badge-error font-semibold truncate max-w-full text-left text-[10px]">
+                  <span className="badge badge-xs bg-red-700 text-white font-semibold truncate border-0 max-w-full text-left text-[10px]">
                     {holiday?.title}
                   </span>
                 </span>

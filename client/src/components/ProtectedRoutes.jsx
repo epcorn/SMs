@@ -3,8 +3,8 @@ import { Navigate, Outlet } from "react-router-dom";
 
 function ProtectedRoutes({ role = [] }) {
   const user = useAuthStore((state) => state.user);
-
-  if (!user) return <Navigate to={"/"} replace />;
+console.log(user)
+  if (!user && !user?.user?.role) return <Navigate to={"/"} replace />;
 
   if (user) {
     if (role.length && !role.includes(user?.user?.role)) {

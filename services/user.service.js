@@ -31,7 +31,7 @@ const userService = {
     };
   },
 
-  createUser: async (creds) => {
+  createUser: async ({creds}) => {
     console.log(creds.firstname);
     if (!creds.firstname && !creds?.email && !creds?.password)
       throw createError("No info provided", 400);
