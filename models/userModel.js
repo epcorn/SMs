@@ -36,6 +36,8 @@ const medicalRecordSchema = new mongoose.Schema({
 
 const advanceSchema = new mongoose.Schema({
   amount: { type: String },
+  note: { type: String },
+  image: { type: String },
   givenBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   date: { type: Date, default: Date.now },
 });

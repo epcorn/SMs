@@ -56,10 +56,14 @@ app.use("/api/site", authentication, siteRouter);
 
 app.use(errorMiddleware);
 
-export default app;
-
 if (process.env.NODE_ENV !== "production") {
+  app.get("/", (req, res) => {
+    res.send("API is running...");
+  });
+
   app.listen(PORT, () => {
-    console.log("Server started on: ", PORT);
+    console.log("Server started on:", PORT);
   });
 }
+
+export default app;

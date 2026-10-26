@@ -83,8 +83,11 @@ const userService = {
     }
     if (!creds || (!creds?.user && !creds.email))
       throw createError("Info not provide", 400);
+    
+    // delete creds.role;
+    delete creds.password;
+    delete creds.advance;
 
-    const { password, ...data } = creds;
     const updatedUser = await User.findByIdAndUpdate(
       id,
       { $set: creds },

@@ -43,7 +43,7 @@ function Employees() {
 
   return (
     <>
-      <div className="flex justify-end items-center flex-col md:flex-row gap-3 mb-4">
+      <div className="flex justify-end items-center flex-col md:flex-row gap-3 mb-4 p-2">
         <h3 className="text-2xl font-semibold mr-auto">Employees</h3>
         <div className="flex ml-auto items-center gap-3">
           <button className="btn btn-neutral btn-square" onClick={() => setToggle(!toggle)}>

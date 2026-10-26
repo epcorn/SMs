@@ -33,7 +33,7 @@ function Attendence() {
   };
 
   return (
-    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col gap-10 h-full px-3">
+    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col gap-10 h-full p-2 px-3">
       {["admin", "operator"].includes(user?.role) && (
         <button
           className={`btn btn-square btn-circle  btn-dash absolute top-1/2 -translate-y-1/2 ${toggle ? "" : "right-0"}`}

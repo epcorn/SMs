@@ -17,7 +17,7 @@ const links = [
     label: "Dashboard",
     link: "dashboard",
     icon: <LayoutDashboard className={classes} />,
-    role: ["admin", "operator", "employee"],
+    role: ["admin", "operator"],
   },
   {
     label: "Employee",
@@ -29,7 +29,7 @@ const links = [
     label: "Leave",
     link: "leave",
     icon: <FaceGrinning className={classes} />,
-    role: ["admin", "operator", "employee"],
+    role: ["admin", "operator"],
   },
   {
     label: "Mark Attendance",
@@ -78,7 +78,7 @@ function Sidebar({ children }) {
         </nav>
 
         {/* Main Page Content rendered here */}
-        <main className="flex-1 overflow-y-auto p-2 w-full bg-slate-50">
+        <main className="flex-1 overflow-y-auto p-0 w-full h-full bg-slate-50">
           {children}
         </main>
       </div>
