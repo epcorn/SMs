@@ -82,14 +82,16 @@ function Attendence() {
 export default Attendence;
 
 function ShowEmpAttendence({ handleMark, isMarking, user, loadingAttdnc, history }) {
+  
   const records = history?.attendenceRecords || [];
   const todays = records.find(a => dateCompare(a?.createdAt, new Date()));
-
   const isCheckedIn = Boolean(todays?.checkInTime);
   const isCheckedOut = Boolean(todays?.checkOutTime || todays?.totalWorkingHours);
 
   const isAdmin = user.role === "admin"
   const statusConfig = getStatusStyle(todays?.status || "N/A");
+  
+  console.log(todays);
 
   return (
     <div className="flex flex-col h-full gap-6 pb-6 pt-4 items-center justify-center">

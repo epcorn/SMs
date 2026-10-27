@@ -26,68 +26,6 @@ const empServices = {
 
     return existAtt;
   },
-
-  attendenceAssign: async function ({ body, user }) {
-    const { id, status = "Present", reason } = body;
-    const privilegedRoles = ["operator", "admin"];
-    const isPrivileged = privilegedRoles.includes(user.role);
-
-    if (id && id !== user.id && !isPrivileged) {
-      throw createError(
-        "You don't have rights to mark attendance for other users",
-        401,
-      );
-    }
-
-    const targetUserId = isPrivileged && id ? id : user.id;
-
-    const targetUser =
-      await User.findById(targetUserId).select("firstname active");
-    if (!targetUser) throw createError("User not found", 404);
-    if (!targetUser.active) throw createError("User not Active", 400);
-
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    // 1. Check if an attendance record already existAtt for today
-    const existingAttendance = await Attendence.findOne({
-      user: targetUser._id,
-      createdAt: { $gte: startOfDay },
-    });
-
-    let updatedAttendance;
-
-    if (!existingAttendance) {
-      updatedAttendance = await Attendence.create({
-        user: targetUser._id,
-        status: status,
-        createdAt: new Date(),
-        history: [
-          { status: status, date: new Date(), changedBy: user.id, reason },
-        ],
-      });
-    } else {
-      updatedAttendance = await Attendence.findOneAndUpdate(
-        { _id: existingAttendance._id },
-        {
-          $set: { status },
-          $push: {
-            history: {
-              status: status,
-              date: new Date(),
-              changedBy: user.id,
-              reason,
-            },
-          },
-        },
-        { new: true, upsert: true, runValidators: true },
-      );
-    }
-
-    await targetUser.save();
-
-    return { msg: `${targetUser?.firstname} is marked ${status}`, targetUser };
-  },
-
   getcoords: async (user) => {
     const me = await User.findById(user.id)
       .select("location site")
@@ -109,21 +47,18 @@ const empServices = {
   },
 
   markAttendance: async function ({ body, user }) {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
     const now = new Date();
-
     const action = body.action;
 
-    const existAtt = await this.existAttendence(user.id, null);
+    const existAtt = await this.existAttendence(user.id);
     await this.getcoords(user);
 
-    if (action === "CHECK_OUT" && existAtt) {
+    if (action === "CHECK_OUT") {
+      if (!existAtt)
+        throw createError("No attendance record found for today", 404);
       if (!existAtt.checkInTime)
-        throw createError("Invalid Attandence Action", 404);
-
-      if (existAtt.totalWorkingHours)
-        throw createError("Already Marked Out", 400);
+        throw createError("Invalid Attendance Action", 400);
+      if (existAtt.checkOutTime) throw createError("Already Marked Out", 400);
 
       const diffMs = now - new Date(existAtt.checkInTime);
       const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
@@ -131,20 +66,23 @@ const empServices = {
       existAtt.checkOutTime = now;
       existAtt.totalWorkingHours = totalHours;
 
+      // Provide status to satisfy schema requirement
       existAtt.history.push({
         action,
+        status: existAtt.status,
         date: now,
         changedBy: user.id,
         reason: "User CheckOut",
       });
 
       await existAtt.save();
-
       return { msg: "Marked Out" };
     }
+
     if (action === "CHECK_IN") {
       if (existAtt)
-        throw createError("Already attendence marked for Today", 400);
+        throw createError("Already attendance marked for Today", 400);
+
       const att = await Attendence.create({
         user: user.id,
         status: "Present",
@@ -153,13 +91,84 @@ const empServices = {
           {
             status: "Present",
             action,
+            date: now,
             changedBy: user.id,
             reason: "User CheckIn",
           },
         ],
       });
+
       return { msg: `marked ${att.status}` };
     }
+
+    throw createError("Invalid action type", 400);
+  },
+
+  // Admin / Operator attendance assignment
+  attendenceAssign: async function ({ body, user }) {
+    const { id, status = "Present", reason = "Administrative update" } = body;
+    const privilegedRoles = ["operator", "admin"];
+    const isPrivileged = privilegedRoles.includes(user.role);
+
+    if (id && id !== user.id && !isPrivileged) {
+      throw createError(
+        "You don't have rights to mark attendance for other users",
+        401,
+      );
+    }
+
+    const targetUserId = isPrivileged && id ? id : user.id;
+
+    const targetUser =
+      await User.findById(targetUserId).select("firstname active");
+    if (!targetUser) throw createError("User not found", 404);
+    if (!targetUser.active) throw createError("User not Active", 400);
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const existingAttendance = await Attendence.findOne({
+      user: targetUser._id,
+      createdAt: { $gte: startOfDay },
+    });
+
+    let updatedAttendance;
+
+    if (!existingAttendance) {
+      updatedAttendance = await Attendence.create({
+        user: targetUser._id,
+        status: status,
+        checkInTime: status !== "Absent" ? new Date() : null,
+        history: [
+          {
+            status: status,
+            action: "STATUS_CHANGE",
+            date: new Date(),
+            changedBy: user.id,
+            reason,
+          },
+        ],
+      });
+    } else {
+      updatedAttendance = await Attendence.findOneAndUpdate(
+        { _id: existingAttendance._id },
+        {
+          $set: { status },
+          $push: {
+            history: {
+              status: status,
+              action: "STATUS_CHANGE",
+              date: new Date(),
+              changedBy: user.id,
+              reason,
+            },
+          },
+        },
+        { new: true, runValidators: true },
+      );
+    }
+
+    return { msg: `${targetUser?.firstname} is marked ${status}`, targetUser };
   },
 
   markActive: async function ({ params, user, body }) {

@@ -1,5 +1,5 @@
 import { createError } from "../middleware/errorMiddleware.js";
-import userService from "../services/user.service.js";
+import userService, { dashboardService } from "../services/user.service.js";
 
 const loginUser = async (req, res, next) => {
   try {
@@ -97,7 +97,24 @@ const uploadController = async (req, res, next) => {
   }
 };
 
-const b = async (req, res, next) => {};
+const getDashboradStats = async (req, res, next) => {
+  // if (req.user.role !== "admin") return;
+  try {
+    const stats = await dashboardService.dashboradStats();
+    res.status(200).json(stats);
+  } catch (error) {
+    next(error);
+  }
+};
+const getDashboradEmpStats = async (req, res, next) => {
+  // if (req.user.role !== "admin") return;
+  try {
+    const stats = await dashboardService.dashboardUserStats();
+    res.status(200).json(stats);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export {
   loginUser,
@@ -107,4 +124,5 @@ export {
   createUser,
   editUser,
   uploadController,
+  getDashboradStats,getDashboradEmpStats
 };

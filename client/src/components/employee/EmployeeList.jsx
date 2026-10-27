@@ -28,6 +28,7 @@ function EmployeeList({ response, responding }) {
               <th>Name</th>
               <th>Email</th>
               <th>Site</th>
+              <th>Role</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -68,64 +69,77 @@ function EmployeeList({ response, responding }) {
                   </td>
                   <td>{user?.email}</td>
                   <td>{user?.site?.name}</td>
+                  <td><p className="badge badge-sm badge-accent capitalize">{user?.role}</p></td>
                   <td
                     className="flex items-center gap-3 overflow-visible"
                     onClick={(e) => {
                       e.stopPropagation();
                     }}>
-                    <AddEmp
-                      type="edit"
-                      user={user}
-                      onSubmitEmp={editUser}
-                      loading={editingUser}
-                    />
-                    <ModalButton
-                      id={`view-emp-modal-${user._id}`}
-                      btn="btn-secondary btn-sm"
-                      title={<Eye className="h-5" />}
-                      onClick={() => {
-                        setSelecteduser(user);
-                        setToggle(false);
-                      }}>
-                      {selecteduser?._id === user?._id && !toggle ? (
-                        <EmpCard user={selecteduser} setToggle={setToggle} />
-                      ) : (
-                        <EmpDetails user={selecteduser} setToggle={setToggle} />
-                      )}
-                    </ModalButton>
-                    <ModalButton
-                      id={`cp-emp-modal-${user._id}`}
-                      title={<LockKeyholeOpenIcon className="h-4" />}
-                      btn="btn-accent btn-sm"
-                      onClick={() => setSelecteduser(user)}>
-                      {selecteduser?._id === user?._id && (
-                        <ChangePassword user={selecteduser} />
-                      )}
-                    </ModalButton>
+                    <div className="tooltip" data-tip='Edit'>
+                      <AddEmp
+                        type="edit"
+                        user={user}
+                        onSubmitEmp={editUser}
+                        loading={editingUser}
+                      />
+                    </div>
 
-                    <ModalButton id={`advance-emp-modal-${user._id}`} btn="btn-success btn-sm" title={<IndianRupee className="h-4" />} onClick={() => setSelecteduser(user)}>
-                      {selecteduser?._id === user?._id &&
-                        <AdvanceForm emp={selecteduser} editUser={editUser} />
-                      }
-                    </ModalButton>
-
-                    <input
-                      type="checkbox"
-                      checked={!!user?.active}
-                      className="toggle toggle-success"
-                      onChange={async () => {
-
-                        try {
-                          const res = await markActive({
-                            id: user._id,
-                            status: !user?.active,
-                          });
-                          toast.success(res.msg);
-                        } catch (error) {
-                          toast.error(error.message);
+                    <div className="tooltip" data-tip='View'>
+                      <ModalButton
+                        id={`view-emp-modal-${user._id}`}
+                        btn="btn-secondary btn-sm"
+                        title={<Eye className="h-5" />}
+                        onClick={() => {
+                          setSelecteduser(user);
+                          setToggle(false);
+                        }}>
+                        {selecteduser?._id === user?._id && !toggle ? (
+                          <EmpCard user={selecteduser} setToggle={setToggle} />
+                        ) : (
+                          <EmpDetails user={selecteduser} setToggle={setToggle} />
+                        )}
+                      </ModalButton>
+                    </div>
+                    <div className="tooltip" data-tip='change password'>
+                      <ModalButton
+                        id={`cp-emp-modal-${user._id}`}
+                        title={<LockKeyholeOpenIcon className="h-4" />}
+                        btn="btn-accent btn-sm"
+                        onClick={() => setSelecteduser(user)}>
+                        {selecteduser?._id === user?._id && (
+                          <ChangePassword user={selecteduser} />
+                        )}
+                      </ModalButton>
+                    </div>
+                    <div className="tooltip" data-tip='Add Advance'>
+                      <ModalButton id={`advance-emp-modal-${user._id}`} btn="btn-success btn-sm" title={<IndianRupee className="h-4" />} onClick={() => setSelecteduser(user)}>
+                        {selecteduser?._id === user?._id &&
+                          <AdvanceForm emp={selecteduser} editUser={editUser} />
                         }
-                      }}
-                    />
+                      </ModalButton>
+                    </div>
+
+                    <div className="tooltip tooltip-left" data-tip='Mark Active/Inactive'>
+                      <input
+                        type="checkbox"
+                        checked={!!user?.active}
+                        className="toggle toggle-success"
+                        onChange={async () => {
+                          const confirm = window.confirm(`Are you sure want to mark user as ${!user.active ? "Active" : "InActive"}`);
+                          if (confirm) {
+                            try {
+                              const res = await markActive({
+                                id: user._id,
+                                status: !user?.active,
+                              });
+                              toast.success(res.msg);
+                            } catch (error) {
+                              toast.error(error.message);
+                            }
+                          }
+                        }}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))

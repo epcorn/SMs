@@ -1,15 +1,16 @@
 const dateFormat = (date) => {
+  if (date === null) return;
   return {
-    time: new Date(date).toLocaleTimeString(undefined, {
+    time: new Date(date).toLocaleTimeString("en-IN", {
       minute: "2-digit",
       hour: "2-digit",
     }),
-    date: new Date(date).toLocaleDateString(undefined, {
+    date: new Date(date).toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     }),
-    fullDateAndTime: new Date(date).toLocaleString(undefined, {
+    fullDateAndTime: new Date(date).toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "2-digit",
@@ -82,4 +83,57 @@ const getStatusStyle = (val) => {
   }
 };
 
-export { dateFormat, dateCompare, userLocation, getStatusStyle };
+const dashboardStatsColor = (label) => {
+  switch (label) {
+    case "Total Records":
+      return {
+        bg: "bg-indigo-200 border-indigo-100",
+        title: "text-indigo-600",
+        value: "text-indigo-900",
+      };
+    case "Total Present":
+      return {
+        bg: "bg-emerald-200 border-emerald-100",
+        title: "text-emerald-600",
+        value: "text-emerald-900",
+      };
+    case "Total Absent":
+      return {
+        bg: "bg-rose-200 border-rose-100",
+        title: "text-rose-600",
+        value: "text-rose-900",
+      };
+    case "Total HalfDay":
+      return {
+        bg: "bg-amber-200 border-amber-100",
+        title: "text-amber-600",
+        value: "text-amber-900",
+      };
+    case "Total CheckIns":
+      return {
+        bg: "bg-sky-200 border-sky-100",
+        title: "text-sky-600",
+        value: "text-sky-900",
+      };
+    case "Total CheckOuts":
+      return {
+        bg: "bg-slate-200 border-slate-200",
+        title: "text-slate-600",
+        value: "text-slate-900",
+      };
+    default:
+      return {
+        bg: "bg-base-200 border-base-300",
+        title: "text-slate-500",
+        value: "text-slate-800",
+      };
+  }
+};
+
+export {
+  dateFormat,
+  dateCompare,
+  userLocation,
+  getStatusStyle,
+  dashboardStatsColor,
+};

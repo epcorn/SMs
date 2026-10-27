@@ -22,51 +22,61 @@ const genderOptions = [
   { label: "Female", value: "female" },
 ];
 
+const roleOptions = [
+  { value: "admin", label: "Admin" },
+  { value: "employee", label: "Employee" },
+  { value: "operator", label: "Operator" },
+]
+
 const formatDateForInput = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
   return isNaN(date.getTime()) ? "" : date.toISOString().split("T")[0];
 };
 
-const getDefaults = (user) => ({
-  firstname: user?.firstname || "",
-  middlename: user?.middlename || "",
-  lastname: user?.lastname || "",
-  email: user?.email || "",
-  photo: user?.photo || "",
-  department: user?.department || "",
-  gender: user?.gender || "",
-  password: user?.password || "",
-  site: user?.site?._id || undefined,
-  userType: user?.userType || "trainee",
-  dob: formatDateForInput(user?.dob),
-  residAddress: user?.residAddress || "",
-  currAddress: user?.currAddress || "",
-  govtIds: user?.govtIds || { id: "", name: "" },
-  policeVerification: user?.policeVerification || "notDone",
-  bloodGroup: user?.bloodGroup || "N/A",
-  joiningDate: formatDateForInput(user?.joiningDate),
-  resume: user?.resume || "",
-  medicalDetails: user?.medicalDetails?.length
-    ? user.medicalDetails
-    : [{ name: "", number: "", file: "" }],
-  bankDetails: user?.bankDetails?.length
-    ? user.bankDetails
-    : [{ name: "", number: "", IFSC: "" }],
-  familyDetails: user?.familyDetails?.length
-    ? user.familyDetails
-    : [{ emergency: false, name: "", relation: "", phone: "", email: "" }],
-  salaryDetails: {
-    currentSalary: user?.salaryDetails?.currentSalary ?? "",
-    basicPay: user?.salaryDetails?.basicPay ?? "",
-    PT: user?.salaryDetails?.PT ?? "",
-    ESIC: user?.salaryDetails?.ESIC ?? "",
-    UAN: user?.salaryDetails?.UAN ?? "",
-    allowance: user?.salaryDetails?.allowance?.length
-      ? user?.salaryDetails?.allowance
-      : [{ name: "", amount: "" }],
-  },
-});
+function getDefaults(user) {
+  return ({
+    firstname: user?.firstname || "",
+    middlename: user?.middlename || "",
+    lastname: user?.lastname || "",
+    email: user?.email || "",
+    role: user?.role || "employee",
+
+    photo: user?.photo || "",
+    department: user?.department || "",
+    gender: user?.gender || "",
+    password: user?.password || "",
+    site: user?.site?._id || undefined,
+    userType: user?.userType || "trainee",
+    dob: formatDateForInput(user?.dob),
+    residAddress: user?.residAddress || "",
+    currAddress: user?.currAddress || "",
+    govtIds: user?.govtIds || { id: "", name: "" },
+    policeVerification: user?.policeVerification || "notDone",
+    bloodGroup: user?.bloodGroup || "N/A",
+    joiningDate: formatDateForInput(user?.joiningDate),
+    resume: user?.resume || "",
+    medicalDetails: user?.medicalDetails?.length
+      ? user.medicalDetails
+      : [{ name: "", number: "", file: "" }],
+    bankDetails: user?.bankDetails?.length
+      ? user.bankDetails
+      : [{ name: "", number: "", IFSC: "" }],
+    familyDetails: user?.familyDetails?.length
+      ? user.familyDetails
+      : [{ emergency: false, name: "", relation: "", phone: "", email: "" }],
+    salaryDetails: {
+      currentSalary: user?.salaryDetails?.currentSalary ?? "",
+      basicPay: user?.salaryDetails?.basicPay ?? "",
+      PT: user?.salaryDetails?.PT ?? "",
+      ESIC: user?.salaryDetails?.ESIC ?? "",
+      UAN: user?.salaryDetails?.UAN ?? "",
+      allowance: user?.salaryDetails?.allowance?.length
+        ? user?.salaryDetails?.allowance
+        : [{ name: "", amount: "" }],
+    },
+  })
+};
 
 function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
   const [uploading, setUploading] = useState(false);
@@ -76,7 +86,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
   const sitesOptions = sites?.map((s) => ({ value: s._id, label: s.name }));
   const modalId =
     type === "edit" && user?._id ? `modal_emp_${user._id}` : "modal_add_emp";
-
+    
   const {
     register,
     control,
@@ -200,7 +210,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
             {/* Basic Info Card */}
             <div className="card bg-base-200 outline outline-gray-400 shadow-sm p-4">
               <h4 className="font-semibold text-lg mb-4">Basic Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
                 <InputField
                   label="First Name"
                   name="firstname"
@@ -223,6 +233,14 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   name="email"
                   type="email"
                   register={register}
+                />
+
+                <SelectField
+                  error={errors}
+                  options={roleOptions}
+                  register={register}
+                  name="role"
+                  label="Role"
                 />
 
                 <SelectField

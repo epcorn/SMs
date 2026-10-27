@@ -24,7 +24,7 @@ const useMarkAttandence = () => {
       return att;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mark", "user"] });
+      queryClient.invalidateQueries({ queryKey: ["mark", "user", "dash"] });
     },
   });
 };

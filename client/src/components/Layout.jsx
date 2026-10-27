@@ -6,7 +6,7 @@ import { Toaster } from 'react-hot-toast';
 function Layout() {
   return (
     <div className='h-dvh w-dvw overflow-hidden'>
-      <Toaster position='top-center'/>
+      <Toaster position='top-center' />
       <Sidebar>
         <Outlet />
       </Sidebar>

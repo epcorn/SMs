@@ -1,4 +1,5 @@
 import { createError } from "../middleware/errorMiddleware.js";
+import Attendence from "../models/attendenceModel.js";
 import User from "../models/userModel.js";
 import { createToken, uploadToCloud } from "../utils/helperFunction.js";
 import path from "path";
@@ -31,7 +32,7 @@ const userService = {
     };
   },
 
-  createUser: async ({creds}) => {
+  createUser: async ({ creds }) => {
     console.log(creds.firstname);
     if (!creds.firstname && !creds?.email && !creds?.password)
       throw createError("No info provided", 400);
@@ -83,7 +84,7 @@ const userService = {
     }
     if (!creds || (!creds?.user && !creds.email))
       throw createError("Info not provide", 400);
-    
+
     // delete creds.role;
     delete creds.password;
     delete creds.advance;
@@ -187,3 +188,115 @@ const userService = {
 };
 
 export default userService;
+
+export const dashboardService = {
+  dashboradStats: async (user) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const [stats, totalUsers] = await Promise.all([
+      Attendence.aggregate([
+        { $match: { createdAt: { $gte: today } } },
+        {
+          $group: {
+            _id: null,
+            "Total Records": { $sum: 1 },
+            "Total Present": {
+              $sum: { $cond: [{ $eq: ["$status", "Present"] }, 1, 0] },
+            },
+            "Total Absent": {
+              $sum: { $cond: [{ $eq: ["$status", "Absent"] }, 1, 0] },
+            },
+            "Total HalfDay": {
+              $sum: { $cond: [{ $eq: ["$status", "Half-day"] }, 1, 0] },
+            },
+            "Total CheckIns": {
+              $sum: { $cond: [{ $ne: ["$checkInTime", null] }, 1, 0] },
+            },
+            "Total CheckOuts": {
+              $sum: { $cond: [{ $ne: ["$checkOutTime", null] }, 1, 0] },
+            },
+            "Avg Working Hours": { $avg: "$totalWorkingHours" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            "Total Records": 1,
+            "Total Present": 1,
+            "Total Absent": 1,
+            "Total HalfDay": 1,
+            "Total CheckIns": 1,
+            "Total CheckOuts": 1,
+            "Avg Working Hours": { $round: ["$Avg Working Hours", 2] },
+          },
+        },
+      ]),
+      User.countDocuments({ role: { $ne: "admin" } }),
+    ]);
+
+    return {
+      totalUsers,
+      stats: stats[0] || {
+        "Total Records": 0,
+        "Total Present": 0,
+        "Total Absent": 0,
+        "Total HalfDay": 0,
+        "Total CheckIns": 0,
+        "Total CheckOuts": 0,
+        "Avg Working Hours": 0,
+      },
+    };
+  },
+  dashboardUserStats: async () => {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    // Fetch all non-admin users and populate today's attendance
+    const employees = await User.find({})
+      .select("firstname middlename lastname role")
+      .lean() // use lean() for faster plain JS objects
+      .populate({
+        path: "attendenceRecords",
+        match: {
+          createdAt: {
+            $gte: startOfToday,
+            $lte: endOfToday,
+          },
+        },
+      });
+
+    // Categorize employees based on today's attendance status
+    const allPresent = [];
+    const allAbsent = [];
+    const allHalfday = [];
+    const allCheckouts = [];
+
+    employees.forEach((emp) => {
+      const todayRecord = emp?.attendenceRecords?.[0];
+
+      if (!todayRecord || todayRecord?.status === "Absent") {
+        // If no record exists for today, treat them as Absent
+        allAbsent.push({
+          ...emp,
+          status: "Absent",
+          checkInTime: "N/A",
+          checkOutTime: "N/A",
+        });
+      } else if (todayRecord.status === "Present") {
+        allPresent.push({ ...emp, ...todayRecord });
+      } else if (todayRecord.status === "Half-day") {
+        allHalfday.push({ ...emp, ...todayRecord });
+      }
+
+      console.log(todayRecord);
+      if (todayRecord && todayRecord.checkOutTime !== null) {
+        allCheckouts.push({ ...emp, ...todayRecord });
+      }
+    });
+
+    return { allPresent, allAbsent, allHalfday, allCheckouts };
+  },
+};

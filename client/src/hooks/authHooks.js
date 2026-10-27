@@ -1,6 +1,6 @@
 import useAuthStore from "@/store/authStore";
 import { fetchFn } from "@/utils/queryClient";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 const useLoginMutation = () => {
   return useMutation({
@@ -42,4 +42,31 @@ const useChangePassword = () => {
   });
 };
 
-export { useLoginMutation, useLogout, useChangePassword };
+const useGetDashboardStats = () => {
+  return useQuery({
+    queryKey: ["user", "dash"],
+    queryFn: async () => {
+      const stats = await fetchFn("dash/stats");
+      return stats;
+    },
+  });
+};
+
+const useGetDashboardUserStats = (options = {}) => {
+  return useQuery({
+    queryKey: ["dash", "user-stats"],
+    queryFn: async () => {
+      const stats = await fetchFn("dash/userStats");
+      return stats;
+    },
+    ...options,
+  });
+};
+
+export {
+  useLoginMutation,
+  useLogout,
+  useChangePassword,
+  useGetDashboardStats,
+  useGetDashboardUserStats,
+};

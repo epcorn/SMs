@@ -1,6 +1,6 @@
 function InputFile({ label, id, allowed, onChange }) {
   return (
-    <div className="mt-3">
+    <div className="mt-2">
       <label htmlFor={id} className="label capitalize">
         {label}
       </label>
@@ -8,7 +8,7 @@ function InputFile({ label, id, allowed, onChange }) {
         id={id}
         type="file"
         accept={allowed || ".pdf,.docx,image/*"}
-        className="file-input file-input-bordered file-input-sm w-full"
+        className="file-input file-input-bordered file-input-md border-green-400 w-full"
         onChange={onChange}
       />
     </div>

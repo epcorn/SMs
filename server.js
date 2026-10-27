@@ -11,7 +11,7 @@ dotenv.config();
 import connectDB from "./conn/connectDB.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import userRouter from "./routes/userRoutes.js";
-import authRoute from "./routes/authRoutes.js";
+import authRoute, { dashRoute } from "./routes/authRoutes.js";
 import { authentication } from "./middleware/authMiddleware.js";
 import fileUpload from "express-fileupload";
 import { v2 as cloudinary } from "cloudinary";
@@ -40,6 +40,7 @@ const mongouri =
     ? process.env.MONGO_URI
     : process.env.MONGO_LOCAL;
 
+    
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_KEY,
@@ -50,6 +51,7 @@ cloudinary.config({
 connectDB(mongouri);
 
 app.use("/api/auth", authRoute);
+app.use("/api/dash", dashRoute);
 app.use("/api/user", authentication, userRouter);
 app.use("/api/emp", authentication, empRouter);
 app.use("/api/site", authentication, siteRouter);
