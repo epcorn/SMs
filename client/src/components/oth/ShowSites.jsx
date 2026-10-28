@@ -2,8 +2,8 @@ import { useGetSiteQuery } from '@/hooks/siteHooks';
 import { Pencil, X } from 'lucide-react';
 import { useEffect } from 'react';
 
-function ShowSites() {
-  const { data: sites, isPending: loading, refetch } = useGetSiteQuery({ enabled: false, staleTime: 5000, refetchOnMount: false })
+function ShowSites({ show }) {
+  const { data: sites, isPending: loading, refetch } = useGetSiteQuery({ enabled: Boolean(show), staleTime: 5000, refetchOnMount: false })
 
   useEffect(() => {
     const modalElement = document.getElementById("showSiteModal");

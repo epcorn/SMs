@@ -1,14 +1,14 @@
 import { dateFormat } from "@/utils/helperfn";
 
 function DashboardTable({ presents, absents, halfday, checkouts, label }) {
-  // Pick whichever prop is passed to this specific instance of the table
+
   const alldata = presents || absents || halfday || checkouts || [];
 
   return (
-    <div className="overflow-x-auto">
-      <div className="min-w-2xl ">
-        <table className="table w-full">
-          <thead className="*:bg-gray-300">
+    <div className="overflow-auto outline h-full max-h-140">
+      <div className="min-w-2xl">
+        <table className="table table-pin-rows table-pin-cols w-full">
+          <thead className="[&_th]:bg-gray-300">
             <tr>
               <th>#</th>
               <th>Name</th>
@@ -18,7 +18,7 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
               <th>Check Out Time</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="">
             {alldata?.length > 0 ? (
               alldata?.map((d, idx) => {
                 // Handle whether data came nested or flattened from your backend service
@@ -53,7 +53,7 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
             ) : (
               <tr>
                 <td colSpan="6" className="text-center py-4 text-lg text-gray-500">
-                  No ones on {label} today 
+                  No ones on {label} today
                 </td>
               </tr>
             )}

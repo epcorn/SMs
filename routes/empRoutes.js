@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   attendenceAssign,
+  getAdavances,
   getAttendence,
   getCoordinates,
   getHolidays,
@@ -18,5 +19,6 @@ empRouter.patch("/location/coords", getCoordinates);
 
 empRouter.get("/attendence", getAttendence);
 empRouter.get("/holidays", getHolidays);
+empRouter.get("/advance", getAdavances);
 
 export default empRouter;

@@ -125,7 +125,7 @@ async function createUser() {
     firstname: "vipul",
     lastname: "gehlot",
     email: "vipulgehlot43@gmail.com",
-    password: "12345",
+    password: "nananana",
     role: "admin",
   });
   console.log("usercreated");

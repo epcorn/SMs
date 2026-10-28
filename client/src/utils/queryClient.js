@@ -12,7 +12,7 @@ export const fetchFn = async (url, options = {}) => {
   const { body, ...rest } = options;
   const isFormData = body instanceof FormData;
 
-  const res = await fetch(`api/${url}`, {
+  const res = await fetch(`/api/${url}`, {
     method: rest.method || "GET",
     headers: {
       // Only set JSON content-type if it's NOT FormData

@@ -11,7 +11,7 @@ import { useAddUser, useGetAllUsers } from "@/hooks/empHooks";
 import EmployeeList from "@/components/employee/EmployeeList";
 
 function Employees() {
-  const [toggle, setToggle] = useState(false)
+  const [toggle, setToggle] = useState({ search: false, sites: false,  })
   useEffect(() => {
     document.title = "SMs | Employees"
   }, [])
@@ -52,23 +52,24 @@ function Employees() {
 
         <div>Add emp
           <AddEmp type="add" onSubmitEmp={addUser} loading={addingUser} /></div>
-        <div>Show Sites<ModalButton id="showSiteModal" title={<span><Eye className="h-4 w-4" /> </span>} btn="btn-secondary btn-md btn-square">
-          <ShowSites />
+        <div>Show Sites<ModalButton id="showSiteModal" onClick={() => { setToggle(prev => ({ ...prev, sites: prev.sites })) }} title={<span><Eye className="h-4 w-4" /> </span>} btn="btn-secondary btn-md btn-square">
+          <ShowSites show={toggle.sites} />
         </ModalButton></div>
-        <div>Add Site<ModalButton id="addSiteModal" title={<Plus className="w-4 h-4" />} btn="btn-sm btn-primary">
-          <AddSite />
-        </ModalButton></div>
+        <div>Add Site
+          <ModalButton id="addSiteModal" onClick={() => { setToggle(prev => ({ ...prev, sites: !prev.sites })) }} title={<Plus className="w-4 h-4" />} btn="btn-sm btn-primary">
+            <AddSite />
+          </ModalButton></div>
       </div>
       <div className="flex justify-end items-center gap-3 mb-4 p-2">
         <h3 className="text-2xl font-semibold mr-auto">Employees</h3>
         <div className="flex ml-auto items-center gap-3">
-          <button className="btn btn-neutral btn-square" onClick={() => setToggle(!toggle)}>
+          <button className="btn btn-neutral btn-square" onClick={() => setToggle(prev => ({ ...prev, search: !prev.search }))}>
             <SearchIcon />
           </button>
 
         </div>
       </div >
-      {toggle && <div className="mb-4">
+      {toggle.search && <div className="mb-4">
         <Search
           register={register}
           errors={errors}

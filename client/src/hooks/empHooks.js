@@ -188,6 +188,23 @@ const useUploadFile = () => {
   });
 };
 
+const useGetAdvances = ({ date, limit, page, search = {} }) => {
+  const params = {};
+  if (date) params.date = date;
+  if (limit) params.limit = limit;
+  if (page) params.page = page;
+  if (search) params.search = search;
+
+  const query = new URLSearchParams(params).toString();
+  return useQuery({
+    queryKey: ["user", params],
+    queryFn: async () => {
+      const res = await fetchFn(`emp/advance?${query}`);
+      return res;
+    },
+  });
+};
+
 export {
   useGetHolidaysQuery,
   useMarkAttandence,
@@ -200,4 +217,5 @@ export {
   useMarkActiveMutation,
   useGetCoOrdinatesMutation,
   useUploadFile,
+  useGetAdvances,
 };

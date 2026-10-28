@@ -46,7 +46,6 @@ function App() {
     return () => stopTracking();
   }, [startTracking, stopTracking]);
 
-
   return (
     <>
       <Routes>
@@ -57,7 +56,7 @@ function App() {
             <Route path="/employee" element={<Employees />} />
           </Route>
 
-          <Route element={<ProtectedRoutes role={["admin"]} />}>
+          <Route element={<ProtectedRoutes role={["admin", "operator"]} />}>
             <Route path="/gps" element={<GPS />} />
           </Route>
 

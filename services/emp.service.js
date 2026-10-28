@@ -3,6 +3,15 @@ import Attendence from "../models/attendenceModel.js";
 import User from "../models/userModel.js";
 import { getDistanceInMeteres } from "../utils/helperFunction.js";
 
+const startEndDate = (date) => {
+  const startOfDay = date ? new Date(date) : new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = date ? new Date(date) : new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  return { startOfDay, endOfDay };
+};
+
 const empServices = {
   existAttendence: async (id) => {
     const startOfDay = new Date();
@@ -37,7 +46,6 @@ const empServices = {
       lon1 = me.location.coordinates[0],
       lat2 = me.site.location.coordinates[1],
       lon2 = me.site.location.coordinates[0];
-    console.log(lat1, lon1, lat2, lon2);
 
     const distance = getDistanceInMeteres(lat1, lon1, lat2, lon2);
     const allowedRadius = me.site.radius || 100;
@@ -103,7 +111,6 @@ const empServices = {
 
     throw createError("Invalid action type", 400);
   },
-
   // Admin / Operator attendance assignment
   attendenceAssign: async function ({ body, user }) {
     const { id, status = "Present", reason = "Administrative update" } = body;
@@ -234,6 +241,61 @@ const empServices = {
       success: true,
       location: user.location,
       user: { id: user._id, name: `${user.firstname} ${user.lastname}` },
+    };
+  },
+
+  getAdvances: async ({ date, limit = 12, page = 1, search }) => {
+    const matchQuery = {};
+
+    if (date) {
+      const { startOfDay, endOfDay } = startEndDate(date);
+      matchQuery["advance.date"] = { $gte: startOfDay, $lte: endOfDay };
+    }
+
+    if (search) {
+      matchQuery.$or = [
+        { firstname: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const result = await User.aggregate([
+      { $unwind: "$advance" },
+      {
+        $lookup: {
+          from: "users",
+          localField: "advance.givenBy",
+          foreignField: "_id",
+          pipeline: [{ $project: { firstname: 1, lastname: 1, role: 1 } }],
+          as: "advance.givenBy",
+        },
+      },
+      {
+        $unwind: { path: "$advance.givenBy", preserveNullAndEmptyArrays: true },
+      },
+      ...(Object.keys(matchQuery).length ? [{ $match: matchQuery }] : []),
+      { $sort: { "advance.date": -1 } },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [{ $skip: (page - 1) * limit }, { $limit: Number(limit) }],
+        },
+      },
+    ]);
+
+    const { data = [], metadata = [] } = result[0] || {};
+    const total = metadata[0]?.total || 0;
+
+    return {
+      advances: data.map((doc) => ({
+        userId: doc._id,
+        employeeName: `${doc.firstname || ""} ${doc.lastname || ""}`.trim(),
+        email: doc.email,
+        ...doc.advance,
+      })),
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit),
     };
   },
 };

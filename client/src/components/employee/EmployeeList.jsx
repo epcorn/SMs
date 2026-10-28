@@ -22,7 +22,7 @@ function EmployeeList({ response, responding }) {
     <div className="flex-1 m-1 flex flex-col overflow-hidden shadow-lg">
       {/* Scrollable container for tbody */}
       <div className="overflow-y-auto max-h-[calc(100dvh-200px)] w-full">
-        <table className="table table-pin-rows  w-full min-w-4xl">
+        <table className="table table-pin-rows  w-full min-w-5xl">
           <thead className="bg-gray-200 text-center ">
             <tr className="bg-gray-200">
               <th>#</th>
