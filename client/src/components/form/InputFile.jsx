@@ -1,7 +1,8 @@
 function InputFile({ label, id, allowed, onChange }) {
+  console.log(label)
   return (
-    <div className="mt-2">
-      <label htmlFor={id} className="label capitalize">
+    <div className="mt-2 flex flex-col">
+      <label htmlFor={id} className="label capitalize text-gray-800 font-semibold">
         {label}
       </label>
       <input

@@ -19,11 +19,12 @@ function EmployeeList({ response, responding }) {
   const { data: users } = response || {};
 
   return (
-    <div>
-      <div className="overflow-x-auto">
-        <table className="table min-w-4xl">
-          <thead className="bg-gray-200 rounded-md text-center">
-            <tr>
+    <div className="flex-1 m-1 flex flex-col overflow-hidden shadow-lg">
+      {/* Scrollable container for tbody */}
+      <div className="overflow-y-auto max-h-[calc(100dvh-200px)] w-full">
+        <table className="table table-pin-rows  w-full min-w-4xl">
+          <thead className="bg-gray-200 text-center ">
+            <tr className="bg-gray-200">
               <th>#</th>
               <th>Name</th>
               <th>Email</th>
@@ -45,16 +46,14 @@ function EmployeeList({ response, responding }) {
                   <td className="px-4">
                     <div className="skeleton h-4 w-24"></div>
                   </td>
-                  <td className="px-4 flex gap-2">
-                    <div className="skeleton h-4 w-5"></div>
-                    <div className="skeleton h-4 w-5"></div>
-                    <div className="skeleton h-4 w-5"></div>
+                  <td className="px-4 flex gap-2" colSpan={3}>
+                    <div className="skeleton h-4 w-20"></div>
                   </td>
                 </tr>
               ))
             ) : !users?.length ? (
               <tr>
-                <td colSpan={4} className="text-center py-12">
+                <td colSpan={6} className="text-center py-12">
                   No users found
                 </td>
               </tr>
@@ -173,7 +172,6 @@ function ChangePassword({ user }) {
       const res = await changePassword(data);
       setResp({ res, err: {} });
       toast.success("Password changed successfully");
-      // document.getElementById(`cp-emp-modal-${user._id}`).close()
     } catch (err) {
       setResp({ err: err, res: {} });
       toast.error("Failed to change password");

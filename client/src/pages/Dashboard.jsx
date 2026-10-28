@@ -16,24 +16,24 @@ function Dashboard() {
 
       {/* Tabs container */}
       <div className="tabs tabs-md mt-5 tabs-border bg-gray-300 tabs-box">
-        <input type="radio" name="my_tabs_6" className="tab" aria-label="All Present" defaultChecked />
+        <input type="radio" name="my_tabs_6" className="tab font-bold" aria-label="All Present" defaultChecked />
         <div className="tab-content bg-base-100 border-base-300 p-6 rounded-b-box shadow-sm">
-          <DashboardTable presents={userStats?.allPresent} />
+          <DashboardTable presents={userStats?.allPresent} label='presents' />
         </div>
 
-        <input type="radio" name="my_tabs_6" className="tab" aria-label="All Absents" />
+        <input type="radio" name="my_tabs_6" className="tab font-bold" aria-label="All Absents" />
         <div className="tab-content bg-base-100 border-base-300 p-6 rounded-b-box shadow-sm">
-          <DashboardTable absents={userStats?.allAbsent} />
+          <DashboardTable absents={userStats?.allAbsent} label='absents' />
         </div>
 
-        <input type="radio" name="my_tabs_6" className="tab" aria-label="Half-Day" />
+        <input type="radio" name="my_tabs_6" className="tab font-bold" aria-label="Half-Day" />
         <div className="tab-content bg-base-100 border-base-300 p-6 rounded-b-box shadow-sm">
-          <DashboardTable halfday={userStats?.allHalfday} />
+          <DashboardTable halfday={userStats?.allHalfday} label='halfday' />
         </div>
 
-        <input type="radio" name="my_tabs_6" className="tab" aria-label="All Checkouts" />
+        <input type="radio" name="my_tabs_6" className="tab font-bold" aria-label="All Checkouts" />
         <div className="tab-content bg-base-100 border-base-300 p-6 rounded-b-box shadow-sm">
-          <DashboardTable checkouts={userStats?.allCheckouts} />
+          <DashboardTable checkouts={userStats?.allCheckouts} label='checkouts' />
         </div>
       </div>
     </div>

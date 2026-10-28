@@ -5,7 +5,7 @@ function SelectField({ options, label = '', name = '', register, error, validati
   const fieldError = error?.[name] || (error?.message ? error : null);
 
   return (
-    <div className="mb-1">
+    <div className="mb-1 flex flex-col">
       <label className="label mt-2 mb-0 font-semibold text-gray-700" htmlFor={fieldId}>
         {label}
       </label>

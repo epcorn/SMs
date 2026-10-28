@@ -86,7 +86,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
   const sitesOptions = sites?.map((s) => ({ value: s._id, label: s.name }));
   const modalId =
     type === "edit" && user?._id ? `modal_emp_${user._id}` : "modal_add_emp";
-    
+
   const {
     register,
     control,
@@ -166,18 +166,19 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
   const photo = watch("photo");
   const resume = watch("resume");
 
+  console.log(type)
   return (
     <>
       <button
         type="button"
-        className={
-          type === "edit"
+        className={`
+          ${type === "edit"
             ? "btn btn-outline btn-sm btn-info"
-            : "btn btn-primary btn-md text-base"
+            : "btn btn-primary btn-md text-base btn-square"}`
         }
         onClick={() => document.getElementById(modalId).showModal()}>
-        {type === "edit" ? <Pencil className="h-4 w-4" /> : "+ Add Employee"}
-      </button>
+        {type === "edit" ? <Pencil className="h-4 w-4" /> : "+"}
+      </button >
 
       <dialog id={modalId} className="modal">
         <div className="modal-box max-w-4xl max-h-[90vh] bg-base-100 flex flex-col p-0">
@@ -226,12 +227,14 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   label="Last Name"
                   name="lastname"
                   register={register}
+                  required={true}
                 />
 
                 <InputField
                   label="Email"
                   name="email"
                   type="email"
+                  required={true}
                   register={register}
                 />
 
@@ -240,6 +243,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   options={roleOptions}
                   register={register}
                   name="role"
+                  validation={{ required: true }}
                   label="Role"
                 />
 

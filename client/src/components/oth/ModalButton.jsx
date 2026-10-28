@@ -16,7 +16,7 @@ function ModalButton({ id = "my-modal-1", title, children, onClick, btn = 'btn-p
         popover="auto"
         className="modal bg-black/40 backdrop-blur-[2px] backdrop:bg-neutral-900/50 p-0"
       >
-        <div className="modal-box max-w-5xl w-fit bg-base-100 text-base-content border border-base-300 shadow-2xl relative p-2">
+        <div className="modal-box md:max-w-5xl w-full bg-base-100 text-base-content border border-base-300 shadow-2xl relative p-2">
 
           {/* Close Button at top-right */}
           <button

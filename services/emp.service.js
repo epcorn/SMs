@@ -27,11 +27,11 @@ const empServices = {
     return existAtt;
   },
   getcoords: async (user) => {
+    if (["admin"].includes(user.role)) return true;
+
     const me = await User.findById(user.id)
       .select("location site")
       .populate("site");
-
-    if (["admin"].includes(user.role)) return true;
 
     const lat1 = me.location.coordinates[1],
       lon1 = me.location.coordinates[0],

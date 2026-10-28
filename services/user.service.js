@@ -277,17 +277,12 @@ export const dashboardService = {
     employees.forEach((emp) => {
       const todayRecord = emp?.attendenceRecords?.[0];
 
-      if (!todayRecord || todayRecord?.status === "Absent") {
+      if (todayRecord?.status === "Absent") {
         // If no record exists for today, treat them as Absent
-        allAbsent.push({
-          ...emp,
-          status: "Absent",
-          checkInTime: "N/A",
-          checkOutTime: "N/A",
-        });
-      } else if (todayRecord.status === "Present") {
+        allAbsent.push({ ...emp, ...todayRecord });
+      } else if (todayRecord?.status === "Present") {
         allPresent.push({ ...emp, ...todayRecord });
-      } else if (todayRecord.status === "Half-day") {
+      } else if (todayRecord?.status === "Half-day") {
         allHalfday.push({ ...emp, ...todayRecord });
       }
 

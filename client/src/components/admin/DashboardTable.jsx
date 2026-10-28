@@ -1,6 +1,6 @@
 import { dateFormat } from "@/utils/helperfn";
 
-function DashboardTable({ presents, absents, halfday, checkouts }) {
+function DashboardTable({ presents, absents, halfday, checkouts, label }) {
   // Pick whichever prop is passed to this specific instance of the table
   const alldata = presents || absents || halfday || checkouts || [];
 
@@ -52,8 +52,8 @@ function DashboardTable({ presents, absents, halfday, checkouts }) {
               })
             ) : (
               <tr>
-                <td colSpan="6" className="text-center py-4 text-gray-500">
-                  No data available
+                <td colSpan="6" className="text-center py-4 text-lg text-gray-500">
+                  No ones on {label} today 
                 </td>
               </tr>
             )}

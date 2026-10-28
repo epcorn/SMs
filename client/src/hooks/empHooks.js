@@ -14,7 +14,7 @@ const useGetHolidaysQuery = () => {
 const useMarkAttandence = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: ["mark", "user"],
+    mutationKey: ["mark"],
     mutationFn: async (data) => {
       const att = await fetchFn("emp/mark", {
         method: "POST",
@@ -24,7 +24,13 @@ const useMarkAttandence = () => {
       return att;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mark", "user", "dash"] });
+      queryClient.invalidateQueries({
+        queryKey: ["mark", "user", "assign"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["user", "mark", "file-upload", "active"],
+      });
     },
   });
 };
