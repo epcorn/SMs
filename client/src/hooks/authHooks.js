@@ -63,10 +63,22 @@ const useGetDashboardUserStats = (options = {}) => {
   });
 };
 
+const useGetMe = (options = {}) => {
+  return useQuery({
+    queryKey: ["user", "dash", "user-stats"],
+    queryFn: async () => {
+      const stats = await fetchFn("user/me");
+      return stats;
+    },
+    ...options,
+  });
+};
+
 export {
   useLoginMutation,
   useLogout,
   useChangePassword,
   useGetDashboardStats,
   useGetDashboardUserStats,
+  useGetMe,
 };

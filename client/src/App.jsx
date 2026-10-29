@@ -66,7 +66,6 @@ function App() {
             <Route path="/leave" element={<Leave />} />
           </Route>
 
-
           <Route element={<ProtectedRoutes role={["admin", "operator", "employee"]} />}>
             <Route path="/attendence" element={<Attendence />} />
             <Route path="/advance" element={<Advance />} />

@@ -185,6 +185,18 @@ const userService = {
       filepath: cloudRes.secure_url,
     };
   },
+  me: async ({ id }) => {
+    const me = await User.findById(id)
+      .select("firstname middlename lastname email role phone photo attendence")
+      .populate({
+        path: "attendenceRecords",
+        options: {
+          sort: { createdAt: -1 },
+          perDocumentLimit: 2,
+        },
+      });
+    return me;
+  },
 };
 
 export default userService;

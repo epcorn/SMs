@@ -283,10 +283,15 @@ const empServices = {
       },
     ]);
 
+    const users = await User.find({})
+      .select("firstname middlename lastname role advance email phone")
+      .lean();
+
     const { data = [], metadata = [] } = result[0] || {};
     const total = metadata[0]?.total || 0;
 
     return {
+      users,
       advances: data.map((doc) => ({
         userId: doc._id,
         employeeName: `${doc.firstname || ""} ${doc.lastname || ""}`.trim(),

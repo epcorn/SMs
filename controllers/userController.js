@@ -116,6 +116,16 @@ const getDashboradEmpStats = async (req, res, next) => {
   }
 };
 
+const getMe = async (req, res, next) => {
+  // if (req.user.role !== "admin") return;
+  try {
+    const me = await userService.me(req.user);
+    res.status(200).json(me);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   loginUser,
   changePassword,
@@ -124,5 +134,5 @@ export {
   createUser,
   editUser,
   uploadController,
-  getDashboradStats,getDashboradEmpStats
+  getDashboradStats,getDashboradEmpStats,getMe
 };

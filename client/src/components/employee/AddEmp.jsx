@@ -40,6 +40,7 @@ function getDefaults(user) {
     middlename: user?.middlename || "",
     lastname: user?.lastname || "",
     email: user?.email || "",
+    phone: user?.phone || "",
     role: user?.role || "employee",
 
     photo: user?.photo || "",
@@ -78,7 +79,7 @@ function getDefaults(user) {
   })
 };
 
-function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
+function AddEmp({ type = "add", user = null, onSubmitEmp, userError, loading }) {
   const [uploading, setUploading] = useState(false);
   const { mutateAsync: uploadFileMutation } = useUploadFile();
   const { data: sites } = useGetSiteQuery();
@@ -154,8 +155,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
 
       setValue(fieldName, fileUrl, { shouldDirty: true });
       toast.success(successMessage);
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast.error("File upload failed");
     } finally {
       e.target.value = "";
@@ -166,7 +166,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
   const photo = watch("photo");
   const resume = watch("resume");
 
-  console.log(type)
+
   return (
     <>
       <button
@@ -195,6 +195,9 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   {user.active ? "Active" : "Inactive"}
                 </span>
               )}
+
+
+              {userError?.message && <p className="text-red-600">{userError?.message}</p>}
             </div>
             <button
               type="button"
@@ -235,6 +238,23 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   name="email"
                   type="email"
                   required={true}
+                  register={register}
+                />
+
+                {type === "add" && (
+                  <InputField
+                    label="Password"
+                    name="password"
+                    type="password"
+                    required={true}
+                    register={register}
+                  />
+                )}
+
+                <InputField
+                  label="Phone"
+                  name="phone"
+                  type="tel"
                   register={register}
                 />
 
@@ -296,14 +316,7 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, loading }) {
                   )}
                 </div>
 
-                {type === "add" && (
-                  <InputField
-                    label="Password"
-                    name="password"
-                    type="password"
-                    register={register}
-                  />
-                )}
+
 
                 <SelectField
                   error={errors}

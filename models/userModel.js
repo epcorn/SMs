@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema(
     lastname: { type: String },
     gender: { type: String },
     email: { type: String, unique: true },
+    phone: { type: String, unique: true },
     password: { type: String, select: false },
     role: {
       type: String,

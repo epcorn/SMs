@@ -1,6 +1,6 @@
 import { useAssignAttendence } from "@/hooks/empHooks";
 import { dateCompare, dateFormat, getStatusStyle } from "@/utils/helperfn";
-import { Check, X, XIcon } from "lucide-react";
+import { Check, LogOut, X, XIcon } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import AttendanceCalendar from "../attendence/AttendenceCalendar";
@@ -44,6 +44,12 @@ function ShowUserAttendence({ users }) {
       text: "½",
       tip: "Half-day",
       btn: "btn btn-sm btn-square text-base bg-warning text-warning-content border-warning tooltip",
+    },
+    {
+      icon: <LogOut className="w-4 "/>,
+      text: "½",
+      tip: "CHECK_OUT",
+      btn: "btn btn-sm btn-square text-base text-warning-content bg-red-400 border-warning tooltip tooltip-left",
     },
   ];
 
@@ -99,16 +105,15 @@ function ShowUserAttendence({ users }) {
                         {todays?.status || "Not Marked"}
                       </span>
                     </td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      <form onSubmit={handleSubmit(handleMark)}>
-                        <div className="flex flex-wrap gap-2 items-center">
+                    <td className="" onClick={(e) => e.stopPropagation()}>
+                      <form className="" onSubmit={handleSubmit(handleMark)}>
+                        <div className="flex flex-wrap justify-end gap-2 items-center">
                           {buttons.map((bt) => {
                             const isActive = isSelected && bt.tip === selectedOption;
                             return (
                               <div
                                 key={bt.tip}
-                                className={` ${isActive ? "aura aura-dual" : ""}`}
-
+                                className={`${isActive ? "aura aura-dual" : ""}`}
                               >
                                 <button
                                   type="button"

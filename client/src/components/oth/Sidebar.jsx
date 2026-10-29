@@ -1,4 +1,4 @@
-import { useLogout } from "@/hooks/authHooks";
+import { useGetMe, useLogout } from "@/hooks/authHooks";
 import useAuthStore from "@/store/authStore";
 import {
   CircleDollarSign,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from '../../assets/logo.png'
+import { dateFormat } from "@/utils/helperfn";
 
 const classes = "w-5 h-5 text-slate-400 transition-colors";
 const links = [
@@ -55,6 +56,11 @@ const links = [
 function Sidebar({ children }) {
   const user = useAuthStore((state) => state.user);
   const { mutateAsync: logout, isPending: loggingOut } = useLogout();
+  const { data: me } = useGetMe()
+
+  const checkIn = me?.attendenceRecords?.[0]?.checkInTime || null;
+  const checkOut = me?.attendenceRecords?.[0]?.checkOutTime || null;
+  const totalWorkingHours = me?.attendenceRecords?.[0]?.totalWorkingHours || 0;
 
   const location = useLocation();
   const activeLocation = location.pathname.replace("/", "");
@@ -65,21 +71,55 @@ function Sidebar({ children }) {
 
       <div className="drawer-content flex flex-col">
         {/* Navbar for Mobile devices (hidden on large screens) */}
-        <nav className="navbar w-full bg-slate-900 text-white border-b border-slate-800 lg:hidden px-4 justify-between">
-          <div className="flex items-center gap-3">
-            <label
-              htmlFor="my-drawer-4"
-              aria-label="open sidebar"
-              className="btn btn-square btn-ghost hover:bg-slate-800 text-rose-300"
-            >
-              <Library />
-            </label>
-            <span className="font-bold tracking-wide">SMs Menu</span>
+        <nav className="navbar w-full bg-slate-900 text-white lg:hidden px-4 justify-between">
+          <div className="navbar w-full bg-slate-900 text-white border-b border-slate-800 lg:hidden px-4 justify-between">
+            <div className="flex items-center gap-3">
+              <label
+                htmlFor="my-drawer-4"
+                aria-label="Open sidebar"
+                className="btn btn-square btn-ghost hover:bg-slate-800 text-rose-300"
+              >
+                <Library />
+              </label>
+
+              <span className="font-bold tracking-wide">SMs Menu</span>
+            </div>
+
+            {/* Mobile avatar dropdown */}
+            <div className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle avatar"
+              >
+                <div className="mask mask-hexagon-2 w-10">
+                  <img
+                    alt="User avatar"
+                    src={
+                      me?.photo ||
+                      "https://res.cloudinary.com/epcorn/image/upload/v1711437894/employee/tmp-1-1711437811427_xkm42n.png"
+                    }
+                  />
+                </div>
+              </div>
+
+              <div
+                tabIndex={0}
+                className="dropdown-content z-99 mt-3 w-72 rounded-box border border-base-300 bg-base-100 p-4 text-slate-900 shadow-xl"
+              >
+                <ProfileDetails
+                  me={me}
+                  checkIn={checkIn}
+                  checkOut={checkOut}
+                  workingHour={totalWorkingHours}
+                />
+              </div>
+            </div>
           </div>
         </nav>
 
         {/* Main Page Content rendered here */}
-        <main className="flex-1 overflow-y-auto p-0 w-full h-full bg-slate-50">
+        <main className="flex-1 overflow-y-auto min-h-0 p-0 w-full h-full bg-slate-50">
           {children}
         </main>
       </div>
@@ -132,9 +172,68 @@ function Sidebar({ children }) {
               );
             })}
 
-            <li className="">
 
-            </li>
+
+            {/* Desktop profile accordion */}
+            <div className="hidden lg:block w-full mt-auto px-0 pb-4">
+              <details className="collapse collapse-arrow rounded-xl border border-slate-700 bg-slate-800/60">
+                <summary className="collapse-title min-h-0 px-1 py-2">
+                  <div className="flex items-center gap-1 pr-2">
+                    <div className="avatar shrink-0">
+                      <div className="mask mask-hexagon-2 w-10">
+                        <img
+                          alt="User avatar"
+                          src={
+                            me?.photo ||
+                            "https://img.daisyui.com/images/profile/demo/distracted2@192.webp"
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white">
+                        {[me?.firstname, me?.middlename, me?.lastname]
+                          .filter(Boolean)
+                          .join(" ") || "Employee"}
+                      </p>
+                      <p className="truncate text-xs text-slate-400">
+                        View profile
+                      </p>
+                    </div>
+                  </div>
+                </summary>
+
+                <div className="collapse-content px-3 text-slate-200">
+                  <div className="border-t border-slate-700 pt-3">
+                    <p className="break-words text-sm">
+                      {me?.email || "N/A"}
+                    </p>
+                    <p className="mt-2 text-sm">
+                      Phone: {me?.phone || "N/A"}
+                    </p>
+                    <p className="mt-2 text-sm">
+                      Check-in:{" "}
+                      {checkIn
+                        ? dateFormat(checkIn)?.fullDateAndTime
+                        : "No attendance record"}
+                    </p>
+                    <p className="mt-2 text-sm">
+                      Check-out:{" "}
+                      {checkOut
+                        ? dateFormat(checkOut)?.fullDateAndTime
+                        : "---"}
+                    </p>
+                    {totalWorkingHours ?
+                      <p>
+                        <span className="font-medium">Total hours: </span>
+                        {totalWorkingHours}
+                      </p> : ""}
+                  </div>
+                </div>
+              </details>
+            </div>
+
             {/* Logout Action */}
             <li className="mt-auto mb-6">
               <img src="" alt="" />
@@ -148,6 +247,8 @@ function Sidebar({ children }) {
               </button>
             </li>
           </ul>
+
+
         </div>
       </div>
     </div>
@@ -155,3 +256,59 @@ function Sidebar({ children }) {
 }
 
 export default Sidebar;
+
+
+function ProfileDetails({ me, checkIn, checkOut, workingHour }) {
+  return (
+    <>
+      <div className="flex items-center gap-3 border-b border-base-300 pb-3">
+        <div className="avatar">
+          <div className="mask mask-hexagon-2 w-12">
+            <img
+              alt="User avatar"
+              src={
+                me?.photo ||
+                "https://res.cloudinary.com/epcorn/image/upload/v1711437894/employee/tmp-1-1711437811427_xkm42n.png"
+              }
+            />
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <p className="font-semibold">
+            {[me?.firstname, me?.middlename, me?.lastname]
+              .filter(Boolean)
+              .join(" ") || "Employee"}
+          </p>
+          <p className="truncate text-sm opacity-70">
+            {me?.email || "N/A"}
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-2 pt-3 text-sm">
+        <p>
+          <span className="font-medium">Phone:</span>{" "}
+          {me?.phone || "N/A"}
+        </p>
+
+        <p>
+          <span className="font-medium">Check-in:</span>{" "}
+          {checkIn
+            ? dateFormat(checkIn)?.fullDateAndTime
+            : "No attendance record"}
+        </p>
+
+        <p>
+          <span className="font-medium">Check-out:</span>
+          {checkOut ? dateFormat(checkOut)?.fullDateAndTime
+            : "---"}
+        </p>
+        {workingHour ? <p>
+          <span className="font-medium">Total hours</span>
+          {workingHour}
+        </p> : ""}
+      </div>
+    </>
+  );
+}

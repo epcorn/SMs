@@ -1,17 +1,18 @@
 import AttendanceCalendar from "@/components/attendence/AttendenceCalendar";
 import ShowUserAttendence from "@/components/employee/ShowUserAttendence";
 import { useGetAttendenceQuery, useMarkAttandence } from "@/hooks/empHooks";
-import useAuthStore from "@/store/authStore";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "motion/react";
 import { dateCompare, getStatusStyle } from "@/utils/helperfn";
+import { useGetMe } from "@/hooks/authHooks";
 
 function Attendence() {
   const [toggle, setToggle] = useState(false);
-  const { user } = useAuthStore((state) => state.user);
+  const { data: user } = useGetMe()
 
+  console.log(user)
   const { mutateAsync: marking, isPending: isMarking } = useMarkAttandence();
   const { data: attendence, isFetching: loadingAttdnc } = useGetAttendenceQuery(
     user?.id,
@@ -34,7 +35,7 @@ function Attendence() {
   const isPrivilegedUser = ["admin", "operator"].includes(user?.role);
 
   return (
-    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col h-full p-2 px-3 overflow-hidden">
+    <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col h-[calc(100dvh-0.1rem)] min-h-0 p-2 px-3 overflow-hidden">
       {isPrivilegedUser && (
         <button
           className={`z-20 btn btn-square btn-circle btn-dash absolute top-1/2 -translate-y-1/2 ${toggle ? "" : "right-0"}`}
@@ -52,7 +53,7 @@ function Attendence() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 80 }}
             transition={{ duration: 0.4 }}
-            className="w-full h-full flex flex-col overflow-y-auto min-h-0"
+            className="w-full flex-1 min-h-0 overflow-y-auto"
           >
             <ShowUserAttendence users={attendence?.users} />
           </motion.div>
@@ -63,7 +64,7 @@ function Attendence() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 80 }}
             transition={{ duration: 0.4 }}
-            className="w-full h-full flex flex-col overflow-y-auto min-h-0"
+            className="w-full flex-1 min-h-0 overflow-y-auto"
           >
             <ShowEmpAttendence
               user={user}
@@ -82,19 +83,19 @@ function Attendence() {
 export default Attendence;
 
 function ShowEmpAttendence({ handleMark, isMarking, user, loadingAttdnc, history }) {
-  
+
   const records = history?.attendenceRecords || [];
   const todays = records.find(a => dateCompare(a?.createdAt, new Date()));
   const isCheckedIn = Boolean(todays?.checkInTime);
   const isCheckedOut = Boolean(todays?.checkOutTime || todays?.totalWorkingHours);
 
-  const isAdmin = user.role === "admin"
-  const statusConfig = getStatusStyle(todays?.status || "N/A");
-  
+  const isAdmin = user?.role === "admin"
+  // const statusConfig = getStatusStyle(todays?.status || "N/A");
+
   console.log(todays);
 
   return (
-    <div className="flex flex-col h-full gap-6 pb-6 pt-4 items-center justify-center">
+    <div className="min-h-full flex flex-col gap-6 pb-6 pt-4 items-center justify-center">
       {/* Title & Subtitle */}
       <div className="text-center space-y-1 hidden">
         <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-base-content">

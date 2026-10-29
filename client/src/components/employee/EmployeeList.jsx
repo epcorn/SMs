@@ -19,11 +19,11 @@ function EmployeeList({ response, responding }) {
   const { data: users } = response || {};
 
   return (
-    <div className="flex-1 m-1 flex flex-col overflow-hidden shadow-lg">
+    <div className="flex-1 min-h-0 m-1 flex flex-col overflow-hidden shadow-lg">
       {/* Scrollable container for tbody */}
-      <div className="overflow-y-auto max-h-[calc(100dvh-200px)] w-full">
+      <div className="flex-1 min-h-0 overflow-auto w-full">
         <table className="table table-pin-rows  w-full min-w-5xl">
-          <thead className="bg-gray-200 text-center ">
+          <thead>
             <tr className="bg-gray-200">
               <th>#</th>
               <th>Name</th>
@@ -70,7 +70,7 @@ function EmployeeList({ response, responding }) {
                   <td>{user?.site?.name}</td>
                   <td><p className="badge badge-sm badge-accent capitalize">{user?.role}</p></td>
                   <td
-                    className="flex items-center gap-3 overflow-visible"
+                    className="flex items-center justify-center gap-3 overflow-visible"
                     onClick={(e) => {
                       e.stopPropagation();
                     }}>
