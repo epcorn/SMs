@@ -100,7 +100,7 @@ const uploadController = async (req, res, next) => {
 const getDashboradStats = async (req, res, next) => {
   // if (req.user.role !== "admin") return;
   try {
-    const stats = await dashboardService.dashboradStats();
+    const stats = await dashboardService.dashboradStats(req.query, req.user);
     res.status(200).json(stats);
   } catch (error) {
     next(error);
@@ -109,7 +109,10 @@ const getDashboradStats = async (req, res, next) => {
 const getDashboradEmpStats = async (req, res, next) => {
   // if (req.user.role !== "admin") return;
   try {
-    const stats = await dashboardService.dashboardUserStats();
+    const stats = await dashboardService.dashboardUserStats(
+      req.query,
+      req.user,
+    );
     res.status(200).json(stats);
   } catch (error) {
     next(error);
@@ -134,5 +137,7 @@ export {
   createUser,
   editUser,
   uploadController,
-  getDashboradStats,getDashboradEmpStats,getMe
+  getDashboradStats,
+  getDashboradEmpStats,
+  getMe,
 };

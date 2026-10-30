@@ -15,7 +15,7 @@ import Advance from "./pages/Advance";
 import useDocumentTitle from "./hooks/useDocumentTitle";
 
 function App() {
-  useDocumentTitle()
+  useDocumentTitle();
 
   const startTracking = useGpsStore((state) => state.startTracking);
   const stopTracking = useGpsStore((state) => state.stopTracking);
@@ -23,6 +23,8 @@ function App() {
   const location = useGpsStore((state) => state.location);
 
   const { mutateAsync: setCoords } = useGetCoOrdinatesMutation();
+
+ 
 
   useEffect(() => {
     if (!location || !user?.user?.id) return;
@@ -46,6 +48,7 @@ function App() {
     return () => stopTracking();
   }, [startTracking, stopTracking]);
 
+
   return (
     <>
       <Routes>
@@ -66,7 +69,10 @@ function App() {
             <Route path="/leave" element={<Leave />} />
           </Route>
 
-          <Route element={<ProtectedRoutes role={["admin", "operator", "employee"]} />}>
+          <Route
+            element={
+              <ProtectedRoutes role={["admin", "operator", "employee"]} />
+            }>
             <Route path="/attendence" element={<Attendence />} />
             <Route path="/advance" element={<Advance />} />
           </Route>

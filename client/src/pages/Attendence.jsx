@@ -34,6 +34,14 @@ function Attendence() {
 
   const isPrivilegedUser = ["admin", "operator"].includes(user?.role);
 
+  if (loadingAttdnc) {
+    return (
+      <div className="grid place-items-center h-full">
+        <span className="loading loading-bars loading-xl"></span>
+      </div>
+    )
+  }
+
   return (
     <div className="relative bg-base-100 rounded-2xl shadow-xs border border-base-300/60 flex flex-col h-[calc(100dvh-0.1rem)] min-h-0 p-2 px-3 overflow-hidden">
       {isPrivilegedUser && (

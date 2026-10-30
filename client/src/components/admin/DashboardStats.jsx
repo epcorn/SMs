@@ -1,10 +1,7 @@
-import { useGetDashboardStats } from '@/hooks/authHooks'
-import { dashboardStatsColor } from '@/utils/helperfn'
+import { dashboardStatsColor } from '@/utils/helperfn';
 
+function DashboardStats({ gettingStats, statsData }) {
 
-
-function DashboardStats() {
-  const { data: statsData, isPending: gettingStats } = useGetDashboardStats()
 
   const statsArray = Object.entries(statsData?.stats || {})?.map(([key, val]) => ({
     label: key,

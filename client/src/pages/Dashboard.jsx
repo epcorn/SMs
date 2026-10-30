@@ -1,18 +1,26 @@
-// Dashboard.jsx
-import React, { Fragment } from "react"
+import React from "react"
 import DashboardStats from "@/components/admin/DashboardStats"
 import DashboardTable from "@/components/admin/DashboardTable"
-import { useGetDashboardUserStats } from "@/hooks/authHooks"
+import { useGetDashboardStats, useGetDashboardUserStats } from "@/hooks/authHooks"
 
 const TABS = [
-  { label: "All Present",   prop: "presents",  key: "allPresent",   name: "presents" },
-  { label: "All Absents",   prop: "absents",   key: "allAbsent",    name: "absents" },
-  { label: "Half-Day",      prop: "halfday",   key: "allHalfday",   name: "halfday" },
+  { label: "All Present", prop: "presents", key: "allPresent", name: "presents" },
+  { label: "All Absents", prop: "absents", key: "allAbsent", name: "absents" },
+  { label: "Half-Day", prop: "halfday", key: "allHalfday", name: "halfday" },
   { label: "All Checkouts", prop: "checkouts", key: "allCheckouts", name: "checkouts" },
 ]
 
 function Dashboard() {
-  const { data: userStats } = useGetDashboardUserStats()
+  const { data: userStats, isLoading: dashLoading } = useGetDashboardUserStats()
+  const { data: statsData, isPending: gettingStats } = useGetDashboardStats();
+
+  if (dashLoading || gettingStats) {
+    return (
+      <div className="grid place-items-center h-full">
+        <span className="loading loading-bars loading-xl"></span>
+      </div>
+    )
+  }
 
   return (
     // exactly viewport height, page itself never scrolls
@@ -22,7 +30,7 @@ function Dashboard() {
       </header>
 
       <div className="shrink-0">
-        <DashboardStats />
+        <DashboardStats gettingStats={gettingStats} statsData={statsData} />
       </div>
 
       {/* takes whatever height is left */}
@@ -46,4 +54,4 @@ function Dashboard() {
   )
 }
 
-export default Dashboard
+export default Dashboard;

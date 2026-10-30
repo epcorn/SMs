@@ -202,8 +202,8 @@ const userService = {
 export default userService;
 
 export const dashboardService = {
-  dashboradStats: async (user) => {
-    const today = new Date();
+  dashboradStats: async (query, user) => {
+    const today = query.date ? new Date(query.date) : new Date();
     today.setHours(0, 0, 0, 0);
     const [stats, totalUsers] = await Promise.all([
       Attendence.aggregate([
@@ -259,11 +259,11 @@ export const dashboardService = {
       },
     };
   },
-  dashboardUserStats: async () => {
-    const startOfToday = new Date();
+  dashboardUserStats: async (query, user) => {
+    const startOfToday = query.date ? new Date(query.date) : new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    const endOfToday = new Date();
+    const endOfToday = query.date ? new Date(query.date) : new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
     // Fetch all non-admin users and populate today's attendance
@@ -307,3 +307,6 @@ export const dashboardService = {
     return { allPresent, allAbsent, allHalfday, allCheckouts };
   },
 };
+
+
+// mongodb+srv://noreplyepcorn:noreply2026@cluster0.5kgbocn.mongodb.net/

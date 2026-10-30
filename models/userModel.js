@@ -95,6 +95,10 @@ const userSchema = new mongoose.Schema(
       type: { type: String, default: "Point" },
       coordinates: [Number],
     },
+
+    //for push notification
+    fcmToken: { type: String, default: null },
+    reminderSent: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

@@ -1,4 +1,3 @@
-
 import { originalConsoleError } from "./utils/redErrorConsole.js";
 originalConsoleError();
 
@@ -17,6 +16,7 @@ import authRoute, { dashRoute } from "./routes/authRoutes.js";
 import { authentication } from "./middleware/authMiddleware.js";
 import empRouter from "./routes/empRoutes.js";
 import siteRouter from "./routes/siteRoutes.js";
+import User from "./models/userModel.js";
 
 dotenv.config();
 
@@ -57,6 +57,16 @@ connectDB(mongoUri);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
+});
+
+app.post("/api/fcm-token", authentication, async (req, res) => {
+  try {
+    console.log(req.body.token);
+    await User.findByIdAndUpdate(req.user.id, { fcmToken: req.body.token });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 app.use("/api/auth", authRoute);

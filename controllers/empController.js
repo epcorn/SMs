@@ -13,7 +13,6 @@ export const getHolidays = async (req, res, next) => {
 };
 
 export const getAttendence = async (req, res, next) => {
-  console.log(req.user);
   try {
     const attendences = await empServices.getAttendence(req.user);
     return res.status(200).json(attendences);

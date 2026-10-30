@@ -193,7 +193,7 @@ function Sidebar({ children }) {
 
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-white">
-                        {[me?.firstname, me?.middlename, me?.lastname]
+                        {[me?.firstname, me?.lastname]
                           .filter(Boolean)
                           .join(" ") || "Employee"}
                       </p>
