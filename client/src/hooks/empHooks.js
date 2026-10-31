@@ -1,5 +1,10 @@
 import { fetchFn } from "@/utils/queryClient";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useMutationState,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 const useGetHolidaysQuery = () => {
   return useQuery({
@@ -205,6 +210,20 @@ const useGetAdvances = ({ date, limit, page, search = {} }) => {
   });
 };
 
+const useMarkCheckout = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationKey: ["mark", "user"],
+    mutationFn: async (id) => {
+      const res = await fetchFn(`emp/attendence/checkout/${id}`, {
+        method: "PATCH",
+      });
+      return res;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["mark", "user"] }),
+  });
+};
+
 export {
   useGetHolidaysQuery,
   useMarkAttandence,
@@ -218,4 +237,5 @@ export {
   useGetCoOrdinatesMutation,
   useUploadFile,
   useGetAdvances,
+  useMarkCheckout,
 };

@@ -5,14 +5,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "motion/react";
-import { dateCompare, getStatusStyle } from "@/utils/helperfn";
+import { dateCompare } from "@/utils/helperfn";
 import { useGetMe } from "@/hooks/authHooks";
 
 function Attendence() {
   const [toggle, setToggle] = useState(false);
   const { data: user } = useGetMe()
 
-  console.log(user)
   const { mutateAsync: marking, isPending: isMarking } = useMarkAttandence();
   const { data: attendence, isFetching: loadingAttdnc } = useGetAttendenceQuery(
     user?.id,

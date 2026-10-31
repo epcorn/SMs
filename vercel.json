@@ -25,5 +25,15 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/send-reminders",
+      "schedule": "31 13 * * *"
+    },
+    {
+      "path": "/api/cron/auto-checkout",
+      "schedule": "0 14 * * *"
+    }
   ]
 }

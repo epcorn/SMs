@@ -1,21 +1,25 @@
 const dateFormat = (date) => {
-  if (date === null) return;
+  // Return null entirely if there is no valid date
+  if (!date) return null;
+  const parsedDate = new Date(date);
+  if (isNaN(parsedDate.getTime())) return null;
+
   return {
-    time: new Date(date).toLocaleTimeString("en-IN", {
-      minute: "2-digit",
+    time: parsedDate.toLocaleTimeString("en-IN", {
       hour: "2-digit",
+      minute: "2-digit",
     }),
-    date: new Date(date).toLocaleDateString("en-IN", {
+    date: parsedDate.toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     }),
-    fullDateAndTime: new Date(date).toLocaleString("en-IN", {
+    fullDateAndTime: parsedDate.toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
       year: "2-digit",
-      minute: "2-digit",
       hour: "2-digit",
+      minute: "2-digit",
     }),
   };
 };

@@ -70,3 +70,13 @@ export const getAdavances = async (req, res, next) => {
     next(error);
   }
 };
+
+export const markCheckout = async (req, res, next) => {
+  try {
+    const data = await empServices.markCheckout(req?.params?.id);
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};

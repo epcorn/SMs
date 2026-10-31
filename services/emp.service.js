@@ -12,6 +12,13 @@ export const startEndDate = (date) => {
   return { startOfDay, endOfDay };
 };
 
+export const calcTotalHours = (inTime) => {
+  const now = new Date();
+  const diffMs = now - new Date(inTime);
+  const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
+  return totalHours;
+};
+
 const empServices = {
   existAttendence: async (id) => {
     const startOfDay = new Date();
@@ -68,9 +75,7 @@ const empServices = {
         throw createError("Invalid Attendance Action", 400);
       if (existAtt.checkOutTime) throw createError("Already Marked Out", 400);
 
-      const diffMs = now - new Date(existAtt.checkInTime);
-      const totalHours = Number((diffMs / (1000 * 60 * 60)).toFixed(2));
-
+      const totalHours = calcTotalHours(existAtt?.checkInTime);
       existAtt.checkOutTime = now;
       existAtt.totalWorkingHours = totalHours;
 
@@ -302,6 +307,41 @@ const empServices = {
       page: Number(page),
       pages: Math.ceil(total / limit),
     };
+  },
+
+  markCheckout: async (userId) => {
+    if (!userId) throw new Error("User ID is required for checkout");
+
+    const { endOfDay, startOfDay } = startEndDate();
+
+    const att = await Attendence.findOne({
+      user: userId,
+      status: { $in: ["Present", "Half-day"] },
+      checkInTime: { $ne: null },
+      checkOutTime: null,
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    if (!att) {
+      throw createError("User not checked-in  today.");
+    }
+
+    const checkOutTime = new Date();
+    const totalWorkingHours = calcTotalHours(att.checkInTime, checkOutTime);
+
+    att.checkOutTime = checkOutTime;
+    att.totalWorkingHours = totalWorkingHours > 0 ? totalWorkingHours : 0;
+
+    att.history.push({
+      action: "CHECK_OUT",
+      status: att.status,
+      changedBy: userId,
+      reason: "Manually checked out by operator",
+      date: checkOutTime,
+    });
+
+    await att.save();
+    return { success: true, msg: `user is Checked Out` };
   },
 };
 

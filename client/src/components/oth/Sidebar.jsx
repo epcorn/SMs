@@ -27,12 +27,12 @@ const links = [
     icon: <Users className={classes} />,
     role: ["admin", "operator"],
   },
-  {
-    label: "Leave",
-    link: "leave",
-    icon: <FaceGrinning className={classes} />,
-    role: ["admin", "operator"],
-  },
+  // {
+  //   label: "Leave",
+  //   link: "leave",
+  //   icon: <FaceGrinning className={classes} />,
+  //   role: ["admin", "operator"],
+  // },
   {
     label: "Mark Attendance",
     link: "attendence",

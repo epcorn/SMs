@@ -1,4 +1,4 @@
-import { useAssignAttendence } from "@/hooks/empHooks";
+import { useAssignAttendence, useMarkCheckout } from "@/hooks/empHooks";
 import { dateCompare, dateFormat, getStatusStyle } from "@/utils/helperfn";
 import { Check, LogOut, X, XIcon } from "lucide-react";
 import { useState } from "react";
@@ -10,10 +10,21 @@ function ShowUserAttendence({ users }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedOption, setSelectedOption] = useState('');
 
-  const { mutateAsync: mark } = useAssignAttendence();
+  const { mutateAsync: mark, isPending: marking } = useAssignAttendence();
+  const { mutateAsync: markCheckout, isPending: checkingOut } = useMarkCheckout();
   const { register, handleSubmit, reset } = useForm();
 
   async function handleMark(data) {
+    if (selectedOption === "CHECK_OUT") {
+      try {
+        const res = await markCheckout(selectedUser);
+        toast.success(res?.msg || "Successfully checked out")
+      } catch (error) {
+        toast.error(error?.message || error?.msg || "Internal server error")
+      }
+      return;
+    }
+
     const payload = { ...data, id: selectedUser, status: selectedOption };
     try {
       const res = await mark(payload);
@@ -46,7 +57,7 @@ function ShowUserAttendence({ users }) {
       btn: "btn btn-sm btn-square text-base bg-warning text-warning-content border-warning tooltip",
     },
     {
-      icon: <LogOut className="w-4 "/>,
+      icon: <LogOut className="w-4 " />,
       text: "½",
       tip: "CHECK_OUT",
       btn: "btn btn-sm btn-square text-base text-warning-content bg-red-400 border-warning tooltip tooltip-left",
@@ -57,13 +68,15 @@ function ShowUserAttendence({ users }) {
     <div className="w-full">
       <h3 className="text-2xl font-semibold my-5">Today's Employee's Attendance</h3>
 
-      <div className="overflow-x-auto pb-20">
-        <table className="table min-w-2xl border border-base-300 shadow-sm rounded-lg bg-base-100">
+      <div className="overflow-x-auto min-w-4xl pb-20">
+        <table className="table  w-full border border-base-300 shadow-sm rounded-lg bg-base-100">
           <thead className="bg-accent text-accent-content">
             <tr>
               <th className="w-12">#</th>
               <th>Name</th>
               <th>Status</th>
+              <th>Check In Time</th>
+              <th>Check Out Time</th>
               <th className="text-right pr-6">Action</th>
             </tr>
           </thead>
@@ -103,6 +116,20 @@ function ShowUserAttendence({ users }) {
                           }`}
                       >
                         {todays?.status || "Not Marked"}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className='text-green-700 bg-green-200 p-2'
+                      >
+                        {dateFormat(todays?.checkInTime)?.fullDateAndTime || "Not Marked"}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className='text-red-700 bg-red-200 p-1'
+                      >
+                        {dateFormat(todays?.checkOutTime)?.fullDateAndTime || "Not Marked"}
                       </span>
                     </td>
                     <td className="" onClick={(e) => e.stopPropagation()}>
@@ -145,7 +172,7 @@ function ShowUserAttendence({ users }) {
                               {...register('reason')}
                               placeholder="Reason..."
                             />
-                            <button type="submit" className="btn btn-sm btn-neutral">
+                            <button type="submit" className="btn btn-sm btn-neutral disabled:opacity-25 disabled:pointer-events-none" disabled={checkingOut || marking}>
                               Mark
                             </button>
                           </div>

@@ -7,6 +7,7 @@ import {
   getHolidays,
   markActive,
   markAttendence,
+  markCheckout,
 } from "../controllers/empController.js";
 
 const empRouter = Router();
@@ -16,6 +17,7 @@ empRouter.post("/active/:id", markActive);
 empRouter.post("/attendence/assign", attendenceAssign);
 
 empRouter.patch("/location/coords", getCoordinates);
+empRouter.patch("/attendence/checkout/:id", markCheckout);
 
 empRouter.get("/attendence", getAttendence);
 empRouter.get("/holidays", getHolidays);
