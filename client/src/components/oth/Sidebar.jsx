@@ -185,7 +185,7 @@ function Sidebar({ children }) {
                           alt="User avatar"
                           src={
                             me?.photo ||
-                            "https://img.daisyui.com/images/profile/demo/distracted2@192.webp"
+                            "https://res.cloudinary.com/epcorn/image/upload/v1711437894/employee/tmp-1-1711437811427_xkm42n.png"
                           }
                         />
                       </div>

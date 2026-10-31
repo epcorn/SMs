@@ -3,7 +3,7 @@ import Attendence from "../models/attendenceModel.js";
 import User from "../models/userModel.js";
 import { getDistanceInMeteres } from "../utils/helperFunction.js";
 
-const startEndDate = (date) => {
+export const startEndDate = (date) => {
   const startOfDay = date ? new Date(date) : new Date();
   startOfDay.setHours(0, 0, 0, 0);
   const endOfDay = date ? new Date(date) : new Date();

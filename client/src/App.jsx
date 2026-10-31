@@ -13,9 +13,11 @@ import useAuthStore from "./store/authStore";
 import { useGetCoOrdinatesMutation } from "./hooks/empHooks";
 import Advance from "./pages/Advance";
 import useDocumentTitle from "./hooks/useDocumentTitle";
+import useNotifications from "./components/oth/Notifications";
 
 function App() {
   useDocumentTitle();
+  useNotifications();
 
   const startTracking = useGpsStore((state) => state.startTracking);
   const stopTracking = useGpsStore((state) => state.stopTracking);
@@ -24,7 +26,6 @@ function App() {
 
   const { mutateAsync: setCoords } = useGetCoOrdinatesMutation();
 
- 
 
   useEffect(() => {
     if (!location || !user?.user?.id) return;

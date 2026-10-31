@@ -17,6 +17,7 @@ import { authentication } from "./middleware/authMiddleware.js";
 import empRouter from "./routes/empRoutes.js";
 import siteRouter from "./routes/siteRoutes.js";
 import User from "./models/userModel.js";
+import otherRouter from "./routes/otherRoutes.js";
 
 dotenv.config();
 
@@ -74,6 +75,7 @@ app.use("/api/dash", dashRoute);
 app.use("/api/user", authentication, userRouter);
 app.use("/api/emp", authentication, empRouter);
 app.use("/api/site", authentication, siteRouter);
+app.use("/api/fcm", otherRouter);
 
 app.use(errorMiddleware);
 
