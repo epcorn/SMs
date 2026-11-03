@@ -63,7 +63,6 @@ app.get("/api/health", (req, res) => {
 
 app.post("/api/fcm-token", authentication, async (req, res) => {
   try {
-    console.log(req.body.token);
     await User.findByIdAndUpdate(req.user.id, { fcmToken: req.body.token });
     res.json({ ok: true });
   } catch (error) {

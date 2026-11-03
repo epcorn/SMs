@@ -1,8 +1,11 @@
 import { onForegroundMessage, requestForToken } from '@/firebase';
+import { fetchFn } from '@/utils/queryClient';
 import { useEffect } from 'react';
 
-function useNotifications() {
+function useNotifications(user) {
+  console.log(user)
   useEffect(() => {
+    if (!user) return;
     // 1. Request token and send to backend
     const initializeNotifications = async () => {
       try {
@@ -10,11 +13,11 @@ function useNotifications() {
         const token = await requestForToken();
 
         if (token) {
-          await fetch("/api/fcm-token", { 
-            method: "POST", 
-            headers: { "Content-Type": "application/json" }, 
-            credentials: "include", 
-            body: JSON.stringify({ token }) 
+          await fetchFn("/fcm-token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: token
           });
         }
       } catch (error) {
@@ -26,15 +29,13 @@ function useNotifications() {
 
     // 2. Listen for foreground messages
     const unsubscribe = onForegroundMessage((payload) => {
-      console.log("Foreground notification received:", payload);
-      
+
       const { title, body } = payload.notification || {};
-      
-      // Native browser notification fall-back if tab is active
+
       if (Notification.permission === "granted") {
-        new Notification(title || "New Notification", { 
-          body, 
-          icon: "/vite.svg" 
+        new Notification(title || "New Notification", {
+          body,
+          icon: "/vite.svg"
         });
       }
     });

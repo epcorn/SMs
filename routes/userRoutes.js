@@ -3,17 +3,21 @@ import {
   changePassword,
   createUser,
   editUser,
-  getAllUsers, getMe, uploadController
+  getAllUsers,
+  getMe,
+  handleRefresh,
+  uploadController,
 } from "../controllers/userController.js";
 
 const userRouter = Router();
 
-userRouter.get("/all", getAllUsers);
 userRouter.get("/me", getMe);
+userRouter.get("/all", getAllUsers);
 
 userRouter.post("/add", createUser);
-userRouter.post("/changepassword", changePassword);
 userRouter.post("/edit/:id", editUser);
+userRouter.post("/refresh", handleRefresh);
 userRouter.post("/upload", uploadController);
+userRouter.post("/changepassword", changePassword);
 
 export default userRouter;

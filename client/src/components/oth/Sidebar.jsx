@@ -43,7 +43,7 @@ const links = [
     label: "Advance",
     link: "advance",
     icon: <CircleDollarSign className={classes} />,
-    role: ["admin", "operator", "employee"],
+    role: ["admin", "operator"],
   },
   {
     label: "GPS",
@@ -54,10 +54,10 @@ const links = [
 ];
 
 function Sidebar({ children }) {
-  const user = useAuthStore((state) => state.user);
+
   const { mutateAsync: logout, isPending: loggingOut } = useLogout();
   const { data: me } = useGetMe()
-
+  
   const checkIn = me?.attendenceRecords?.[0]?.checkInTime || null;
   const checkOut = me?.attendenceRecords?.[0]?.checkOutTime || null;
   const totalWorkingHours = me?.attendenceRecords?.[0]?.totalWorkingHours || 0;
@@ -149,7 +149,7 @@ function Sidebar({ children }) {
           <ul className="menu w-full grow p-4 gap-1.5">
             {links.map((li) => {
               const isActive = activeLocation === li.link;
-              if (!li.role.includes(user?.user?.role)) {
+              if (!li.role.includes(me?.role)) {
                 return;
               }
               return (
@@ -171,8 +171,6 @@ function Sidebar({ children }) {
                 </li>
               );
             })}
-
-
 
             {/* Desktop profile accordion */}
             <div className="hidden lg:block w-full mt-auto px-0 pb-4">
@@ -206,7 +204,7 @@ function Sidebar({ children }) {
 
                 <div className="collapse-content px-3 text-slate-200">
                   <div className="border-t border-slate-700 pt-3">
-                    <p className="break-words text-sm">
+                    <p className="wrap-break-words text-sm">
                       {me?.email || "N/A"}
                     </p>
                     <p className="mt-2 text-sm">
@@ -247,8 +245,6 @@ function Sidebar({ children }) {
               </button>
             </li>
           </ul>
-
-
         </div>
       </div>
     </div>

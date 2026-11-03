@@ -1,7 +1,11 @@
 import { createError } from "../middleware/errorMiddleware.js";
 import Attendence from "../models/attendenceModel.js";
 import User from "../models/userModel.js";
-import { createToken, uploadToCloud } from "../utils/helperFunction.js";
+import {
+  createRefreshToken,
+  createToken,
+  uploadToCloud,
+} from "../utils/helperFunction.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -19,9 +23,15 @@ const userService = {
     const validateUser = await extUser.comparePassword(creds.password);
     if (!validateUser) throw createError("credentials not matched", 401);
 
-    const token = await createToken(extUser);
+    const accessToken = await createToken(extUser);
+    const refreshToken = await createRefreshToken(extUser);
+
+    extUser.refreshToken = refreshToken;
+    await extUser.save();
+
     return {
-      token,
+      token: accessToken,
+      refreshToken,
       user: {
         id: extUser._id,
         name: extUser.name,
@@ -30,6 +40,22 @@ const userService = {
         photo: extUser.photo,
       },
     };
+  },
+
+  refreshSession: async (oldToken) => {
+    if (!oldToken) throw createError("Unauthorized", 401);
+
+    try {
+      const decoded = jwt.verify(oldToken, process.env.JWT_REFRESH_SECRET);
+      const user = await User.findById(decoded.id).select("+refreshToken");
+
+      if (!user || user.refreshToken !== oldToken)
+        throw createError("Forbidden", 403);
+      const newToken = await createToken(user);
+      return { token: newToken };
+    } catch (error) {
+      throw createError("Refresh token expired or invalid", 403);
+    }
   },
 
   createUser: async ({ creds }) => {
@@ -197,8 +223,6 @@ const userService = {
       });
     return me;
   },
-
-  
 };
 
 export default userService;
@@ -309,6 +333,5 @@ export const dashboardService = {
     return { allPresent, allAbsent, allHalfday, allCheckouts };
   },
 };
-
 
 // mongodb+srv://noreplyepcorn:noreply2026@cluster0.5kgbocn.mongodb.net/

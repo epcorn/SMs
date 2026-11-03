@@ -68,8 +68,8 @@ function ShowUserAttendence({ users }) {
     <div className="w-full">
       <h3 className="text-2xl font-semibold my-5">Today's Employee's Attendance</h3>
 
-      <div className="overflow-x-auto min-w-4xl pb-20">
-        <table className="table  w-full border border-base-300 shadow-sm rounded-lg bg-base-100">
+      <div className="overflow-x-auto min-w-6xl pb-20">
+        <table className="table w-full border border-base-300 shadow-sm rounded-lg bg-base-100">
           <thead className="bg-accent text-accent-content">
             <tr>
               <th className="w-12">#</th>
@@ -113,21 +113,21 @@ function ShowUserAttendence({ users }) {
                     <td>
                       <span
                         className={`badge badge-md font-medium ${getStatusStyle(todays?.status).bg
-                          }`}
+                          } whitespace-nowrap`}
                       >
                         {todays?.status || "Not Marked"}
                       </span>
                     </td>
                     <td>
                       <span
-                        className='text-green-700 bg-green-200 p-2'
+                        className='text-green-700 bg-green-200 px-1 whitespace-nowrap'
                       >
                         {dateFormat(todays?.checkInTime)?.fullDateAndTime || "Not Marked"}
                       </span>
                     </td>
                     <td>
                       <span
-                        className='text-red-700 bg-red-200 p-1'
+                        className='text-red-700 bg-red-200 px-1 whitespace-nowrap'
                       >
                         {dateFormat(todays?.checkOutTime)?.fullDateAndTime || "Not Marked"}
                       </span>

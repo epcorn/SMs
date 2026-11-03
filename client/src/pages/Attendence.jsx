@@ -99,8 +99,6 @@ function ShowEmpAttendence({ handleMark, isMarking, user, loadingAttdnc, history
   const isAdmin = user?.role === "admin"
   // const statusConfig = getStatusStyle(todays?.status || "N/A");
 
-  console.log(todays);
-
   return (
     <div className="min-h-full flex flex-col gap-6 pb-6 pt-4 items-center justify-center">
       {/* Title & Subtitle */}

@@ -27,7 +27,6 @@ export const markActive = async (req, res, next) => {
     const data = await empServices.markActive(req);
     return res.status(200).json(data);
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };

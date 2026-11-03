@@ -99,6 +99,7 @@ const userSchema = new mongoose.Schema(
     //for push notification
     fcmToken: { type: String, default: null },
     reminderSent: { type: Boolean, default: false },
+    refreshToken: { type: String, select: false },
   },
   { timestamps: true },
 );

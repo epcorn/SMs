@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import ProtectedRoutes from "./components/ProtectedRoutes";
@@ -14,10 +14,12 @@ import { useGetCoOrdinatesMutation } from "./hooks/empHooks";
 import Advance from "./pages/Advance";
 import useDocumentTitle from "./hooks/useDocumentTitle";
 import useNotifications from "./components/oth/Notifications";
+import { useGetMe } from "./hooks/authHooks";
 
 function App() {
+  const me = useGetMe();
   useDocumentTitle();
-  useNotifications();
+  useNotifications(me);
 
   const startTracking = useGpsStore((state) => state.startTracking);
   const stopTracking = useGpsStore((state) => state.stopTracking);
@@ -78,6 +80,8 @@ function App() {
             <Route path="/advance" element={<Advance />} />
           </Route>
         </Route>
+
+        <Route path="*" element={<Navigate to={'/'} replace />} />
       </Routes>
     </>
   );

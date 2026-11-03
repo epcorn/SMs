@@ -3,20 +3,47 @@ import userService, { dashboardService } from "../services/user.service.js";
 
 const loginUser = async (req, res, next) => {
   try {
-    console.log("login body", req.body);
-    const { token, user } = await userService.loginUser(req.body);
+    const { token, user, refreshToken } = await userService.loginUser(req.body);
     res.cookie("EMS_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie("EMS_Refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res
       .status(200)
       .json({ success: true, msg: "Logged in successfull", user });
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    next(error);
+  }
+};
+
+const handleRefresh = async (req, res, next) => {
+  try {
+    const oldRefreshToken = req.cookies.EMS_Refresh_token;
+
+    const { token } = await userService.refreshSession(oldRefreshToken);
+
+    // Issue the new short-lived access token cookie
+    res.cookie("EMS_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, msg: "Token refreshed successfully" });
+  } catch (error) {
     next(error);
   }
 };
@@ -55,11 +82,9 @@ const getAllUsers = async (req, res, next) => {
 
 const createUser = async (req, res, next) => {
   try {
-    console.log(req.body);
     const { user, msg } = await userService.createUser(req.body);
     return res.status(200).json({ user, msg });
   } catch (error) {
-    console.log("error creating user", error);
     next(error);
   }
 };
@@ -69,7 +94,6 @@ const editUser = async (req, res, next) => {
     const msg = await userService.editUser(req.body, req.params.id, req.user);
     return res.status(200).json(msg);
   } catch (error) {
-    console.log("error creating user", error);
     next(error);
   }
 };
@@ -92,7 +116,7 @@ const uploadController = async (req, res, next) => {
       .status(200)
       .json({ msg: "Files uploaded successfully", results });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     next(error);
   }
 };
@@ -131,6 +155,7 @@ const getMe = async (req, res, next) => {
 
 export {
   loginUser,
+  handleRefresh,
   changePassword,
   logout,
   getAllUsers,

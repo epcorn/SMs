@@ -11,10 +11,16 @@ export const createToken = async (user) => {
       role: user.role,
     },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRY },
+    { expiresIn: "15m" },
   );
 
   return token;
+};
+
+export const createRefreshToken = (user) => {
+  return jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: "7d",
+  });
 };
 
 export const resetTodaysAttendeceDaily = async () => {
