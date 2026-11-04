@@ -8,6 +8,7 @@ import {
 } from "../utils/helperFunction.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import * as XLSX from "xlsx";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -240,9 +241,11 @@ export const dashboardService = {
   dashboradStats: async (query, user) => {
     const today = query.date ? new Date(query.date) : new Date();
     today.setHours(0, 0, 0, 0);
+    const endOfToday = query.date ? new Date(query.date) : new Date();
+    endOfToday.setHours(23, 59, 59, 999);
     const [stats, totalUsers] = await Promise.all([
       Attendence.aggregate([
-        { $match: { createdAt: { $gte: today } } },
+        { $match: { createdAt: { $gte: today, $lte: endOfToday } } },
         {
           $group: {
             _id: null,
@@ -301,10 +304,9 @@ export const dashboardService = {
     const endOfToday = query.date ? new Date(query.date) : new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
-    // Fetch all non-admin users and populate today's attendance
-    const employees = await User.find({})
+    const employees = await User.find({ role: { $ne: "admin" } })
       .select("firstname middlename lastname role")
-      .lean() // use lean() for faster plain JS objects
+      .lean()
       .populate({
         path: "attendenceRecords",
         match: {
@@ -315,7 +317,6 @@ export const dashboardService = {
         },
       });
 
-    // Categorize employees based on today's attendance status
     const allPresent = [];
     const allAbsent = [];
     const allHalfday = [];
@@ -324,23 +325,102 @@ export const dashboardService = {
     employees.forEach((emp) => {
       const todayRecord = emp?.attendenceRecords?.[0];
 
-      if (todayRecord?.status === "Absent") {
-        // If no record exists for today, treat them as Absent
-        allAbsent.push({ ...emp, ...todayRecord });
-      } else if (todayRecord?.status === "Present") {
-        allPresent.push({ ...emp, ...todayRecord });
-      } else if (todayRecord?.status === "Half-day") {
-        allHalfday.push({ ...emp, ...todayRecord });
+      const employeeData = {
+        _id: emp._id,
+        firstname: emp.firstname,
+        middlename: emp.middlename,
+        lastname: emp.lastname,
+        role: emp.role,
+        ...(todayRecord || {}),
+      };
+
+      if (todayRecord.status === "Absent") {
+        allAbsent.push(employeeData);
+      } else if (todayRecord.status === "Present") {
+        allPresent.push(employeeData);
+      } else if (todayRecord.status === "Half-day") {
+        allHalfday.push(employeeData);
       }
 
-      console.log(todayRecord);
-      if (todayRecord && todayRecord.checkOutTime !== null) {
-        allCheckouts.push({ ...emp, ...todayRecord });
+      if (
+        todayRecord &&
+        todayRecord.checkOutTime !== null &&
+        todayRecord.checkOutTime !== undefined
+      ) {
+        allCheckouts.push(employeeData);
       }
     });
 
     return { allPresent, allAbsent, allHalfday, allCheckouts };
   },
-};
 
-// mongodb+srv://noreplyepcorn:noreply2026@cluster0.5kgbocn.mongodb.net/
+  monthlyAttendanceReport: async () => {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = now.getUTCMonth();
+
+    const firstDay = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+    const lastDay = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
+    const daysInMonth = lastDay.getUTCDate();
+
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const dayOf = (d) =>
+      new Date(new Date(d).getTime() + IST_OFFSET_MS).getUTCDate();
+
+    const users = await User.find()
+      .select("attendenceRecords firstname lastname role")
+      .populate({
+        path: "attendenceRecords",
+        match: { createdAt: { $gte: firstDay, $lte: lastDay } },
+      })
+      .lean();
+
+    const headers = [
+      "Employee",
+      "Role",
+      ...Array.from({ length: daysInMonth }, (_, i) => String(i + 1)),
+      "TotalPresent",
+      "TotalAbsent",
+      "TotalHalfDay",
+    ];
+
+    const rows = users.map((u) => {
+      const row = { Employee: `${u.firstname} ${u.lastname}`, Role: u.role };
+      for (let i = 1; i <= daysInMonth; i++) row[i] = "";
+
+      let present = 0,
+        absent = 0,
+        halfDay = 0;
+
+      const records = [...(u.attendenceRecords || [])].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      );
+
+      const byDay = {};
+      for (const att of records) byDay[dayOf(att.createdAt)] = att.status;
+
+      for (const [day, status] of Object.entries(byDay)) {
+        row[day] = status;
+        if (status === "Present") present++;
+        else if (status === "Absent") absent++;
+        else if (status === "Half-Day") halfDay++;
+      }
+
+      row.TotalPresent = present;
+      row.TotalAbsent = absent;
+      row.TotalHalfDay = halfDay;
+      return row;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(rows, { header: headers });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Attendance");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "buffer",
+    });
+
+    const label = `${firstDay.getUTCFullYear()}-${String(firstDay.getUTCMonth() + 1).padStart(2, "0")}`;
+    return { excelBuffer, filename: `Monthly_Attendance_${label}.xlsx` };
+  },
+};

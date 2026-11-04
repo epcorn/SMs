@@ -20,20 +20,19 @@ if (!getApps().length) {
 }
 
 const otherServices = {
-  autoCheckout: async (req, res, next) => {
-    const users = await User.find({})
-      .select(
-        "firstname middlename lastname role email phone attendenceRecords",
-      )
-      .populate("attendenceRecords");
+  // autoCheckout: async (req, res, next) => {
+  //   const users = await User.find({})
+  //     .select(
+  //       "firstname middlename lastname role email phone attendenceRecords",
+  //     )
+  //     .populate("attendenceRecords");
 
-    res.send(users);
-  },
+  //   res.send(users);
+  // },
 
   reminderNotification: async () => {
     const { endOfDay, startOfDay } = startEndDate();
 
-    // 1. Find users who have an FCM token and an active attendance record for today
     const users = await User.find({ fcmToken: { $exists: true, $ne: null } })
       .select(
         "firstname middlename lastname role email phone attendenceRecords reminderSent fcmToken",
@@ -59,9 +58,7 @@ const otherServices = {
     let failureCount = 0;
     const notifiedUserIds = [];
 
-    // 2. Loop through each user individually so notifications are completely decoupled
     for (const user of usersToRemind) {
-      // Optional: Personalize the notification with the user's first name
       const userName = user.firstname ? user.firstname : "there";
 
       const message = {
@@ -73,7 +70,7 @@ const otherServices = {
           type: "checkout_reminder",
           userId: user._id.toString(),
         },
-        token: user.fcmToken, // Individual token per user
+        token: user.fcmToken, 
       };
 
       try {
@@ -87,7 +84,6 @@ const otherServices = {
           error.code || error.message,
         );
 
-        // 3. Automatically clean up stale or unregistered FCM tokens from this specific user
         if (
           error.code === "messaging/registration-token-not-registered" ||
           error.code === "messaging/invalid-registration-token"
@@ -98,7 +94,6 @@ const otherServices = {
       }
     }
 
-    // 4. Mark reminder as sent only for the users who successfully received it
     if (notifiedUserIds.length > 0) {
       await User.updateMany(
         { _id: { $in: notifiedUserIds } },
@@ -112,11 +107,11 @@ const otherServices = {
       message: `Processed reminders: ${successCount} sent, ${failureCount} failed.`,
     };
   },
+  
   autoCheckOut: async () => {
     const { endOfDay, startOfDay } = startEndDate();
-    const now = new Date(); // Current time or set to 7:30 PM if testing
+    const now = new Date(); 
 
-    // Find all active attendance records for today that haven't checked out yet
     const attRecords = await Attendence.find({
       status: { $in: ["Present", "Half-day"] },
       checkInTime: { $ne: null },
@@ -134,19 +129,16 @@ const otherServices = {
 
     for (const rec of attRecords) {
       const checkIn = new Date(rec.checkInTime);
-      const checkOut = now; // 7:30 PM or current time
+      const checkOut = now; 
 
-      // Calculate total working hours
       const diffMs = checkOut - checkIn;
       const totalWorkingHours = parseFloat(
         (diffMs / (1000 * 60 * 60)).toFixed(2),
       );
 
-      // Update fields
       rec.checkOutTime = checkOut;
       rec.totalWorkingHours = totalWorkingHours > 0 ? totalWorkingHours : 0;
 
-      // Optional: push into your history sub-document array
       rec.history.push({
         action: "CHECK_OUT",
         status: rec.status,

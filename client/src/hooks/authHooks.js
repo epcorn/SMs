@@ -42,21 +42,21 @@ const useChangePassword = () => {
   });
 };
 
-const useGetDashboardStats = () => {
+const useGetDashboardStats = (date) => {
   return useQuery({
-    queryKey: ["user", "dash"],
+    queryKey: ["user", "dash", date],
     queryFn: async () => {
-      const stats = await fetchFn("dash/stats");
+      const stats = await fetchFn(`dash/stats?date=${date}`);
       return stats;
     },
   });
 };
 
-const useGetDashboardUserStats = (options = {}) => {
+const useGetDashboardUserStats = (date, options = {}) => {
   return useQuery({
-    queryKey: ["dash", "user-stats"],
+    queryKey: ["dash", "user-stats", date],
     queryFn: async () => {
-      const stats = await fetchFn("dash/userStats");
+      const stats = await fetchFn(`dash/userStats?date=${date}`);
       return stats;
     },
     ...options,

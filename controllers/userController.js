@@ -154,6 +154,22 @@ const getMe = async (req, res, next) => {
   }
 };
 
+const getMonthlyAttandenceReport = async (req, res, next) => {
+  try {
+    const { excelBuffer, filename } = await dashboardService.monthlyAttendanceReport();
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+
+    return res.send(excelBuffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   loginUser,
   handleRefresh,
@@ -166,4 +182,5 @@ export {
   getDashboradStats,
   getDashboradEmpStats,
   getMe,
+  getMonthlyAttandenceReport,
 };

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import DashboardStats from "@/components/admin/DashboardStats"
 import DashboardTable from "@/components/admin/DashboardTable"
 import { useGetDashboardStats, useGetDashboardUserStats } from "@/hooks/authHooks"
@@ -11,8 +11,9 @@ const TABS = [
 ]
 
 function Dashboard() {
-  const { data: userStats, isLoading: dashLoading } = useGetDashboardUserStats()
-  const { data: statsData, isPending: gettingStats } = useGetDashboardStats();
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0])
+  const { data: userStats, isLoading: dashLoading } = useGetDashboardUserStats(date)
+  const { data: statsData, isPending: gettingStats } = useGetDashboardStats(date);
 
   if (dashLoading || gettingStats) {
     return (
@@ -26,7 +27,10 @@ function Dashboard() {
     // exactly viewport height, page itself never scrolls
     <div className="h-dvh overflow-hidden p-4 sm:p-6 flex flex-col border">
       <header className="my-3 shrink-0">
-        <h2 className="text-3xl font-bold">Dashboard</h2>
+        <div className="flex justify-between">
+          <h2 className="text-3xl font-bold">Dashboard</h2>
+          <input type="date" className="input w-fit" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
       </header>
 
       <div className="shrink-0">

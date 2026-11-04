@@ -1,4 +1,3 @@
-// DashboardTable.jsx
 import { dateFormat } from "@/utils/helperfn";
 
 function DashboardTable({ presents, absents, halfday, checkouts, label }) {
@@ -21,8 +20,8 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
           {alldata.length > 0 ? (
             alldata.map((d, idx) => {
               const recordStatus = d?.status || d?.attendenceRecords?.[0]?.status || "Absent";
-              const checkIn = d?.attendenceRecords?.[0]?.checkInTime;
-              const checkOut = d?.attendenceRecords?.[0]?.checkOutTime;
+              const checkIn = d?.checkInTime;
+              const checkOut = d?.checkOutTime;
 
               return (
                 <tr key={d._id || idx} className="hover">
@@ -31,13 +30,12 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
                   <td>{d?.role}</td>
                   <td>
                     <span
-                      className={`badge ${
-                        recordStatus === "Present"
-                          ? "badge-success"
-                          : recordStatus === "Half-day"
+                      className={`badge ${recordStatus === "Present"
+                        ? "badge-success"
+                        : recordStatus === "Half-day"
                           ? "badge-warning"
                           : "badge-error"
-                      }`}
+                        }`}
                     >
                       {recordStatus}
                     </span>

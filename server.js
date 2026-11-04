@@ -19,6 +19,7 @@ import siteRouter from "./routes/siteRoutes.js";
 import User from "./models/userModel.js";
 import otherRouter from "./routes/otherRoutes.js";
 import { autoCheckoutUser, cronService } from "./services/cron.service.js";
+import otherServices from "./services/other.service.js";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use(
     credentials: true,
   }),
 );
+
 
 app.use(morgan("dev"));
 app.use(express.json());
@@ -77,8 +79,6 @@ app.use("/api/emp", authentication, empRouter);
 app.use("/api/site", authentication, siteRouter);
 app.use("/api/fcm", otherRouter);
 
-// Wrap it in an arrow function so it runs on the schedule, not on boot
-// In a route file or server.js
 app.get("/api/cron/send-reminders", cronService);
 app.get("/api/cron/auto-checkout", autoCheckoutUser);
 
