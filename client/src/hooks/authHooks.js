@@ -70,6 +70,7 @@ const useGetMe = (options = {}) => {
       const stats = await fetchFn("user/me");
       return stats;
     },
+    retry: false,
     ...options,
   });
 };

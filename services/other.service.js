@@ -1,17 +1,22 @@
 import { getMessaging } from "firebase-admin/messaging";
 import User from "../models/userModel.js";
 import { startEndDate } from "./emp.service.js";
-import { initializeApp, getApps, applicationDefault } from "firebase-admin/app";
+import { initializeApp, getApps, cert } from "firebase-admin/app";
 import dotenv from "dotenv";
 import Attendence from "../models/attendenceModel.js";
 dotenv.config();
 
-// Safely initialize Firebase without forcing a downloaded private key file
 if (!getApps().length) {
-  initializeApp({
-    credential: applicationDefault(),
-    projectId: "project-587c6976-454c-43a7-8f3",
-  });
+  try {
+    const serviceAccount = JSON.parse(
+      Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, "base64").toString(
+        "utf8",
+      ),
+    );
+    initializeApp({ credential: cert(serviceAccount) });
+  } catch (err) {
+    console.error("Firebase init failed:", err.message);
+  }
 }
 
 const otherServices = {

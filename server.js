@@ -61,7 +61,7 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
 });
 
-app.post("/api/fcm-token", authentication, async (req, res) => {
+app.post("/api/token/fcm-token", authentication, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.user.id, { fcmToken: req.body.token });
     res.json({ ok: true });
@@ -72,7 +72,7 @@ app.post("/api/fcm-token", authentication, async (req, res) => {
 
 app.use("/api/auth", authRoute);
 app.use("/api/dash", dashRoute);
-app.use("/api/user", authentication, userRouter);
+app.use("/api/user", userRouter);
 app.use("/api/emp", authentication, empRouter);
 app.use("/api/site", authentication, siteRouter);
 app.use("/api/fcm", otherRouter);

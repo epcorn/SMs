@@ -14,16 +14,18 @@ import { useGetCoOrdinatesMutation } from "./hooks/empHooks";
 import Advance from "./pages/Advance";
 import useDocumentTitle from "./hooks/useDocumentTitle";
 import useNotifications from "./components/oth/Notifications";
-import { useGetMe } from "./hooks/authHooks";
+// import { useGetMe } from "./hooks/authHooks";
 
 function App() {
-  const me = useGetMe();
+  const user = useAuthStore((state) => state.user);
+  // const me = useGetMe({ enabled: Boolean(user?.user?.id) });
+
   useDocumentTitle();
-  useNotifications(me);
+  useNotifications(user?.user?.id);
 
   const startTracking = useGpsStore((state) => state.startTracking);
   const stopTracking = useGpsStore((state) => state.stopTracking);
-  const user = useAuthStore((state) => state.user);
+
   const location = useGpsStore((state) => state.location);
 
   const { mutateAsync: setCoords } = useGetCoOrdinatesMutation();

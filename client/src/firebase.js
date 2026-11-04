@@ -1,15 +1,9 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
-// import { getAnalytics } from "firebase/analytics";
-import {
-  getMessaging,
-  getToken,
-  onMessage,
-  isSupported,
-} from "firebase/messaging"; // Added for notifications
+import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDhXRpuajlyPLuWN5uZbbMM20YrWs3FGlY",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "project-587c6976-454c-43a7-8f3.firebaseapp.com",
   projectId: "project-587c6976-454c-43a7-8f3",
   storageBucket: "project-587c6976-454c-43a7-8f3.firebasestorage.app",
@@ -18,53 +12,44 @@ const firebaseConfig = {
   measurementId: "G-P6RMZYW83F",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
 
-// Initialize Firebase Cloud Messaging (FCM)
-export const messaging = getMessaging(app);
+let messagingPromise = null;
+const getMessagingSafe = () => {
+  if (!messagingPromise) {
+    messagingPromise = isSupported()
+      .then((ok) => (ok ? getMessaging(app) : null))
+      .catch(() => null);
+  }
+  return messagingPromise;
+};
 
-// Helper function to ask user for permission and get the FCM device token
 export const requestForToken = async () => {
   try {
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) return null;
+
+    const messaging = await getMessagingSafe();
+    if (!messaging) return null;
+
     const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      console.log("Notification permission not granted:", permission);
-      return null;
-    }
+    if (permission !== "granted") return null;
 
-    const registration = await navigator.serviceWorker.register(
-      "/firebase-messaging-sw.js",
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+
+    return (
+      (await getToken(messaging, {
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration: registration,
+      })) || null
     );
-
-    const currentToken = await getToken(messaging, {
-      vapidKey:
-        import.meta.env.VITE_FIREBASE_VAPID_KEY ||
-        "BE8a-_VA9WG6pnLmZyhwWg19sDZwwk-cxpbqWVIPHGsiNWM_xp8MK6qyCCpjkjKMz4wNnlc6m3cOD1NEL1_wjq0",
-      serviceWorkerRegistration: registration,
-    });
-
-    if (currentToken) {
-      console.log("Device FCM Token:", currentToken);
-      return currentToken;
-    }
-    console.log("No registration token available.");
-    return null;
   } catch (err) {
-    console.error("An error occurred while retrieving token.", err);
+    console.error("Failed to get FCM token:", err);
     return null;
   }
 };
-                    
-// Listen for notifications when the app is open (Foreground)
-export const onMessageListener = () =>
-  new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      resolve(payload);
-    });
-  });
-export const getMessagingIfSupported = async () =>
-  (await isSupported()) ? getMessaging(app) : null;
 
-export const onForegroundMessage = (callback) => onMessage(messaging, callback);
+// returns an unsubscribe function (async, so handle it in the hook)
+export const onForegroundMessage = async (callback) => {
+  const messaging = await getMessagingSafe();
+  return messaging ? onMessage(messaging, callback) : () => {};
+};

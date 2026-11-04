@@ -2,7 +2,7 @@ import { createError } from "../middleware/errorMiddleware.js";
 import Attendence from "../models/attendenceModel.js";
 import User from "../models/userModel.js";
 import {
-  createRefreshToken,
+  // createRefreshToken,
   createToken,
   uploadToCloud,
 } from "../utils/helperFunction.js";
@@ -24,14 +24,15 @@ const userService = {
     if (!validateUser) throw createError("credentials not matched", 401);
 
     const accessToken = await createToken(extUser);
-    const refreshToken = await createRefreshToken(extUser);
+    // const refreshToken = await createRefreshToken(extUser);
 
-    extUser.refreshToken = refreshToken;
-    await extUser.save();
-
+    // await User.updateOne(
+    //   { _id: extUser._id },
+    //   { $push: { refreshTokens: { $each: [refreshToken], $slice: -5 } } },
+    // );
     return {
       token: accessToken,
-      refreshToken,
+      // refreshToken,
       user: {
         id: extUser._id,
         name: extUser.name,
@@ -45,17 +46,25 @@ const userService = {
   refreshSession: async (oldToken) => {
     if (!oldToken) throw createError("Unauthorized", 401);
 
+    let decoded;
     try {
-      const decoded = jwt.verify(oldToken, process.env.JWT_REFRESH_SECRET);
-      const user = await User.findById(decoded.id).select("+refreshToken");
-
-      if (!user || user.refreshToken !== oldToken)
-        throw createError("Forbidden", 403);
-      const newToken = await createToken(user);
-      return { token: newToken };
-    } catch (error) {
+      decoded = jwt.verify(oldToken, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
+      console.error("Refresh verify failed:", err.message);
       throw createError("Refresh token expired or invalid", 403);
     }
+
+    const user = await User.findById(decoded.id).select("+refreshToken");
+    if (!user) {
+      console.error("Refresh: user not found");
+      throw createError("Forbidden", 403);
+    }
+    if (user.refreshTokens !== oldToken) {
+      console.error("Refresh: token doesn't match the one in DB");
+      throw createError("Forbidden", 403);
+    }
+
+    return { token: await createToken(user) };
   },
 
   createUser: async ({ creds }) => {
