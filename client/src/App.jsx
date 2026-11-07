@@ -14,11 +14,10 @@ import { useGetCoOrdinatesMutation } from "./hooks/empHooks";
 import Advance from "./pages/Advance";
 import useDocumentTitle from "./hooks/useDocumentTitle";
 import useNotifications from "./components/oth/Notifications";
-// import { useGetMe } from "./hooks/authHooks";
+
 
 function App() {
   const user = useAuthStore((state) => state.user);
-  // const me = useGetMe({ enabled: Boolean(user?.user?.id) });
 
   useDocumentTitle();
   useNotifications(user?.user?.id);
@@ -59,7 +58,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route element={<Layout />}>
-          {/* ROLE protected */}
           <Route element={<ProtectedRoutes role={["admin", "operator"]} />}>
             <Route path="/employee" element={<Employees />} />
           </Route>

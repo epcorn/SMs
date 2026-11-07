@@ -4,13 +4,14 @@ import User from "../models/userModel.js";
 import { getDistanceInMeteres } from "../utils/helperFunction.js";
 
 export const startEndDate = (date) => {
-  const startOfDay = date ? new Date(date) : new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = date ? new Date(date) : new Date();
-  endOfDay.setHours(23, 59, 59, 999);
+  const targetDate = date ? new Date(date) : new Date();
+
+  const startOfDay = new Date(targetDate.setUTCHours(0, 0, 0, 0));
+  const endOfDay = new Date(targetDate.setUTCHours(23, 59, 59, 999));
 
   return { startOfDay, endOfDay };
 };
+
 
 export const calcTotalHours = (inTime) => {
   const now = new Date();

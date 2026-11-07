@@ -4,25 +4,19 @@ import userService, { dashboardService } from "../services/user.service.js";
 const loginUser = async (req, res, next) => {
   try {
     const { token, user } = await userService.loginUser(req.body);
+
     res.cookie("EMS_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
       path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    // res.cookie("EMS_Refresh_token", refreshToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === "production",
-    //   sameSite: "strict",
-    //   maxAge: 7 * 24 * 60 * 60 * 1000,
-    // });
 
     return res
       .status(200)
-      .json({ success: true, msg: "Logged in successfull", user });
+      .json({ success: true, msg: "Logged in successfully", user });
   } catch (error) {
-    console.error(error);
     next(error);
   }
 };
@@ -61,9 +55,10 @@ const changePassword = async (req, res, next) => {
 const logout = async (req, res, next) => {
   try {
     res.clearCookie("EMS_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      path: "/",
       sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
     });
 
     return res.status(200).json({ msg: "Logged out successfully" });
@@ -140,6 +135,7 @@ const getDashboradEmpStats = async (req, res, next) => {
     );
     res.status(200).json(stats);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };
@@ -156,7 +152,8 @@ const getMe = async (req, res, next) => {
 
 const getMonthlyAttandenceReport = async (req, res, next) => {
   try {
-    const { excelBuffer, filename } = await dashboardService.monthlyAttendanceReport();
+    const { excelBuffer, filename } =
+      await dashboardService.monthlyAttendanceReport();
 
     res.setHeader(
       "Content-Type",
@@ -166,6 +163,7 @@ const getMonthlyAttandenceReport = async (req, res, next) => {
 
     return res.send(excelBuffer);
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };

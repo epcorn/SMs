@@ -20,23 +20,14 @@ if (!getApps().length) {
 }
 
 const otherServices = {
-  // autoCheckout: async (req, res, next) => {
-  //   const users = await User.find({})
-  //     .select(
-  //       "firstname middlename lastname role email phone attendenceRecords",
-  //     )
-  //     .populate("attendenceRecords");
-
-  //   res.send(users);
-  // },
-
   reminderNotification: async () => {
     const { endOfDay, startOfDay } = startEndDate();
 
-    const users = await User.find({ fcmToken: { $exists: true, $ne: null } })
-      .select(
-        "firstname middlename lastname role email phone attendenceRecords reminderSent fcmToken",
-      )
+    const users = await User.find({
+      "fcmTokens.0": { $exists: true },
+      $or: [{ reminderSentOn: null }, { reminderSentOn: { $lt: startOfDay } }],
+    })
+      .select("firstname fcmTokens attendenceRecords")
       .populate({
         path: "attendenceRecords",
         match: {
@@ -45,6 +36,14 @@ const otherServices = {
           checkOutTime: null,
         },
       });
+
+    console.log(
+      "Day range:",
+      startOfDay,
+      endOfDay,
+      "| users with tokens:",
+      users?.length,
+    );
 
     const usersToRemind = users.filter(
       (user) => user.attendenceRecords && user.attendenceRecords.length > 0,
@@ -59,45 +58,67 @@ const otherServices = {
     const notifiedUserIds = [];
 
     for (const user of usersToRemind) {
-      const userName = user.firstname ? user.firstname : "there";
-
-      const message = {
-        notification: {
-          title: `Hello ${userName}, Time to Check Out!`,
-          body: "It looks like you haven't checked out for today yet. Please remember to clock out.",
-        },
-        data: {
-          type: "checkout_reminder",
-          userId: user._id.toString(),
-        },
-        token: user.fcmToken, 
-      };
+      const userName = user.firstname || "there";
 
       try {
-        await getMessaging().send(message);
-        successCount++;
-        notifiedUserIds.push(user._id);
+        const res = await getMessaging().sendEachForMulticast({
+          tokens: user.fcmTokens,
+          notification: {
+            title: `Hello ${userName}, Time to Check Out!`,
+            body: "It looks like you haven't checked out for today yet. Please remember to clock out.",
+          },
+          data: {
+            type: "checkout_reminder",
+            userId: user._id.toString(),
+          },
+        });
+
+        successCount += res.successCount;
+        failureCount += res.failureCount;
+
+        // collect dead tokens for cleanup
+        const dead = [];
+        res.responses.forEach((r, i) => {
+          if (!r.success) {
+            console.error(
+              "FCM send failed:",
+              user._id,
+              r.error?.code,
+              r.error?.message,
+            );
+            const code = r.error?.code;
+            if (
+              code === "messaging/registration-token-not-registered" ||
+              code === "messaging/invalid-registration-token"
+            ) {
+              dead.push(user.fcmTokens[i]);
+            }
+          }
+        });
+
+        if (dead.length) {
+          await User.updateOne(
+            { _id: user._id },
+            { $pull: { fcmTokens: { $in: dead } } },
+          );
+        }
+
+        // mark as reminded if at least one device received it
+        if (res.successCount > 0) notifiedUserIds.push(user._id);
       } catch (error) {
         failureCount++;
         console.error(
-          `Failed to send reminder to user ${user._id}:`,
+          "Reminder failed for user",
+          user._id,
           error.code || error.message,
         );
-
-        if (
-          error.code === "messaging/registration-token-not-registered" ||
-          error.code === "messaging/invalid-registration-token"
-        ) {
-          console.log(`Removing stale fcmToken for user: ${user._id}`);
-          await User.findByIdAndUpdate(user._id, { $unset: { fcmToken: 1 } });
-        }
       }
     }
 
     if (notifiedUserIds.length > 0) {
       await User.updateMany(
         { _id: { $in: notifiedUserIds } },
-        { $set: { reminderSent: true } },
+        { $set: { reminderSentOn: new Date() } },
       );
     }
 
@@ -107,10 +128,10 @@ const otherServices = {
       message: `Processed reminders: ${successCount} sent, ${failureCount} failed.`,
     };
   },
-  
+
   autoCheckOut: async () => {
     const { endOfDay, startOfDay } = startEndDate();
-    const now = new Date(); 
+    const now = new Date();
 
     const attRecords = await Attendence.find({
       status: { $in: ["Present", "Half-day"] },
@@ -129,7 +150,7 @@ const otherServices = {
 
     for (const rec of attRecords) {
       const checkIn = new Date(rec.checkInTime);
-      const checkOut = now; 
+      const checkOut = now;
 
       const diffMs = checkOut - checkIn;
       const totalWorkingHours = parseFloat(

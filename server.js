@@ -19,7 +19,6 @@ import siteRouter from "./routes/siteRoutes.js";
 import User from "./models/userModel.js";
 import otherRouter from "./routes/otherRoutes.js";
 import { autoCheckoutUser, cronService } from "./services/cron.service.js";
-import otherServices from "./services/other.service.js";
 
 dotenv.config();
 
@@ -36,7 +35,6 @@ app.use(
   }),
 );
 
-
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -48,7 +46,7 @@ cloudinary.config({
   api_secret: process.env.CLOUD_SECRET,
 });
 
-const mongoUri =
+const mongoUri = 
   process.env.NODE_ENV === "production"
     ? process.env.MONGO_URI
     : process.env.MONGO_LOCAL;
@@ -63,12 +61,18 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
 });
 
-app.post("/api/token/fcm-token", authentication, async (req, res) => {
+app.post("/api/token/fcm-token", authentication, async (req, res, next) => {
   try {
-    await User.findByIdAndUpdate(req.user.id, { fcmToken: req.body.token });
+    const { token } = req.body;
+    if (!token)
+      return res.status(400).json({ success: false, msg: "Token required" });
+    await User.findByIdAndUpdate(req.user.id, {
+      $addToSet: { fcmTokens: token },
+    });
+
     res.json({ ok: true });
-  } catch (error) {
-    console.error(error);
+  } catch (e) {
+    next(e);
   }
 });
 

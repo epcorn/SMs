@@ -1,16 +1,13 @@
 import { useGetMe, useLogout } from "@/hooks/authHooks";
-import useAuthStore from "@/store/authStore";
 import {
-  CircleDollarSign,
-  FaceGrinning,
-  Highlighter,
+  CircleDollarSign, Highlighter,
   LayoutDashboard,
   Library, LogOutIcon,
   MapPin,
   Users
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import logo from '../../assets/logo.png'
+import logo from '../../assets/logo.png';
 import { dateFormat } from "@/utils/helperfn";
 
 const classes = "w-5 h-5 text-slate-400 transition-colors";

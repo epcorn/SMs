@@ -65,11 +65,12 @@ const useGetDashboardUserStats = (date, options = {}) => {
 
 const useGetMe = (options = {}) => {
   return useQuery({
-    queryKey: ["user", "dash", "user-stats"],
+    queryKey: ["me"],
     queryFn: async () => {
       const stats = await fetchFn("user/me");
       return stats;
     },
+    staleTime: 5 * 60 * 1000,
     retry: false,
     ...options,
   });

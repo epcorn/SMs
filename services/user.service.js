@@ -9,16 +9,19 @@ import {
 import path from "path";
 import { fileURLToPath } from "url";
 import * as XLSX from "xlsx";
+import { startEndDate } from "./emp.service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const userService = {
   loginUser: async (creds) => {
+
     const extUser = await User.findOne({ email: creds.email }).select(
       "+password",
     );
 
+    
     if (!extUser) throw createError("User not found", 404);
 
     const validateUser = await extUser.comparePassword(creds.password);
@@ -239,10 +242,10 @@ export default userService;
 
 export const dashboardService = {
   dashboradStats: async (query, user) => {
-    const today = query.date ? new Date(query.date) : new Date();
-    today.setHours(0, 0, 0, 0);
-    const endOfToday = query.date ? new Date(query.date) : new Date();
-    endOfToday.setHours(23, 59, 59, 999);
+    const { startOfDay: today, endOfDay: endOfToday } = startEndDate(
+      query.date,
+    );
+
     const [stats, totalUsers] = await Promise.all([
       Attendence.aggregate([
         { $match: { createdAt: { $gte: today, $lte: endOfToday } } },
@@ -298,54 +301,53 @@ export const dashboardService = {
     };
   },
   dashboardUserStats: async (query, user) => {
-    const startOfToday = query.date ? new Date(query.date) : new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    const { startOfDay: startOfToday, endOfDay: endOfToday } = startEndDate(
+      query.date,
+    );
 
-    const endOfToday = query.date ? new Date(query.date) : new Date();
-    endOfToday.setHours(23, 59, 59, 999);
-
-    const employees = await User.find({ role: { $ne: "admin" } })
+    const employees = await User.find({  })
       .select("firstname middlename lastname role")
       .lean()
       .populate({
         path: "attendenceRecords",
         match: {
           createdAt: {
-            $gte: startOfToday,
-            $lte: endOfToday,
+            $gt: startOfToday,
+            $lt: endOfToday,
           },
         },
       });
-
+    console.log(employees, startOfToday, endOfToday);
+    
     const allPresent = [];
     const allAbsent = [];
     const allHalfday = [];
     const allCheckouts = [];
 
-    employees.forEach((emp) => {
+    employees?.forEach((emp) => {
       const todayRecord = emp?.attendenceRecords?.[0];
 
       const employeeData = {
-        _id: emp._id,
-        firstname: emp.firstname,
-        middlename: emp.middlename,
-        lastname: emp.lastname,
-        role: emp.role,
+        _id: emp?._id,
+        firstname: emp?.firstname,
+        middlename: emp?.middlename,
+        lastname: emp?.lastname,
+        role: emp?.role,
         ...(todayRecord || {}),
       };
 
-      if (todayRecord.status === "Absent") {
+      if (todayRecord?.status === "Absent") {
         allAbsent.push(employeeData);
-      } else if (todayRecord.status === "Present") {
+      } else if (todayRecord?.status === "Present") {
         allPresent.push(employeeData);
-      } else if (todayRecord.status === "Half-day") {
+      } else if (todayRecord?.status === "Half-day") {
         allHalfday.push(employeeData);
       }
 
       if (
         todayRecord &&
-        todayRecord.checkOutTime !== null &&
-        todayRecord.checkOutTime !== undefined
+        todayRecord?.checkOutTime !== null &&
+        todayRecord?.checkOutTime !== undefined
       ) {
         allCheckouts.push(employeeData);
       }
@@ -384,20 +386,20 @@ export const dashboardService = {
       "TotalHalfDay",
     ];
 
-    const rows = users.map((u) => {
-      const row = { Employee: `${u.firstname} ${u.lastname}`, Role: u.role };
+    const rows = users?.map((u) => {
+      const row = { Employee: `${u?.firstname} ${u?.lastname}`, Role: u?.role };
       for (let i = 1; i <= daysInMonth; i++) row[i] = "";
 
       let present = 0,
         absent = 0,
         halfDay = 0;
 
-      const records = [...(u.attendenceRecords || [])].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      const records = [...(u?.attendenceRecords || [])].sort(
+        (a, b) => new Date(a?.createdAt) - new Date(b?.createdAt),
       );
 
       const byDay = {};
-      for (const att of records) byDay[dayOf(att.createdAt)] = att.status;
+      for (const att of records) byDay[dayOf(att?.createdAt)] = att?.status;
 
       for (const [day, status] of Object.entries(byDay)) {
         row[day] = status;
