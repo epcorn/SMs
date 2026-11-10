@@ -105,7 +105,7 @@ function ShowUserAttendence({ users }) {
                       {/* Tooltip for History Log on Name */}
                       <div className="dropdown dropdown-hover">
                         <span className="font-medium">{name || "N/A"}</span>
-                        <div className="dropdown-content z-50 p-3 shadow-xl rounded-box bg-base-200 text-base-content border border-base-300 w-96">
+                        <div className="dropdown-content z-50 p-3 shadow-xl rounded-box bg-base-200 text-base-content border border-base-300 min-w-96">
                           <AttedenceHistory history={todays?.history || []} />
                         </div>
                       </div>
@@ -225,7 +225,7 @@ function AttedenceHistory({ history }) {
           <span className="opacity-80 text-[10px]">
             {dateFormat(h?.date)?.time || "N/A"}
           </span>
-          <span className="col-span-2 opacity-80 truncate">
+          <span className="col-span-2 opacity-80">
             {h?.reason || "—"}
           </span>
         </div>

@@ -1,9 +1,7 @@
 import { fetchFn } from "@/utils/queryClient";
 import {
-  useMutation,
-  useMutationState,
-  useQuery,
-  useQueryClient,
+  useMutation, useQuery,
+  useQueryClient
 } from "@tanstack/react-query";
 
 const useGetHolidaysQuery = () => {
@@ -71,6 +69,7 @@ const useGetAttendenceQuery = (id = "") => {
 const useGetAllUsers = ({ page = 1, limit = 12, name = "", email = "" }) => {
   const params = Object.fromEntries(
     Object.entries({ page, limit, name, email }).filter(
+      //eslint-disable-next-line
       ([_, v]) => v !== undefined,
     ),
   );
@@ -224,6 +223,28 @@ const useMarkCheckout = () => {
   });
 };
 
+const useAddDuty = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationKey: ["duty"],
+    mutationFn: async (data) => {
+      const res = await fetchFn("emp/duty", { method: "POST", body: data });
+      return res;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["duty"] }),
+  });
+};
+
+const useGetDuties = () => {
+  return useQuery({
+    queryKey: ["duty"],
+    queryFn: async () => {
+      const res = await fetchFn("emp/duty");
+      return res;
+    },
+  });
+};
+
 export {
   useGetHolidaysQuery,
   useMarkAttandence,
@@ -238,4 +259,6 @@ export {
   useUploadFile,
   useGetAdvances,
   useMarkCheckout,
+  useAddDuty,
+  useGetDuties,
 };

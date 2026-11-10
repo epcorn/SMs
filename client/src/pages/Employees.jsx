@@ -36,7 +36,9 @@ function Employees() {
     handleSubmit,
   } = useForm();
 
-  const search = (data) => {
+console.log(response)
+  
+const search = (data) => {
     setEmpData((prev) => ({ ...prev, ...data, page: 1 }));
   };
 

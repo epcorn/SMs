@@ -231,7 +231,7 @@ function Sidebar({ children }) {
 
             {/* Logout Action */}
             <li className="mt-auto mb-6">
-              <img src="" alt="" />
+              {/* <img src="" alt="" /> */}
               <button
                 onClick={logout}
                 disabled={loggingOut}

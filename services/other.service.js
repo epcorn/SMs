@@ -1,23 +1,8 @@
 import { getMessaging } from "firebase-admin/messaging";
 import User from "../models/userModel.js";
 import { startEndDate } from "./emp.service.js";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import dotenv from "dotenv";
 import Attendence from "../models/attendenceModel.js";
-dotenv.config();
 
-if (!getApps().length) {
-  try {
-    const serviceAccount = JSON.parse(
-      Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, "base64").toString(
-        "utf8",
-      ),
-    );
-    initializeApp({ credential: cert(serviceAccount) });
-  } catch (err) {
-    console.error("Firebase init failed:", err.message);
-  }
-}
 
 const otherServices = {
   reminderNotification: async () => {

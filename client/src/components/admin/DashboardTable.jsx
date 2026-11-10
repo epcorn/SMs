@@ -1,7 +1,9 @@
-import { dateFormat } from "@/utils/helperfn";
+import { dateCompare, dateFormat } from "@/utils/helperfn";
 
 function DashboardTable({ presents, absents, halfday, checkouts, label }) {
   const alldata = presents || absents || halfday || checkouts || [];
+
+
 
   return (
     <div className="max-h-full overflow-auto">
@@ -12,6 +14,7 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
             <th>Name</th>
             <th>Role</th>
             <th>Status</th>
+            <th>Duty Time</th>
             <th>Check In Time</th>
             <th>Check Out Time</th>
           </tr>
@@ -22,6 +25,9 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
               const recordStatus = d?.status || d?.attendenceRecords?.[0]?.status || "Absent";
               const checkIn = d?.checkInTime;
               const checkOut = d?.checkOutTime;
+
+              const duty = d?.duty.find(d => dateCompare(d.createdAt, new Date()))?.startTime;
+              console.log(duty)
 
               return (
                 <tr key={d._id || idx} className="hover">
@@ -40,6 +46,7 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
                       {recordStatus}
                     </span>
                   </td>
+                  <td>{dateFormat(duty)?.time || "N/A"}</td>
                   <td>{checkIn ? dateFormat(checkIn)?.time : "N/A"}</td>
                   <td>{checkOut ? dateFormat(checkOut)?.time : "N/A"}</td>
                 </tr>

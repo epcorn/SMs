@@ -109,6 +109,11 @@ userSchema.virtual("attendenceRecords", {
   localField: "_id",
   foreignField: "user",
 });
+userSchema.virtual("dutyRecords", {
+  ref: "Duty",
+  localField: "_id",
+  foreignField: "user",
+});
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
@@ -120,8 +125,9 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.set("toObject", { virtuals: true, getters: true });
-userSchema.set("toJSON", { virtuals: true, getters: true });
+userSchema.set("toObject", { virtuals: true, getters: true, id: false });
+userSchema.set("toJSON", { virtuals: true, getters: true, id: false });
+
 const User = mongoose.model("User", userSchema);
 
 export default User;

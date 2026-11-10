@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import fileUpload from "express-fileupload";
 import { v2 as cloudinary } from "cloudinary";
+import { initializeApp, getApps, cert } from "firebase-admin/app";
 
 import connectDB from "./conn/connectDB.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
@@ -21,6 +22,20 @@ import otherRouter from "./routes/otherRoutes.js";
 import { autoCheckoutUser, cronService } from "./services/cron.service.js";
 
 dotenv.config();
+
+if (!getApps().length) {
+  try {
+    const serviceAccount = JSON.parse(
+      Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_B64, "base64").toString(
+        "utf8",
+      ),
+    );
+    initializeApp({ credential: cert(serviceAccount) });
+  } catch (err) {
+    console.error("Firebase init failed:", err.message);
+  }
+}
+
 
 const app = express();
 
@@ -46,7 +61,7 @@ cloudinary.config({
   api_secret: process.env.CLOUD_SECRET,
 });
 
-const mongoUri = 
+const mongoUri =
   process.env.NODE_ENV === "production"
     ? process.env.MONGO_URI
     : process.env.MONGO_LOCAL;

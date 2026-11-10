@@ -1,5 +1,7 @@
+import { getMessaging } from "firebase-admin/messaging";
 import { createError } from "../middleware/errorMiddleware.js";
 import Attendence from "../models/attendenceModel.js";
+import Duty from "../models/dutyModel.js";
 import User from "../models/userModel.js";
 import { getDistanceInMeteres } from "../utils/helperFunction.js";
 
@@ -11,7 +13,6 @@ export const startEndDate = (date) => {
 
   return { startOfDay, endOfDay };
 };
-
 
 export const calcTotalHours = (inTime) => {
   const now = new Date();
@@ -26,10 +27,6 @@ const empServices = {
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
-
-    // if (user && ["operator", "admin"].includes(user.role)) {
-    //   return;
-    // }
 
     const existAtt = await Attendence.findOne({
       user: id,
@@ -69,6 +66,13 @@ const empServices = {
     const existAtt = await this.existAttendence(user.id);
     await this.getcoords(user);
 
+    const { endOfDay, startOfDay } = startEndDate(now);
+
+    const assignedDuty = await Duty.findOne({
+      user: user.id,
+      startTime: { $gte: startOfDay, $lte: endOfDay },
+    });
+
     if (action === "CHECK_OUT") {
       if (!existAtt)
         throw createError("No attendance record found for today", 404);
@@ -80,7 +84,6 @@ const empServices = {
       existAtt.checkOutTime = now;
       existAtt.totalWorkingHours = totalHours;
 
-      // Provide status to satisfy schema requirement
       existAtt.history.push({
         action,
         status: existAtt.status,
@@ -97,6 +100,21 @@ const empServices = {
       if (existAtt)
         throw createError("Already attendance marked for Today", 400);
 
+      let checkInReason = "User CheckIn";
+
+      // Check if duty exists and handle the 15-minute grace period
+      if (assignedDuty && assignedDuty.startTime) {
+        const startTimeMs = new Date(assignedDuty.startTime).getTime();
+        const nowMs = now.getTime();
+        const gracePeriodMs = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+        // If check-in is later than startTime + 15 mins
+        if (nowMs > startTimeMs + gracePeriodMs) {
+          const minutesLate = Math.floor((nowMs - startTimeMs) / (60 * 1000));
+          checkInReason = `Late CheckIn (${minutesLate} mins late)`;
+        }
+      }
+
       const att = await Attendence.create({
         user: user.id,
         status: "Present",
@@ -107,7 +125,7 @@ const empServices = {
             action,
             date: now,
             changedBy: user.id,
-            reason: "User CheckIn",
+            reason: checkInReason, // Will dynamically log if they are late
           },
         ],
       });
@@ -117,6 +135,7 @@ const empServices = {
 
     throw createError("Invalid action type", 400);
   },
+
   // Admin / Operator attendance assignment
   attendenceAssign: async function ({ body, user }) {
     const { id, status = "Present", reason = "Administrative update" } = body;
@@ -203,14 +222,17 @@ const empServices = {
   },
 
   getAttendence: async (currentUser) => {
-    const populateOptions = {
-      path: "attendenceRecords",
-      populate: {
-        path: "history.changedBy",
-        select: "firstname lastname",
-        options: { strictPopulate: false },
+    const populateOptions = [
+      { path: "dutyRecords" },
+      {
+        path: "attendenceRecords",
+        populate: {
+          path: "history.changedBy",
+          select: "firstname lastname",
+          options: { strictPopulate: false },
+        },
       },
-    };
+    ];
     const singleUser = await User.findById(currentUser.id)
       .populate(populateOptions)
       .select(
@@ -347,3 +369,60 @@ const empServices = {
 };
 
 export default empServices;
+
+export const dutyServices = {
+  createDuty: async (data) => {
+    const user = await User.findById(data.id);
+    if (!user) throw createError("User not found", 404);
+
+    const newDuty = await Duty.create({
+      instruction: data.instruction,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      site: data.site,
+      user: data.id,
+    });
+
+    if (!newDuty) throw createError("Duty not created", 400);
+
+    if (user.fcmTokens && user.fcmTokens.length > 0) {
+      try {
+        const response = await getMessaging().sendEachForMulticast({
+          tokens: user.fcmTokens,
+          notification: {
+            title: "Hello! Your Duty time has changed",
+            body: data?.instruction || "Your shift has been updated.",
+          },
+        });
+
+        console.log("FCM Success count:", response.successCount);
+        console.log("FCM Failure count:", response.failureCount);
+
+        if (response.failureCount > 0) {
+          response.responses.forEach((resp, idx) => {
+            if (!resp.success) {
+              console.error(
+                `Token error [${user.fcmTokens[idx]}]:`,
+                resp.error.message,
+              );
+            }
+          });
+        }
+      } catch (err) {
+        console.error("FCM Multicast error:", err);
+      }
+    }
+
+    return {
+      msg: "Duty has been created and assigned successfully",
+      success: true,
+    };
+  },
+
+  getDuty: async () => {
+    const duties = await Duty.find({})
+      .populate({ path: "user", select: "firstname lastname role email phone" })
+      .lean();
+    return { duties };
+  },
+};

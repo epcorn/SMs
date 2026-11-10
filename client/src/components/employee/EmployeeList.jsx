@@ -4,10 +4,12 @@ import InputField from "../form/InputField";
 import AddEmp from "./AddEmp";
 import ModalButton from "../oth/ModalButton";
 import EmpCard, { EmpDetails } from "./EmpCard";
-import { Eye, IndianRupee, LockKeyholeOpenIcon } from "lucide-react";
+import { AlarmClock, Eye, IndianRupee, LockKeyholeOpenIcon } from "lucide-react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { dateFormat } from "@/utils/helperfn";
+import ChangeDutyTime from "./ChangeDutyTime";
+import { useGetSiteQuery } from "@/hooks/siteHooks";
 
 function EmployeeList({ response, responding }) {
   const [selecteduser, setSelecteduser] = useState({});
@@ -15,6 +17,7 @@ function EmployeeList({ response, responding }) {
 
   const { mutateAsync: editUser, isFetching: editingUser } = useEditUser();
   const { mutateAsync: markActive } = useMarkActiveMutation();
+  const { data: sites } = useGetSiteQuery();
 
   const { data: users } = response || {};
 
@@ -96,6 +99,17 @@ function EmployeeList({ response, responding }) {
                           <EmpCard user={selecteduser} setToggle={setToggle} />
                         ) : (
                           <EmpDetails user={selecteduser} setToggle={setToggle} />
+                        )}
+                      </ModalButton>
+                    </div>
+                    <div className="tooltip" data-tip='change Duty time'>
+                      <ModalButton
+                        id={`cd-emp-modal-${user._id}`}
+                        title={<AlarmClock className="h-4.5" />}
+                        btn="btn-accent btn-sm"
+                        onClick={() => setSelecteduser(user)}>
+                        {selecteduser?._id === user?._id && (
+                          <ChangeDutyTime user={selecteduser} sites={sites}/>
                         )}
                       </ModalButton>
                     </div>
@@ -298,3 +312,4 @@ function AdvanceForm({ emp, editUser }) {
     </div>
   );
 }
+

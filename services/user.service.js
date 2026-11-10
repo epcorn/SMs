@@ -16,12 +16,10 @@ const __dirname = path.dirname(__filename);
 
 const userService = {
   loginUser: async (creds) => {
-
     const extUser = await User.findOne({ email: creds.email }).select(
       "+password",
     );
 
-    
     if (!extUser) throw createError("User not found", 404);
 
     const validateUser = await extUser.comparePassword(creds.password);
@@ -109,6 +107,9 @@ const userService = {
   },
 
   editUser: async (creds, id, reqUser) => {
+    console.log(reqUser);
+    if (!["admin", "operator"].includes(reqUser.role))
+      throw createError("You dont have access", 400);
     if (creds.advance) {
       const { advance: _, ...advanceData } = creds;
       const newAdvanceEntry = { ...advanceData, givenBy: reqUser.id };
@@ -149,6 +150,7 @@ const userService = {
     if (me.role === "employee") {
       const user = await User.findById(me.id).populate([
         { path: "attendenceRecords" },
+        { path: "dutyRecords" },
         { path: "site" },
         {
           path: "advance.givenBy",
@@ -180,6 +182,7 @@ const userService = {
       User.find(query)
         .populate([
           { path: "attendenceRecords" },
+          { path: "dutyRecords" },
           { path: "site" },
           {
             path: "advance.givenBy",
@@ -305,20 +308,23 @@ export const dashboardService = {
       query.date,
     );
 
-    const employees = await User.find({  })
+    const employees = await User.find({})
       .select("firstname middlename lastname role")
       .lean()
-      .populate({
-        path: "attendenceRecords",
-        match: {
-          createdAt: {
-            $gt: startOfToday,
-            $lt: endOfToday,
+      .populate([
+        { path: "dutyRecords" },
+        {
+          path: "attendenceRecords",
+          match: {
+            createdAt: {
+              $gt: startOfToday,
+              $lt: endOfToday,
+            },
           },
         },
-      });
+      ]);
     console.log(employees, startOfToday, endOfToday);
-    
+
     const allPresent = [];
     const allAbsent = [];
     const allHalfday = [];
@@ -333,6 +339,7 @@ export const dashboardService = {
         middlename: emp?.middlename,
         lastname: emp?.lastname,
         role: emp?.role,
+        duty: emp.dutyRecords,
         ...(todayRecord || {}),
       };
 

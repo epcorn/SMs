@@ -19,13 +19,12 @@ export const requestForToken = async () => {
     );
     return await getToken(getMessaging(app), {
       vapidKey:
-        import.meta.env.VITE_FIREBASE_VAPID_KEY ||
-        "BE8a-_VA9WG6pnLmZyhwWg19sDZwwk-cxpbqWVIPHGsiNWM_xp8MK6qyCCpjkjKMz4wNnlc6m3cOD1NEL1_wjq0",
+        "BFvAIhcFnJUO37L-1cu7dG2Igj_GIiWvqMxQyoK_6FQiJhR2M9E0Fn0Iq7aRmjPNwjdIpECli1MCNTYhuhl9ZCo",
       serviceWorkerRegistration: registration,
     });
   } catch (e) {
     console.error("FCM token error:", e.code, e.message);
-    return null;
+    return () => {};
   }
 };
 

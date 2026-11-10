@@ -2,19 +2,23 @@ import React, { useState } from "react"
 import DashboardStats from "@/components/admin/DashboardStats"
 import DashboardTable from "@/components/admin/DashboardTable"
 import { useGetDashboardStats, useGetDashboardUserStats } from "@/hooks/authHooks"
+import { useGetDuties } from "@/hooks/empHooks"
 
 const TABS = [
   { label: "All Present", prop: "presents", key: "allPresent", name: "presents" },
   { label: "All Absents", prop: "absents", key: "allAbsent", name: "absents" },
   { label: "Half-Day", prop: "halfday", key: "allHalfday", name: "halfday" },
   { label: "All Checkouts", prop: "checkouts", key: "allCheckouts", name: "checkouts" },
+  // { label: "Duties", prop: "duty", key: "duties", name: "duties" },
 ]
 
 function Dashboard() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0])
   const { data: userStats, isLoading: dashLoading } = useGetDashboardUserStats(date)
   const { data: statsData, isPending: gettingStats } = useGetDashboardStats(date);
+  const { data: duties, } = useGetDuties()
 
+  
   if (dashLoading || gettingStats) {
     return (
       <div className="grid place-items-center h-full">

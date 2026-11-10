@@ -14,16 +14,25 @@ export const fetchFn = async (url, options = {}) => {
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...headers,
     },
-    credentials: "include",
+    credentials: "include", // Ensures the EMS_token cookie is sent properly
     ...(body && { body: isFormData ? body : JSON.stringify(body) }),
   });
 
   if (!res.ok) {
-    // session expired: log out, but not for failed login attempts
-    if (res.status === 401 && !url.includes("auth/login")) {
-      localStorage.removeItem("emp-user");
-      useAuthStore.getState().clearUser();
+    // Only clear session on 401 if it's not a login/auth check endpoint
+    // and we actually have an active user in the store
+    if (
+      res.status === 401 &&
+      !url.includes("auth/") &&
+      !url.includes("user/me")
+    ) {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser) {
+        localStorage.removeItem("emp-user");
+        useAuthStore.getState().clearUser();
+      }
     }
+
     const errorData = await res.json().catch(() => ({}));
     throw new Error(
       errorData.msg || errorData.message || "Something went wrong",

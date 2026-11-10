@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "motion/react";
-import { dateCompare } from "@/utils/helperfn";
+import { dateCompare, dateFormat } from "@/utils/helperfn";
 import { useGetMe } from "@/hooks/authHooks";
 
 function Attendence() {
@@ -90,6 +90,9 @@ function Attendence() {
 export default Attendence;
 
 function ShowEmpAttendence({ handleMark, isMarking, user, loadingAttdnc, history }) {
+  const duty = history?.dutyRecords?.find(d => dateCompare(d?.createdAt, new Date()));
+
+  console.log(duty);
 
   const records = history?.attendenceRecords || [];
   const todays = records.find(a => dateCompare(a?.createdAt, new Date()));
@@ -113,7 +116,10 @@ function ShowEmpAttendence({ handleMark, isMarking, user, loadingAttdnc, history
 
       {/* Main Interactive Action Container */}
       <div className="flex flex-col items-center justify-center gap-6 py-4">
-
+        {duty && <div className="text-center *:outline *:outline-gray-300 text-sm flex gap-2 *:p-1 *:rounded-md ">
+          <p><strong>In Time</strong><br /> <span>{dateFormat(duty?.startTime).fullDateAndTime}</span></p>
+          <p><strong>Out Time</strong><br /> <span>{dateFormat(duty?.endTime).fullDateAndTime}</span> </p>
+        </div>}
         {/* 1. Show Check-In Button if not yet checked in */}
         {!isCheckedIn && (
           <button

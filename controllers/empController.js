@@ -1,8 +1,8 @@
 import { createError } from "../middleware/errorMiddleware.js";
 import Holiday from "../models/holidayModel.js";
-import empServices from "../services/emp.service.js";
+import empServices, { dutyServices } from "../services/emp.service.js";
 
-export const getHolidays = async (req, res, next) => {
+const getHolidays = async (req, res, next) => {
   try {
     const holidays = await Holiday.find().lean();
     if (!holidays) throw createError("holidays not found", 404);
@@ -12,7 +12,7 @@ export const getHolidays = async (req, res, next) => {
   }
 };
 
-export const getAttendence = async (req, res, next) => {
+const getAttendence = async (req, res, next) => {
   try {
     const attendences = await empServices.getAttendence(req.user);
     return res.status(200).json(attendences);
@@ -22,7 +22,7 @@ export const getAttendence = async (req, res, next) => {
   }
 };
 
-export const markActive = async (req, res, next) => {
+const markActive = async (req, res, next) => {
   try {
     const data = await empServices.markActive(req);
     return res.status(200).json(data);
@@ -31,7 +31,7 @@ export const markActive = async (req, res, next) => {
   }
 };
 
-export const markAttendence = async (req, res, next) => {
+const markAttendence = async (req, res, next) => {
   try {
     const data = await empServices.markAttendance(req);
     return res.status(200).json(data);
@@ -41,7 +41,7 @@ export const markAttendence = async (req, res, next) => {
   }
 };
 
-export const attendenceAssign = async (req, res, next) => {
+const attendenceAssign = async (req, res, next) => {
   try {
     const data = await empServices.attendenceAssign(req);
     return res.status(200).json(data);
@@ -50,7 +50,7 @@ export const attendenceAssign = async (req, res, next) => {
   }
 };
 
-export const getCoordinates = async (req, res, next) => {
+const getCoordinates = async (req, res, next) => {
   try {
     const data = await empServices.getCoOrdinates(req.body);
     return res.status(200).json(data);
@@ -60,7 +60,7 @@ export const getCoordinates = async (req, res, next) => {
   }
 };
 
-export const getAdavances = async (req, res, next) => {
+const getAdavances = async (req, res, next) => {
   try {
     const data = await empServices.getAdvances(req.query);
     return res.status(200).json(data);
@@ -70,7 +70,7 @@ export const getAdavances = async (req, res, next) => {
   }
 };
 
-export const markCheckout = async (req, res, next) => {
+const markCheckout = async (req, res, next) => {
   try {
     const data = await empServices.markCheckout(req?.params?.id);
     return res.status(200).json(data);
@@ -78,4 +78,36 @@ export const markCheckout = async (req, res, next) => {
     console.error(error);
     next(error);
   }
+};
+
+const addDuty = async (req, res, next) => {
+  try {
+    const data = await dutyServices.createDuty(req?.body);
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+const getDuties = async (req, res, next) => {
+  try {
+    const duties = await dutyServices.getDuty();
+    return res.status(200).json(duties);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export {
+  getHolidays,
+  getAttendence,
+  markActive,
+  markAttendence,
+  attendenceAssign,
+  getCoordinates,
+  getAdavances,
+  markCheckout,
+  addDuty,
+  getDuties,
 };
