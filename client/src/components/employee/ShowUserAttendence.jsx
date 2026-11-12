@@ -199,7 +199,7 @@ function ShowUserAttendence({ users }) {
 
 export default ShowUserAttendence;
 
-function AttedenceHistory({ history }) {
+export function AttedenceHistory({ history }) {
   if (!history || !Array.isArray(history) || history.length === 0) {
     return <div className="p-2 text-xs text-base-content/60">No history available</div>;
   }

@@ -1,8 +1,9 @@
 import useAuthStore from "@/store/authStore";
 import { fetchFn } from "@/utils/queryClient";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useLoginMutation = () => {
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async (creds) => {
@@ -14,11 +15,13 @@ const useLoginMutation = () => {
     onSuccess: (data) => {
       localStorage.setItem("emp-user", JSON.stringify(data));
       useAuthStore.getState().setUser(data);
+      qc.invalidateQueries({ queryKey: ["user", "dash"] });
     },
   });
 };
 
 const useLogout = () => {
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async () => {
@@ -28,6 +31,7 @@ const useLogout = () => {
     onSuccess: () => {
       localStorage.removeItem("emp-user");
       useAuthStore.getState().clearUser();
+      qc.invalidateQueries({ queryKey: ["user"] });
     },
   });
 };
@@ -65,7 +69,7 @@ const useGetDashboardUserStats = (date, options = {}) => {
 
 const useGetMe = (options = {}) => {
   return useQuery({
-    queryKey: ["me"],
+    queryKey: ["user"],
     queryFn: async () => {
       const stats = await fetchFn("user/me");
       return stats;

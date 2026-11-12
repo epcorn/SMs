@@ -70,7 +70,6 @@ const userService = {
   },
 
   createUser: async ({ creds }) => {
-    console.log(creds.firstname);
     if (!creds.firstname && !creds?.email && !creds?.password)
       throw createError("No info provided", 400);
     const user = await User.findOne({ email: creds.email });
@@ -107,7 +106,6 @@ const userService = {
   },
 
   editUser: async (creds, id, reqUser) => {
-    console.log(reqUser);
     if (!["admin", "operator"].includes(reqUser.role))
       throw createError("You dont have access", 400);
     if (creds.advance) {
@@ -323,7 +321,6 @@ export const dashboardService = {
           },
         },
       ]);
-    console.log(employees, startOfToday, endOfToday);
 
     const allPresent = [];
     const allAbsent = [];
@@ -362,7 +359,6 @@ export const dashboardService = {
 
     return { allPresent, allAbsent, allHalfday, allCheckouts };
   },
-
   monthlyAttendanceReport: async () => {
     const now = new Date();
     const year = now.getUTCFullYear();

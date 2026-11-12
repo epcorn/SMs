@@ -92,7 +92,7 @@ const addDuty = async (req, res, next) => {
 
 const getDuties = async (req, res, next) => {
   try {
-    const duties = await dutyServices.getDuty();
+    const duties = await dutyServices.getDuty(req.query.date);
     return res.status(200).json(duties);
   } catch (error) {
     next(error);

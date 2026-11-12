@@ -1,8 +1,5 @@
 import { fetchFn } from "@/utils/queryClient";
-import {
-  useMutation, useQuery,
-  useQueryClient
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useGetHolidaysQuery = () => {
   return useQuery({
@@ -226,22 +223,27 @@ const useMarkCheckout = () => {
 const useAddDuty = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationKey: ["duty"],
+    mutationKey: ["user"],
     mutationFn: async (data) => {
       const res = await fetchFn("emp/duty", { method: "POST", body: data });
       return res;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["duty"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["duty"] });
+      qc.invalidateQueries({ queryKey: ["user"] });
+      qc.invalidateQueries({ queryKey: ["mark", "user", "assign"] });
+    },
   });
 };
 
-const useGetDuties = () => {
+const useGetDuties = (date, options = {}) => {
   return useQuery({
-    queryKey: ["duty"],
+    queryKey: ["duty", { date }],
     queryFn: async () => {
-      const res = await fetchFn("emp/duty");
+      const res = await fetchFn(`emp/duty?date=${date}`);
       return res;
     },
+    ...options,
   });
 };
 

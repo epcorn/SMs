@@ -58,11 +58,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route element={<Layout />}>
+
           <Route element={<ProtectedRoutes role={["admin", "operator"]} />}>
             <Route path="/employee" element={<Employees />} />
           </Route>
 
-          <Route element={<ProtectedRoutes role={["admin", "operator"]} />}>
+          <Route element={<ProtectedRoutes role={["admin"]} />}>
             <Route path="/gps" element={<GPS />} />
           </Route>
 
@@ -76,8 +77,8 @@ function App() {
             element={
               <ProtectedRoutes role={["admin", "operator", "employee"]} />
             }>
-            <Route path="/attendence" element={<Attendence />} />
-            <Route path="/advance" element={<Advance />} />
+              <Route path="/attendence" element={<Attendence />} />
+              <Route path="/advance" element={<Advance />} />
           </Route>
         </Route>
 

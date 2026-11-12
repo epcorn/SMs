@@ -8,6 +8,7 @@ const dateFormat = (date) => {
     time: parsedDate.toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Asia/kolkata",
     }),
     date: parsedDate.toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -20,6 +21,7 @@ const dateFormat = (date) => {
       year: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "Asia/kolkata",
     }),
   };
 };
@@ -28,6 +30,12 @@ const convertIsoDate = (val) => new Date(val).toISOString().split("T")[0];
 
 const dateCompare = (a, b) => {
   return convertIsoDate(a) === convertIsoDate(b);
+};
+
+const greaterThanToday = (a, b) => {
+  const dateA = convertIsoDate(a);
+  const dateB = convertIsoDate(b);
+  return new Date(dateA).getTime() >= new Date(dateB).getTime();
 };
 
 const userLocation = () => {
@@ -136,6 +144,7 @@ const dashboardStatsColor = (label) => {
 
 export {
   dateFormat,
+  greaterThanToday,
   dateCompare,
   userLocation,
   getStatusStyle,

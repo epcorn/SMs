@@ -4,7 +4,7 @@ import { dateFormat } from "@/utils/helperfn";
 import { useState } from "react";
 
 function Advance() {
-  const [state, setState] = useState({ page: 1, limit: 5, date: null });
+  const [state, setState] = useState({ page: 1, limit: 15, date: null });
 
   const { data: advanceData } = useGetAdvances({
     date: state.date,
@@ -33,12 +33,15 @@ function Advance() {
 export default Advance;
 
 function AllAdvances({ allAdvancesList, paginationData }) {
+  const totalAmount = allAdvancesList?.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+
+
   const { page, pages, total, onchange } = paginationData
   return (
     <div className="flex-1 flex flex-col justify-between overflow-hidden m-4 mt-0 outline outline-neutral-400 rounded-lg">
-      {/* Scrollable table container separated from pagination */}
-      <div className="flex-1 overflow-x-auto overflow-y-auto max-h-[80dvh]">
-        <table className="table table-pin-rows table-pin-cols max-h-[80dvh] w-full">
+      <div className="flex-1 overflow-auto max-h-[80dvh] w-full">
+        <table className="table table-pin-rows min-w-max w-full">
           <thead className="[&_th]:bg-neutral-300 sticky top-0 z-10">
             <tr>
               <th>Date</th>
@@ -64,7 +67,7 @@ function AllAdvances({ allAdvancesList, paginationData }) {
                   <td>{employeeName}</td>
                   <td>{email}</td>
                   <td>{givenBy?.firstname ? `${givenBy.firstname} ${givenBy.lastname || ""}` : "System"}</td>
-                  <td>{amount} ₹</td>
+                  <td className="text-right">{amount} /-</td>
                   <td>{note || "—"}</td>
                   <td>
                     {image ? (
@@ -78,10 +81,11 @@ function AllAdvances({ allAdvancesList, paginationData }) {
                 </tr>
               ))
             )}
+            <tr><td colSpan={5} className="text-right "><strong>Total: {totalAmount}</strong></td></tr>
           </tbody>
         </table>
       </div>
-      
+
       {/* Pinned Pagination at the bottom */}
       <div className="shrink-0 p-2 border-t border-neutral-300 bg-base-100 flex justify-center">
         <Pagination page={page} pages={pages} total={total} onchange={onchange} />

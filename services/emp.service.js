@@ -419,10 +419,14 @@ export const dutyServices = {
     };
   },
 
-  getDuty: async () => {
-    const duties = await Duty.find({})
+  getDuty: async (date) => {
+    const { startOfDay, endOfDay } = startEndDate(date);
+    const filter = date
+      ? { startTime: { $gte: startOfDay, $lte: endOfDay } }
+      : {};
+    const duties = await Duty.find(filter)
       .populate({ path: "user", select: "firstname lastname role email phone" })
       .lean();
-    return { duties };
+    return duties;
   },
 };

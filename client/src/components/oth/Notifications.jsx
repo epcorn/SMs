@@ -4,7 +4,7 @@ import { fetchFn } from "@/utils/queryClient";
 
 export default function useNotifications(userId) {
   useEffect(() => {
-    console.log("useNotifications mounted with userId:", userId);
+
 
     if (!userId) {
       console.log("Skipping notifications: No userId provided yet.");
@@ -12,7 +12,6 @@ export default function useNotifications(userId) {
     }
 
     requestForToken().then((token) => {
-      console.log("FCM Token retrieved:", token);
       if (token) {
         fetchFn("token/fcm-token", { method: "POST", body: { token } }).catch(console.error);
       }

@@ -4,7 +4,7 @@ import InputField from "../form/InputField";
 import AddEmp from "./AddEmp";
 import ModalButton from "../oth/ModalButton";
 import EmpCard, { EmpDetails } from "./EmpCard";
-import { AlarmClock, Eye, IndianRupee, LockKeyholeOpenIcon } from "lucide-react";
+import { AlarmClock, Eye, IndianRupee, LockKeyholeOpenIcon, Notebook } from "lucide-react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { dateFormat } from "@/utils/helperfn";
@@ -109,7 +109,7 @@ function EmployeeList({ response, responding }) {
                         btn="btn-accent btn-sm"
                         onClick={() => setSelecteduser(user)}>
                         {selecteduser?._id === user?._id && (
-                          <ChangeDutyTime user={selecteduser} sites={sites}/>
+                          <ChangeDutyTime user={selecteduser} sites={sites} />
                         )}
                       </ModalButton>
                     </div>
@@ -251,26 +251,57 @@ function AdvanceForm({ emp, editUser }) {
   const fullName = [emp?.firstname, emp?.middlename, emp?.lastname].filter(Boolean).join(" ");
 
   return (
-    <div className="card bg-base-100 max-w-2xl min-w-xl w-full p-6 shadow-xl border border-base-300">
+    <div className="card bg-base-100 min-w-xl w-full p-6 pt-1 shadow-xl border border-base-300">
       <h3 className="font-bold text-2xl mb-3">Advance Details</h3>
       <p className="text-sm text-base-content font-bold mb-4">
         Employee: <span className="font-semibold text-base-content/80">{fullName || "N/A"}</span>
       </p>
 
+
+      {/* Form Section */}
+      <form onSubmit={handleSubmit(submit)} className="flex flex-col sm:flex-row gap-3 items-end mb-4">
+        <div className="form-control w-full">
+          <label className="input input-lg pb-1 border border-black ">
+            <IndianRupee className="w-5 h-5" />
+            <input
+              type="number"
+              required
+              placeholder="Amount in Rupees..."
+              className="placeholder:text-gray-600 text-xl w-full"
+              {...register("amount", { required: true })}
+            />
+          </label>
+          <label className="input input-lg pb-1 border border-black ml-2">
+            <Notebook />
+            <input
+              type="text"
+              required
+              placeholder="Note..."
+              className="input"
+              {...register("note", { required: true })}
+            />
+          </label>
+        </div>
+        <button type="submit" className="btn btn-primary w-full sm:w-auto mt-auto">
+          Add Advance
+        </button>
+      </form>
+
       {/* Table Section */}
-      <div className="overflow-x-auto scrollbar-none max-h-72 rounded-lg border border-base-300 mb-6">
+      <div className="overflow-x-auto max-h-72 rounded-lg outline mb-6">
         <table className="table table-pin-rows w-full">
           <thead className="[&_th]:bg-gray-700 text-white">
             <tr>
               <th>Date</th>
               <th>Given By</th>
+              <th>Note</th>
               <th className="text-right">Amount</th>
             </tr>
           </thead>
           <tbody>
             {!emp?.advance?.length ? (
               <tr>
-                <td colSpan={3} className="text-center text-base-content/50 py-6">
+                <td colSpan={4} className="text-center py-6">
                   No advance taken
                 </td>
               </tr>
@@ -291,24 +322,7 @@ function AdvanceForm({ emp, editUser }) {
         </table>
       </div>
 
-      {/* Form Section */}
-      <form onSubmit={handleSubmit(submit)} className="flex flex-col sm:flex-row gap-3 items-end">
-        <div className="form-control w-full">
-          <label className="input input-lg pb-1 border border-black ">
-            <IndianRupee className="w-5 h-5" />
-            <input
-              type="number"
-              required
-              placeholder="Amount in Rupees..."
-              className="placeholder:text-gray-600 text-xl w-full"
-              {...register("amount", { required: true })}
-            />
-          </label>
-        </div>
-        <button type="submit" className="btn btn-primary w-full sm:w-auto mt-auto">
-          Give Advance
-        </button>
-      </form>
+
     </div>
   );
 }

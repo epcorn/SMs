@@ -3,7 +3,7 @@ import { createError } from "./errorMiddleware.js";
 
 export const authentication = (req, res, next) => {
   const token = req.cookies?.EMS_token;
-
+console.log("CHECKING ROUTE:", req.originalUrl, "Has Token:", !!token);
   if (!token) {
     console.log("AUTH: no EMS_token cookie on", req.method, req.originalUrl);
     return next(createError("You are not authorised", 401));
@@ -17,8 +17,6 @@ export const authentication = (req, res, next) => {
     next(createError("Access token expired or invalid", 401));
   }
 };
-
-
 
 export const operatorAccess = (req, res, next) => {
   const token = req.cookies.EMS_token;

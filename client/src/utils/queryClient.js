@@ -28,6 +28,15 @@ export const fetchFn = async (url, options = {}) => {
     ) {
       const currentUser = useAuthStore.getState().user;
       if (currentUser) {
+        // 1. Fire the logout request first while the session context is still intact
+        fetch(`/api/auth/logout`, {
+          method: "POST",
+          credentials: "include",
+        }).catch(() => {
+          // Ignore network errors during cleanup logout
+        });
+
+        // 2. Then clear local state and storage
         localStorage.removeItem("emp-user");
         useAuthStore.getState().clearUser();
       }

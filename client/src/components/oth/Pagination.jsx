@@ -18,7 +18,7 @@ function Pagination({ pages, page, total, onchange = () => { } }) {
           )
         })}
       </div>
-      <h3 className='text-center font-semibold '>Total pages {total}</h3>
+      <h3 className='text-center font-semibold '>Total Records {total}</h3>
     </div>
   )
 }

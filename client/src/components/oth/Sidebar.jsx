@@ -24,12 +24,6 @@ const links = [
     icon: <Users className={classes} />,
     role: ["admin", "operator"],
   },
-  // {
-  //   label: "Leave",
-  //   link: "leave",
-  //   icon: <FaceGrinning className={classes} />,
-  //   role: ["admin", "operator"],
-  // },
   {
     label: "Mark Attendance",
     link: "attendence",
@@ -61,6 +55,14 @@ function Sidebar({ children }) {
 
   const location = useLocation();
   const activeLocation = location.pathname.replace("/", "");
+
+  // Function to close the drawer on mobile when a link is clicked
+  const handleLinkClick = () => {
+    const drawerCheckbox = document.getElementById("my-drawer-4");
+    if (drawerCheckbox) {
+      drawerCheckbox.checked = false;
+    }
+  };
 
   return (
     <div className="drawer lg:drawer-open h-screen">
@@ -153,6 +155,7 @@ function Sidebar({ children }) {
                 <li key={li.link}>
                   <Link
                     to={li.link}
+                    onClick={handleLinkClick}
                     className={`flex focus-within:bg-rose-400/20 focus:text-white items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm
                       ${isActive
                         ? "bg-rose-400/20 border-l-4 text-white border-l-rose-400 shadow-lg shadow-rose-300/10 scale-[1.02]"
@@ -231,9 +234,11 @@ function Sidebar({ children }) {
 
             {/* Logout Action */}
             <li className="mt-auto mb-6">
-              {/* <img src="" alt="" /> */}
               <button
-                onClick={logout}
+                onClick={() => {
+                  handleLinkClick();
+                  logout();
+                }}
                 disabled={loggingOut}
                 className="flex items-center gap-4 py-3 px-4 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 rounded-xl transition-all duration-200 w-full text-left font-semibold text-sm group"
               >

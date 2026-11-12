@@ -28,6 +28,18 @@ const roleOptions = [
   { value: "operator", label: "Operator" },
 ]
 
+const religiousOptions = [
+  { value: "hindu", label: "Hindu" },
+  { value: "muslim", label: "Muslim" },
+  { value: "christian", label: "Christian" },
+  { value: "sikh", label: "Sikh" },
+  { value: "buddhist", label: "Buddhist" },
+  { value: "jain", label: "Jain" },
+  { value: "parsi", label: "Parsi / Zoroastrian" },
+  { value: "jewish", label: "Jewish" },
+  { value: "other", label: "Other" },
+]
+
 const formatDateForInput = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -265,6 +277,15 @@ function AddEmp({ type = "add", user = null, onSubmitEmp, userError, loading }) 
                   name="role"
                   validation={{ required: true }}
                   label="Role"
+                />
+
+                <SelectField
+                  error={errors}
+                  options={religiousOptions}
+                  register={register}
+                  name="religion"
+                  validation={{ required: true }}
+                  label="Religion"
                 />
 
                 <SelectField

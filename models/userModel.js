@@ -48,6 +48,21 @@ const userSchema = new mongoose.Schema(
     middlename: { type: String },
     lastname: { type: String },
     gender: { type: String },
+    religion: {
+      type: String,
+      default: "hindu",
+      enum: [
+        "hindu",
+        "muslim",
+        "christian",
+        "sikh",
+        "buddhist",
+        "jain",
+        "parsi",
+        "jewish",
+        "other",
+      ],
+    },
     email: { type: String, unique: true },
     phone: { type: String, unique: true },
     password: { type: String, select: false },
@@ -60,6 +75,8 @@ const userSchema = new mongoose.Schema(
 
     department: { type: String, default: "" },
     active: { type: Boolean, default: true },
+
+    dutyTime: { startTime: Date, endTime: Date },
 
     userType: { type: String, default: "" },
     dob: { type: Date },
