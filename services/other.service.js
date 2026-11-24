@@ -4,14 +4,92 @@ import { startEndDate } from "./emp.service.js";
 import Attendence from "../models/attendenceModel.js";
 
 const otherServices = {
+  sendTestNotification: async (userId) => {
+    if (!userId) {
+      throw new Error("userId is required");
+    }
+
+    const user = await User.findById(userId).select("firstname +fcmTokens");
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const validEntries = (user.fcmTokens || []).filter((item) => item.token);
+
+    // if (validEntries.length === 0) {
+    //   return {
+    //     success: false,
+    //     message: "User has no valid FCM tokens stored.",
+    //   };
+    // }
+
+    const validTokens = validEntries.map((item) => item.token);
+    const userName = user.firstname || "there";
+
+    const res = await getMessaging().sendEachForMulticast({
+      tokens: validTokens,
+      notification: {
+        title: `Hello ${userName}!`,
+        body: "This is a test push notification.",
+      },
+      data: {
+        type: "test_notification",
+        userId: user._id.toString(),
+      },
+    });
+
+    const errors = [];
+    const dead = [];
+
+    res.responses.forEach((r, i) => {
+      if (!r.success) {
+        const code = r.error?.code;
+        const msg = r.error?.message || "";
+
+        errors.push({
+          deviceId: validEntries[i]?.deviceId || "unknown",
+          deviceName: validEntries[i]?.deviceName || "unknown",
+          tokenPreview: `${validTokens[i].slice(0, 12)}...`,
+          code,
+          message: msg,
+        });
+
+        if (
+          code === "messaging/registration-token-not-registered" ||
+          code === "messaging/invalid-registration-token" ||
+          code === "messaging/invalid-payload" ||
+          msg.includes("THIRD_PARTY_PERMISSION_DENIED")
+        ) {
+          dead.push(validTokens[i]);
+        }
+      }
+    });
+
+    if (dead.length) {
+      await User.updateOne(
+        { _id: user._id },
+        { $pull: { fcmTokens: { token: { $in: dead } } } },
+      );
+    }
+
+    return {
+      success: res.successCount > 0,
+      totalTokens: validTokens.length,
+      successCount: res.successCount,
+      failureCount: res.failureCount,
+      removedDeadTokens: dead.length,
+      errors,
+    };
+  },
+
   reminderNotification: async () => {
     const { endOfDay, startOfDay } = startEndDate();
 
     const users = await User.find({
-      "fcmTokens.0": { $exists: true },
+      "fcmTokens.token": { $exists: true, $ne: "" },
       $or: [{ reminderSentOn: null }, { reminderSentOn: { $lt: startOfDay } }],
     })
-      .select("firstname fcmTokens attendenceRecords")
+      .select("firstname +fcmTokens attendenceRecords")
       .populate({
         path: "attendenceRecords",
         match: {
@@ -34,11 +112,27 @@ const otherServices = {
     const notifiedUserIds = [];
 
     for (const user of usersToRemind) {
+      const validTokenEntries = (user.fcmTokens || []).filter(
+        (item) =>
+          typeof item?.token === "string" && item.token.trim().length > 0,
+      );
+
+      // Clean up any empty/malformed token entries while preserving { deviceId, token, ... } objects
+      if (validTokenEntries.length !== (user.fcmTokens || []).length) {
+        await User.updateOne(
+          { _id: user._id },
+          { $set: { fcmTokens: validTokenEntries } },
+        );
+      }
+
+      const validTokens = validTokenEntries.map((item) => item.token);
+      if (validTokens.length === 0) continue;
+
       const userName = user.firstname || "there";
 
       try {
         const res = await getMessaging().sendEachForMulticast({
-          tokens: user.fcmTokens,
+          tokens: validTokens,
           notification: {
             title: `Hello ${userName}, Time to Check Out!`,
             body: "It looks like you haven't checked out for today yet. Please remember to clock out.",
@@ -52,7 +146,7 @@ const otherServices = {
         successCount += res.successCount;
         failureCount += res.failureCount;
 
-        // collect dead tokens for cleanup
+        // Collect dead/403 tokens for cleanup
         const dead = [];
         res.responses.forEach((r, i) => {
           if (!r.success) {
@@ -63,11 +157,14 @@ const otherServices = {
               r.error?.message,
             );
             const code = r.error?.code;
+            const msg = r.error?.message || "";
             if (
               code === "messaging/registration-token-not-registered" ||
-              code === "messaging/invalid-registration-token"
+              code === "messaging/invalid-registration-token" ||
+              code === "messaging/invalid-payload" ||
+              msg.includes("THIRD_PARTY_PERMISSION_DENIED")
             ) {
-              dead.push(user.fcmTokens[i]);
+              dead.push(validTokens[i]);
             }
           }
         });
@@ -75,11 +172,11 @@ const otherServices = {
         if (dead.length) {
           await User.updateOne(
             { _id: user._id },
-            { $pull: { fcmTokens: { $in: dead } } },
+            { $pull: { fcmTokens: { token: { $in: dead } } } },
           );
         }
 
-        // mark as reminded if at least one device received it
+        // Mark as reminded if at least one device received it
         if (res.successCount > 0) notifiedUserIds.push(user._id);
       } catch (error) {
         failureCount++;

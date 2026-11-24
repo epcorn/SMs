@@ -24,19 +24,23 @@ const loginUser = async (req, res, next) => {
 
 const saveFCMToken = async (req, res, next) => {
   try {
-    const { token, deviceId, deviceName } = req.body;
-    if (!token || !deviceId) {
+    const cleanToken = req.body?.token?.trim();
+    const cleanDeviceId = req.body?.deviceId?.trim();
+    const { deviceName } = req.body;
+
+    if (!cleanToken || !cleanDeviceId) {
       return res
         .status(400)
         .json({ success: false, msg: "Token and deviceId are required" });
     }
 
-    const user = await User.findById(req.user.id);
+    // Must explicitly include +fcmTokens because select: false is set on schema
+    const user = await User.findById(req.user.id).select("+fcmTokens");
     if (!user) {
       return res.status(404).json({ success: false, msg: "User not found" });
     }
 
-    // Normalize any legacy string elements or entries missing deviceId/token
+    // Normalize any legacy entries and remove same token if stored under an old deviceId
     user.fcmTokens = (user.fcmTokens || [])
       .map((item, idx) => {
         if (typeof item === "string") {
@@ -49,20 +53,26 @@ const saveFCMToken = async (req, res, next) => {
         }
         return item;
       })
-      .filter((item) => item && item.deviceId && item.token);
+      .filter(
+        (item) =>
+          item &&
+          item.deviceId &&
+          item.token &&
+          !(item.token === cleanToken && item.deviceId !== cleanDeviceId),
+      );
 
     const existingIndex = user.fcmTokens.findIndex(
-      (item) => item.deviceId === deviceId,
+      (item) => item.deviceId === cleanDeviceId,
     );
 
     if (existingIndex > -1) {
-      user.fcmTokens[existingIndex].token = token;
+      user.fcmTokens[existingIndex].token = cleanToken;
       if (deviceName) user.fcmTokens[existingIndex].deviceName = deviceName;
       user.fcmTokens[existingIndex].lastActive = new Date();
     } else {
       user.fcmTokens.push({
-        deviceId,
-        token,
+        deviceId: cleanDeviceId,
+        token: cleanToken,
         deviceName: deviceName || "PWA Browser",
         lastActive: new Date(),
       });

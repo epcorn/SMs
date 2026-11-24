@@ -189,6 +189,7 @@ const userSchema = new mongoose.Schema(
     fcmTokens: {
       type: [fcmTokenSchema],
       default: [],
+      select: false,
     },
     reminderSentOn: { type: Date, default: null },
     refreshTokens: { type: [String], select: false, default: [] },

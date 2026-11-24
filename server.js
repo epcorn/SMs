@@ -21,6 +21,7 @@ import User from "./models/userModel.js";
 import otherRouter from "./routes/otherRoutes.js";
 import { autoCheckoutUser, cronService } from "./services/cron.service.js";
 import { saveFCMToken } from "./controllers/userController.js";
+import otherServices from "./services/other.service.js";
 
 dotenv.config();
 
@@ -70,7 +71,18 @@ if (!mongoUri) {
   throw new Error("MongoDB connection string is missing");
 }
 
-connectDB(mongoUri);
+app.use(async (req, res, next) => {
+  try {
+    await connectDB(mongoUri);
+    next();
+  } catch (err) {
+    console.error("Database connection failed:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+});
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
@@ -83,11 +95,25 @@ app.use("/api/emp", authentication, empRouter);
 app.use("/api/site", authentication, siteRouter);
 app.use("/api/fcm", otherRouter);
 
-//save token 
+//save token
 app.post("/api/token/fcm-token", authentication, saveFCMToken);
 
 app.get("/api/cron/send-reminders", cronService);
 app.get("/api/cron/auto-checkout", autoCheckoutUser);
+
+// test fcm notification
+app.get("/api/test-notification", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const result = await otherServices.sendTestNotification(userId);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 
 app.use(errorMiddleware);
 

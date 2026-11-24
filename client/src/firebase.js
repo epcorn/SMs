@@ -24,7 +24,7 @@ export const requestForToken = async () => {
     });
   } catch (e) {
     console.error("FCM token error:", e.code, e.message);
-    return () => {};
+    return null;
   }
 };
 
