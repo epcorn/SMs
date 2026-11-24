@@ -148,9 +148,18 @@ function getDefaults(user) {
         ? user.salaryDetails.allowance
         : [{ name: "", amount: "" }],
     },
-    hospitalised: user?.hospitalised || "no",
-    physically_disabled: user?.physically_disabled || "no",
-    political_conn: user?.political_conn || "no",
+    hospitalised: {
+      status: user?.hospitalised?.status || "no",
+      text: user?.hospitalised?.text || "",
+    },
+    physically_disabled: {
+      status: user?.physically_disabled?.status || "no",
+      text: user?.physically_disabled?.text || "",
+    },
+    political_conn: {
+      status: user?.political_conn?.status || "no",
+      text: user?.political_conn?.text || "",
+    },
   };
 }
 
@@ -182,7 +191,9 @@ function AddEmp({
 
   const storageKey =
     customStorageKey ||
-    (type === "edit" && user?._id ? `form_edit_emp_${user._id}` : "form_add_emp");
+    (type === "edit" && user?._id
+      ? `form_edit_emp_${user._id}`
+      : "form_add_emp");
 
   const { clearPersistedData } = useFormPersist(storageKey, watch, setValue, {
     enabled: type === "add" || type === "edit",
@@ -235,7 +246,7 @@ function AddEmp({
     try {
       const responseData = await onSubmitEmp?.(payload);
       toast.success(
-        responseData?.msg || (type === "edit" ? "User Edited" : "User Created")
+        responseData?.msg || (type === "edit" ? "User Edited" : "User Created"),
       );
       clearPersistedData();
       onSuccess?.();
@@ -272,6 +283,11 @@ function AddEmp({
   const same = watch("same");
   const presentAddress = watch("address.present");
 
+  const hospitalised = watch("hospitalised.status");
+  const physically_disabled = watch("physically_disabled.status");
+  const political_conn = watch("political_conn.status");
+
+  console.log(political_conn?.status);
   useEffect(() => {
     if (same) {
       setValue("address.permanent", presentAddress, { shouldValidate: true });
@@ -287,8 +303,7 @@ function AddEmp({
         {user && (
           <span
             className={`badge badge-sm ${user.active ? "badge-success" : "badge-ghost"
-              }`}
-          >
+              }`}>
             {user.active ? "Active" : "Inactive"}
           </span>
         )}
@@ -296,8 +311,7 @@ function AddEmp({
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col flex-1 overflow-y-auto pr-1 gap-4"
-      >
+        className="flex flex-col flex-1 overflow-y-auto pr-1 gap-4">
         {/* Basic Info */}
         <div className="card bg-base-200 outline outline-gray-400 shadow-sm p-4 m-1">
           <h4 className="font-semibold text-lg mb-4">Basic Information</h4>
@@ -391,8 +405,7 @@ function AddEmp({
                   href={resume}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link link-primary text-xs mt-1"
-                >
+                  className="link link-primary text-xs mt-1">
                   View Resume
                 </a>
               )}
@@ -559,8 +572,7 @@ function AddEmp({
               return (
                 <div
                   key={item.id}
-                  className="bg-base-200/50 border p-4 rounded-lg flex flex-col gap-4"
-                >
+                  className="bg-base-200/50 border p-4 rounded-lg flex flex-col gap-4 [&_input]:uppercase">
                   <h4 className="font-semibold">{item.title}</h4>
                   <InputField
                     label={item.numberField.label}
@@ -582,8 +594,7 @@ function AddEmp({
                         className="btn btn-xs btn-error"
                         onClick={() =>
                           setValue(filePath, "", { shouldDirty: true })
-                        }
-                      >
+                        }>
                         Remove
                       </button>
                     </div>
@@ -596,7 +607,7 @@ function AddEmp({
                       handleFileUpload(
                         e,
                         filePath,
-                        `${item.title} uploaded successfully!`
+                        `${item.title} uploaded successfully!`,
                       )
                     }
                     type="btn"
@@ -622,8 +633,7 @@ function AddEmp({
                   grade: "",
                   file: "",
                 })
-              }
-            >
+              }>
               + Add Education
             </button>
           </div>
@@ -631,8 +641,7 @@ function AddEmp({
             {eduFields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end bg-base-100 p-3 rounded-box"
-              >
+                className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end bg-base-100 p-3 rounded-box">
                 <div className="md:col-span-2">
                   <InputField
                     label="Degree"
@@ -668,8 +677,7 @@ function AddEmp({
                     <button
                       type="button"
                       className="btn btn-square btn-error btn-sm"
-                      onClick={() => removeEdu(index)}
-                    >
+                      onClick={() => removeEdu(index)}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
@@ -686,10 +694,7 @@ function AddEmp({
             <button
               type="button"
               className="btn btn-sm btn-outline btn-primary"
-              onClick={() =>
-                appendMedical({ name: "", number: "", file: "" })
-              }
-            >
+              onClick={() => appendMedical({ name: "", number: "", file: "" })}>
               + Add Certificate
             </button>
           </div>
@@ -699,8 +704,7 @@ function AddEmp({
               return (
                 <div
                   key={field.id}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-base-100 p-3 rounded-box"
-                >
+                  className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-base-100 p-3 rounded-box">
                   <InputField
                     label={`Certificate ${index + 1} Name`}
                     name={`medicalDetails.${index}.name`}
@@ -725,8 +729,7 @@ function AddEmp({
                             href={fileValue}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="link link-primary text-xs"
-                          >
+                            className="link link-primary text-xs">
                             View File
                           </a>
                           <button
@@ -736,8 +739,7 @@ function AddEmp({
                               setValue(`medicalDetails.${index}.file`, "", {
                                 shouldDirty: true,
                               })
-                            }
-                          >
+                            }>
                             Change
                           </button>
                         </div>
@@ -749,7 +751,7 @@ function AddEmp({
                             handleFileUpload(
                               e,
                               `medicalDetails.${index}.file`,
-                              "Certificate uploaded successfully!"
+                              "Certificate uploaded successfully!",
                             )
                           }
                         />
@@ -759,8 +761,7 @@ function AddEmp({
                       <button
                         type="button"
                         className="btn btn-square btn-error btn-sm"
-                        onClick={() => removeMedical(index)}
-                      >
+                        onClick={() => removeMedical(index)}>
                         <Trash2 className="h-4 w-4" />
                       </button>
                     )}
@@ -786,8 +787,7 @@ function AddEmp({
                   phone: "",
                   email: "",
                 })
-              }
-            >
+              }>
               + Add Member
             </button>
           </div>
@@ -795,8 +795,7 @@ function AddEmp({
             {familyFields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center bg-base-100 p-2 rounded-box"
-              >
+                className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center bg-base-100 p-2 rounded-box">
                 <div className="flex items-start gap-2">
                   <label className="label flex flex-col cursor-pointer gap-2">
                     <span className="label-text font-semibold text-black text-sm">
@@ -838,8 +837,7 @@ function AddEmp({
                     <button
                       type="button"
                       className="btn btn-square btn-error btn-sm"
-                      onClick={() => removeFamily(index)}
-                    >
+                      onClick={() => removeFamily(index)}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
@@ -856,8 +854,7 @@ function AddEmp({
             <button
               type="button"
               className="btn btn-sm btn-outline btn-primary"
-              onClick={() => appendBank({ name: "", number: "", IFSC: "" })}
-            >
+              onClick={() => appendBank({ name: "", number: "", IFSC: "" })}>
               + Add Account
             </button>
           </div>
@@ -865,8 +862,7 @@ function AddEmp({
             {bankFields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-base-100 p-3 rounded-box"
-              >
+                className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end bg-base-100 p-3 rounded-box">
                 <InputField
                   label="Account Holder Name"
                   name={`bankDetails.${index}.name`}
@@ -892,8 +888,7 @@ function AddEmp({
                     <button
                       type="button"
                       className="btn btn-square btn-error btn-sm"
-                      onClick={() => removeBank(index)}
-                    >
+                      onClick={() => removeBank(index)}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
@@ -950,8 +945,7 @@ function AddEmp({
               <button
                 type="button"
                 className="btn btn-xs btn-outline btn-primary"
-                onClick={() => appendAllowance({ name: "", amount: "" })}
-              >
+                onClick={() => appendAllowance({ name: "", amount: "" })}>
                 + Add Allowance
               </button>
             </div>
@@ -959,8 +953,7 @@ function AddEmp({
               {allowanceFields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="flex gap-2 items-center bg-base-200 rounded-box outline p-1"
-                >
+                  className="flex gap-2 items-center bg-base-200 rounded-box outline p-1">
                   <div className="flex gap-2 flex-1">
                     <InputField
                       name={`salaryDetails.allowance.${index}.name`}
@@ -979,8 +972,7 @@ function AddEmp({
                     <button
                       type="button"
                       className="btn btn-square btn-error btn-xs"
-                      onClick={() => removeAllowance(index)}
-                    >
+                      onClick={() => removeAllowance(index)}>
                       ✕
                     </button>
                   )}
@@ -995,27 +987,60 @@ function AddEmp({
           <h3 className="col-span-full font-semibold text-lg mb-2">
             Other Questions
           </h3>
-          <SelectField
-            error={errors}
-            options={otherOptions}
-            name="hospitalised"
-            label="Hospitalsed Previously"
-            register={register}
-          />
-          <SelectField
-            error={errors}
-            options={otherOptions}
-            name="physically_disabled"
-            label="Physically disabled"
-            register={register}
-          />
-          <SelectField
-            error={errors}
-            options={otherOptions}
-            name="political_conn"
-            label="Political connection"
-            register={register}
-          />
+          <div>
+            <SelectField
+              error={errors}
+              options={otherOptions}
+              name="hospitalised.status"
+              label="Hospitalsed Previously"
+              register={register}
+            />
+            {hospitalised !== "no" && (
+              <InputField
+                error={errors}
+                label={"Describe"}
+                showLabel={false}
+                register={register}
+                name="hospitalised.text"
+              />
+            )}
+          </div>
+          <div>
+            <SelectField
+              error={errors}
+              options={otherOptions}
+              name="physically_disabled.status"
+              label="Physically disabled"
+              register={register}
+            />
+            {physically_disabled !== "no" && (
+              <InputField
+                error={errors}
+                label={"Describe"}
+                showLabel={false}
+                register={register}
+                name={"physically_disabled.text"}
+              />
+            )}
+          </div>
+          <div>
+            <SelectField
+              error={errors}
+              options={otherOptions}
+              name="political_conn.status"
+              label="Political connection"
+              register={register}
+            />
+            {political_conn !== "no" && (
+              <InputField
+                error={errors}
+                label={"Describe"}
+                register={register}
+                showLabel={false}
+                name={"political_conn.text"}
+              />
+            )}
+          </div>
         </div>
 
         <div className="modal-action mt-2">
@@ -1025,8 +1050,7 @@ function AddEmp({
           <button
             type="submit"
             disabled={loading || uploading}
-            className="btn btn-accent w-full"
-          >
+            className="btn btn-accent w-full">
             {uploading
               ? "Uploading file..."
               : type === "edit"

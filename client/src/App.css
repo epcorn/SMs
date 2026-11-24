@@ -1,0 +1,23 @@
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #printable-employee-form,
+  #printable-employee-form * {
+    visibility: visible;
+  }
+
+  #printable-employee-form {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

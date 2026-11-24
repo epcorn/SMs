@@ -3,7 +3,6 @@ import User from "../models/userModel.js";
 import { startEndDate } from "./emp.service.js";
 import Attendence from "../models/attendenceModel.js";
 
-
 const otherServices = {
   reminderNotification: async () => {
     const { endOfDay, startOfDay } = startEndDate();
@@ -21,14 +20,6 @@ const otherServices = {
           checkOutTime: null,
         },
       });
-
-    console.log(
-      "Day range:",
-      startOfDay,
-      endOfDay,
-      "| users with tokens:",
-      users?.length,
-    );
 
     const usersToRemind = users.filter(
       (user) => user.attendenceRecords && user.attendenceRecords.length > 0,

@@ -69,11 +69,18 @@ const addressFields = {
 };
 
 const yesNoField = {
-  type: String,
-  enum: ["yes", "no"],
-  default: "no",
-  lowercase: true,
-  trim: true,
+  status: {
+    type: String,
+    enum: ["yes", "no"],
+    default: "no",
+    lowercase: true,
+    trim: true,
+  },
+  text: {
+    type: String,
+    default: "",
+    trim: true,
+  },
 };
 
 const userSchema = new mongoose.Schema(
@@ -186,7 +193,11 @@ const userSchema = new mongoose.Schema(
     reminderSentOn: { type: Date, default: null },
     refreshTokens: { type: [String], select: false, default: [] },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
 );
 
 userSchema.virtual("attendenceRecords", {

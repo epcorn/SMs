@@ -6,7 +6,6 @@ export const cronService = async (req, res) => {
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-
   try {
     console.log("Running production reminder notification via API trigger...");
     const result = await otherServices.reminderNotification();

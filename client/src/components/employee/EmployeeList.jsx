@@ -20,6 +20,7 @@ import { useForm } from "react-hook-form";
 import { dateFormat } from "@/utils/helperfn";
 import ChangeDutyTime from "./ChangeDutyTime";
 import { useGetSiteQuery } from "@/hooks/siteHooks";
+import EmployeeDetailForm from "./EmployeeDetailForm";
 
 function EmployeeList({
   response,
@@ -220,12 +221,16 @@ function EmployeeList({
 
             {modalState.type === "view" &&
               activeUser &&
-              (!toggle ? (
-                <EmpCard user={activeUser} setToggle={setToggle} />
-              ) : (
-                <EmpDetails user={activeUser} setToggle={setToggle} />
-              ))}
-
+              <>
+                {/* (!toggle ? (
+                 <EmpCard user={activeUser} setToggle={setToggle} />
+               ) : (
+                 <EmpDetails user={activeUser} setToggle={setToggle} />
+               ))
+               */}
+                <EmployeeDetailForm user={activeUser} />
+              </>
+            }
             {modalState.type === "duty" && activeUser && (
               <ChangeDutyTime
                 user={activeUser}

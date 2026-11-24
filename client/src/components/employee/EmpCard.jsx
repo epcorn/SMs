@@ -77,7 +77,6 @@ const Show = ({ label, value, classes }) => (
   </section>
 );
 
-
 export function EmpDetails({ user = {}, setToggle }) {
   const familyList = user?.familyDetails?.filter(
     f => f?.name || f?.relation || f?.phone
@@ -190,8 +189,8 @@ export function EmpDetails({ user = {}, setToggle }) {
       {/* Government IDs */}
       <Section title="Government Identification">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Field label="Aadhaar Number" value={govtIds?.adhaar_number ? `[Aadhaar Redacted]` : "N/A"} />
-          <Field label="PAN Number" value={govtIds?.pan_number} />
+          <Field label="Aadhaar Number" value={govtIds?.adhaar_number || "N/A"} />
+          <Field label="PAN Number" value={govtIds?.pan_number} classes='[&>div:last-child]:uppercase'/>
           <Field label="Voter ID Number" value={govtIds?.voter_number} />
 
           {[
@@ -462,10 +461,10 @@ export function EmpCard({ user = {}, setToggle }) {
         />
         <Show
           label="Aadhaar Number"
-          value={user?.govtIds?.adhaar_number ? "[Aadhaar Redacted]" : "N/A"}
+          value={user?.govtIds?.adhaar_number || "N/A"}
           classes='col-span-full'
         />
-        <Show label="PAN Number" value={user?.govtIds?.pan_number} classes='col-span-full'/>
+        <Show label="PAN Number" value={user?.govtIds?.pan_number} classes='col-span-full [&>p:last-child]:uppercase' />
       </div>
 
 

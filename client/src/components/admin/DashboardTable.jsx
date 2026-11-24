@@ -1,9 +1,9 @@
-import { dateCompare, dateFormat } from "@/utils/helperfn";
+import { dateFormat } from "@/utils/helperfn";
 import { AttedenceHistory } from "../employee/ShowUserAttendence";
 
 function DashboardTable({ presents, absents, halfday, checkouts, label }) {
   const alldata = presents || absents || halfday || checkouts || [];
-  console.log(alldata)
+
   return (
     <div className="max-h-full h-full overflow-auto">
       <table className="table table-pin-rows table-pin-cols w-full min-w-2xl">
