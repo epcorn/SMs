@@ -124,6 +124,7 @@ const changePassword = async (req, res, next) => {
 };
 
 const logout = async (req, res, next) => {
+  console.log(req.body?.deviceId || req.query?.deviceId);
   try {
     const deviceId = req.body?.deviceId || req.query?.deviceId;
 
@@ -142,6 +143,7 @@ const logout = async (req, res, next) => {
 
     return res.status(200).json({ msg: "Logged out successfully" });
   } catch (error) {
+    console.error(error);
     next(error);
   }
 };

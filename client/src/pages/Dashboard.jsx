@@ -21,7 +21,7 @@ function Dashboard() {
   // const { data: dutyData, } = useGetDuties({ date: currentDate });
 
   return (
-    <div className="h-dvh overflow-hidden p-4 sm:p-6 flex flex-col border">
+    <div className="h-dvh overflow-hidden p-4 sm:p-6 flex flex-col">
       <header className="my-3 shrink-0">
         <div className="flex justify-between">
           <h2 className="text-3xl font-bold">Dashboard</h2>

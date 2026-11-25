@@ -10,7 +10,7 @@ import { Link, useLocation } from "react-router-dom";
 import logo from '../../assets/logo.png';
 import { dateFormat } from "@/utils/helperfn";
 
-const classes = "w-5 h-5 text-slate-400 transition-colors";
+const classes = "w-5 h-5 text-theme-text/80 transition-colors";
 const links = [
   {
     label: "Dashboard",
@@ -70,18 +70,18 @@ function Sidebar({ children }) {
 
       <div className="drawer-content flex flex-col">
         {/* Navbar for Mobile devices (hidden on large screens) */}
-        <nav className="navbar w-full bg-slate-900 text-white lg:hidden px-4 justify-between">
-          <div className="navbar w-full bg-slate-900 text-white border-b border-slate-800 lg:hidden px-4 justify-between">
+        <nav className="navbar w-full bg-theme-bg text-theme-text lg:hidden px-4 justify-between">
+          <div className="navbar w-full bg-theme-bg text-theme-text border-b border-theme-bg lg:hidden px-4 justify-between">
             <div className="flex items-center gap-3">
               <label
                 htmlFor="my-drawer-4"
                 aria-label="Open sidebar"
-                className="btn btn-square btn-ghost hover:bg-slate-800 text-rose-300"
+                className="btn btn-square btn-ghost hover:bg-theme-hover text-theme-text"
               >
                 <Library />
               </label>
 
-              <span className="font-bold tracking-wide">SMs Menu</span>
+              <span className="font-bold tracking-wide text-theme-text">SMs Menu</span>
             </div>
 
             {/* Mobile avatar dropdown */}
@@ -89,7 +89,7 @@ function Sidebar({ children }) {
               <div
                 tabIndex={0}
                 role="button"
-                className="btn btn-ghost btn-circle avatar"
+                className="btn btn-ghost btn-circle avatar hover:bg-theme-hover"
               >
                 <div className="mask mask-hexagon-2 w-10">
                   <img
@@ -131,15 +131,15 @@ function Sidebar({ children }) {
           className="drawer-overlay"
         ></label>
 
-        {/* Left Side Navigation Board - Upgraded to Premium Dark Slate Theme */}
-        <div className="flex min-h-full flex-col items-start bg-slate-900 w-64 border-r border-slate-800 text-slate-300">
+        {/* Left Side Navigation Board */}
+        <div className="flex min-h-full flex-col items-start bg-theme-bg text-theme-text w-64 border-r border-theme-hover/40">
           {/* Sidebar Header Title */}
-          <div className="px-6 py-5 border-b border-slate-800 w-full grid grid-cols-3 items-center">
+          <div className="px-6 py-5 border-b border-theme-hover w-full grid grid-cols-3 items-center">
             <img src={logo} alt="" className="" />
-            <h3 className="col-span-2 font-extrabold text-2xl text-rose-300 tracking-wide">
+            <h3 className="col-span-2 font-extrabold text-2xl text-theme-text tracking-wide">
               SMs
             </h3>
-            <p className="col-span-full text-xs text-slate-400 mt-1 hidden lg:block">
+            <p className="col-span-full text-xs text-theme-text/80 mt-1 hidden lg:block">
               Squad Management System
             </p>
           </div>
@@ -156,14 +156,14 @@ function Sidebar({ children }) {
                   <Link
                     to={li.link}
                     onClick={handleLinkClick}
-                    className={`flex focus-within:bg-rose-400/20 focus:text-white items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm
+                    className={`flex focus-within:bg-theme-hover focus:text-theme-text items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm text-theme-text
                       ${isActive
-                        ? "bg-rose-400/20 border-l-4 text-white border-l-rose-400 shadow-lg shadow-rose-300/10 scale-[1.02]"
-                        : "hover:bg-rose-400/30 hover:text-white"
+                        ? "bg-theme-hover border-l-4 text-theme-text border-l-theme-text shadow-lg scale-[1.02]"
+                        : "hover:bg-theme-hover hover:text-theme-text"
                       }`}
                   >
                     {/* Keeps the icon matching text colors correctly */}
-                    <span className={`${isActive ? "[&_svg]:text-white" : ""}`}>
+                    <span className={`${isActive ? "[&_svg]:text-theme-text" : ""}`}>
                       {li.icon}
                     </span>
                     <span>{li.label}</span>
@@ -174,8 +174,8 @@ function Sidebar({ children }) {
 
             {/* Desktop profile accordion */}
             <div className="hidden lg:block w-full mt-auto px-0 pb-4">
-              <details className="collapse collapse-arrow rounded-xl border border-slate-700 bg-slate-800/60">
-                <summary className="collapse-title min-h-0 px-1 py-2">
+              <details className="collapse collapse-arrow rounded-xl border border-theme-hover/40 bg-theme-bg text-theme-text">
+                <summary className="collapse-title min-h-0 px-1 py-2 hover:bg-theme-hover rounded-xl transition-colors">
                   <div className="flex items-center gap-1 pr-2">
                     <div className="avatar shrink-0">
                       <div className="mask mask-hexagon-2 w-10">
@@ -190,40 +190,40 @@ function Sidebar({ children }) {
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">
+                      <p className="truncate text-sm font-semibold text-theme-text">
                         {[me?.firstname, me?.lastname]
                           .filter(Boolean)
                           .join(" ") || "Employee"}
                       </p>
-                      <p className="truncate text-xs text-slate-400">
+                      <p className="truncate text-xs text-theme-text/80">
                         View profile
                       </p>
                     </div>
                   </div>
                 </summary>
 
-                <div className="collapse-content px-3 text-slate-200">
-                  <div className="border-t border-slate-700 pt-3">
-                    <p className="wrap-break-words text-sm">
+                <div className="collapse-content px-3 text-theme-text">
+                  <div className="border-t border-theme-hover/40 pt-3">
+                    <p className="wrap-break-words text-sm text-theme-text">
                       {me?.email || "N/A"}
                     </p>
-                    <p className="mt-2 text-sm">
+                    <p className="mt-2 text-sm text-theme-text">
                       Phone: {me?.phone || "N/A"}
                     </p>
-                    <p className="mt-2 text-sm">
+                    <p className="mt-2 text-sm text-theme-text">
                       Check-in:{" "}
                       {checkIn
                         ? dateFormat(checkIn)?.fullDateAndTime
                         : "No attendance record"}
                     </p>
-                    <p className="mt-2 text-sm">
+                    <p className="mt-2 text-sm text-theme-text">
                       Check-out:{" "}
                       {checkOut
                         ? dateFormat(checkOut)?.fullDateAndTime
                         : "---"}
                     </p>
                     {totalWorkingHours ?
-                      <p>
+                      <p className="text-theme-text">
                         <span className="font-medium">Total hours: </span>
                         {totalWorkingHours}
                       </p> : ""}
@@ -240,9 +240,9 @@ function Sidebar({ children }) {
                   logout();
                 }}
                 disabled={loggingOut}
-                className="flex items-center gap-4 py-3 px-4 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 rounded-xl transition-all duration-200 w-full text-left font-semibold text-sm group"
+                className="flex items-center gap-4 py-3 px-4 hover:bg-theme-hover text-theme-text hover:text-theme-text rounded-xl transition-all duration-200 w-full text-left font-semibold text-sm group"
               >
-                <LogOutIcon className="w-5 h-5 text-rose-400 group-hover:scale-110 transition-transform" />
+                <LogOutIcon className="w-5 h-5 text-theme-text group-hover:scale-110 transition-transform" />
                 <span>Logout</span>
               </button>
             </li>

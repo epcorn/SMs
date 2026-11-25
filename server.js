@@ -19,7 +19,7 @@ import empRouter from "./routes/empRoutes.js";
 import siteRouter from "./routes/siteRoutes.js";
 import User from "./models/userModel.js";
 import otherRouter from "./routes/otherRoutes.js";
-import { autoCheckoutUser, cronService } from "./services/cron.service.js";
+import { autoCheckoutUser, cronService, startReminderCron } from "./services/cron.service.js";
 import { saveFCMToken } from "./controllers/userController.js";
 import otherServices from "./services/other.service.js";
 import { testNotification } from "./controllers/otherController.js";
@@ -33,6 +33,7 @@ if (!getApps().length) {
         "utf8",
       ),
     );
+
     initializeApp({ credential: cert(serviceAccount) });
   } catch (err) {
     console.error("Firebase init failed:", err.message);
@@ -47,6 +48,7 @@ app.use(
     origin: process.env.FRONTEND_URL || [
       "http://localhost:3000",
       "https://sms-lake-sigma.vercel.app",
+      "https://thumbnail-injection-characterized-compilation.trycloudflare.com"
     ],
     credentials: true,
   }),
@@ -103,13 +105,27 @@ app.get("/api/testreminders", testNotification);
 app.get("/api/cron/send-reminders", cronService);
 app.get("/api/cron/auto-checkout", autoCheckoutUser);
 
-
 app.use(errorMiddleware);
 
-if (process.env.NODE_ENV !== "production") {
-  app.listen(process.env.PORT || 8000, () => {
-    console.log("Server started");
-  });
-}
+const PORT = process.env.PORT || 8000;
+
+const startServer = async () => {
+  try {
+    await connectDB(mongoUri);
+
+    console.log("MongoDB connected successfully");
+
+    if (process.env.NODE_ENV !== "production") {
+      app.listen(PORT, () => {
+        console.log(`Server started on port ${PORT}`);
+      });
+    }
+  } catch (error) {
+    console.error("Server startup failed:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 export default app;

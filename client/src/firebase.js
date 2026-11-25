@@ -13,25 +13,50 @@ const app = initializeApp({
 
 export const requestForToken = async () => {
   try {
-    if ((await Notification.requestPermission()) !== "granted") return null;
+    const vapidKey =
+      "BFvAIhcFnJUO37L-1cu7dG2Igj_GIiWvqMxQyoK_6FQiJhR2M9E0Fn0Iq7aRmjPNwjdIpECli1MCNTYhuhl9ZCo";
+
+    console.log("Firebase project:", app.options.projectId);
+    console.log("VAPID key:", vapidKey);
+
     const registration = await navigator.serviceWorker.register(
       "/firebase-messaging-sw.js",
+      { scope: "/" },
     );
-    return await getToken(getMessaging(app), {
-      vapidKey:
-        "BFvAIhcFnJUO37L-1cu7dG2Igj_GIiWvqMxQyoK_6FQiJhR2M9E0Fn0Iq7aRmjPNwjdIpECli1MCNTYhuhl9ZCo",
+
+    const messaging = getMessaging(app);
+
+    const token = await getToken(messaging, {
+      vapidKey,
       serviceWorkerRegistration: registration,
     });
-  } catch (e) {
-    console.error("FCM token error:", e.code, e.message);
+
+    const subscription = await registration.pushManager.getSubscription();
+
+    console.log(
+      "Actual applicationServerKey:",
+      subscription?.options?.applicationServerKey
+        ? btoa(
+            String.fromCharCode(
+              ...new Uint8Array(subscription.options.applicationServerKey),
+            ),
+          )
+        : null,
+    );
+
+    return token;
+  } catch (error) {
+    console.error("FCM error:", error);
     return null;
   }
 };
 
-export const onForegroundMessage = (cb) => {
-  try {
-    return onMessage(getMessaging(app), cb);
-  } catch {
-    return () => {};
-  }
+export const onForegroundMessage = (callback) => {
+  const messaging = getMessaging(app);
+
+  return onMessage(messaging, (payload) => {
+    console.log("FCM MESSAGE RECEIVED:", payload);
+
+    callback(payload);
+  });
 };

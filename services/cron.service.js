@@ -1,4 +1,5 @@
 import otherServices from "./other.service.js";
+import cron from "node-cron";
 
 export const cronService = async (req, res) => {
   // Simple security check using a secret header or query param
@@ -16,7 +17,7 @@ export const cronService = async (req, res) => {
   }
 };
 
-export const autoCheckoutUser=async (req, res) => {
+export const autoCheckoutUser = async (req, res) => {
   const authHeader = req.headers.authorization;
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -30,5 +31,17 @@ export const autoCheckoutUser=async (req, res) => {
     console.error("Auto-checkout cron error:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
-}
+};
 
+//test reminder
+export const startReminderCron = () => {
+  cron.schedule("* * * * *", async () => {
+    console.log("cron run");
+    try {
+      console.log("Running reminder cron...");
+      await otherServices.reminderNotification();
+    } catch (error) {
+      console.error("Cron execution error:", error);
+    }
+  });
+};

@@ -28,7 +28,7 @@ const useLogout = () => {
   return useMutation({
     mutationKey: ["user"],
     mutationFn: async () => {
-      await fetchFn("auth/logout", { method: "POST", body: deviceId });
+      await fetchFn("auth/logout", { method: "POST", body: {deviceId} });
       return { msg: "logout success" };
     },
     onSuccess: () => {

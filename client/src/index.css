@@ -6,6 +6,18 @@
   --font-signature: "Mr De Haviland", "Great Vibes", cursive;
   --font-inter: "Inter", sans-serif;
   --animate-toast-fade: toast-fade 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+
+  --color-theme-bg: #ea580c;
+  --color-theme-text: #ffffff; 
+  --color-theme-hover: #123a93c9;
+
+  /* --color-theme-bg: #1e3a8a;
+  --color-theme-text: #ffffff;
+  --color-theme-hover: #ea580c; */
+
+  /* --color-theme-bg: #dbeafe;
+  --color-theme-text: #0f172a;
+  --color-theme-hover: #fb923c; */
 }
 
 @keyframes toast-fade {

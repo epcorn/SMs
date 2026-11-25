@@ -16,13 +16,6 @@ const otherServices = {
 
     const validEntries = (user.fcmTokens || []).filter((item) => item.token);
 
-    // if (validEntries.length === 0) {
-    //   return {
-    //     success: false,
-    //     message: "User has no valid FCM tokens stored.",
-    //   };
-    // }
-
     const validTokens = validEntries.map((item) => item.token);
     const userName = user.firstname || "there";
 
@@ -83,13 +76,15 @@ const otherServices = {
   },
 
   reminderNotification: async () => {
-    const { endOfDay, startOfDay } = startEndDate();
+    const now = new Date();
+    const { startOfDay, endOfDay } = startEndDate();
 
     const users = await User.find({
+      active: true,
       "fcmTokens.0": { $exists: true },
-      $or: [{ reminderSentOn: null }, { reminderSentOn: { $lt: startOfDay } }],
+      "duty.endTime": { $exists: true, $ne: "" },
     })
-      .select("firstname +fcmTokens")
+      .select("firstname duty +fcmTokens")
       .populate({
         path: "attendenceRecords",
         match: {
@@ -102,7 +97,28 @@ const otherServices = {
     for (const user of users) {
       if (!user.attendenceRecords?.length) continue;
 
-      const tokens = user.fcmTokens.map((item) => item.token).filter(Boolean);
+      const [hours, minutes] = user.duty.endTime.split(":").map(Number);
+
+      const dutyEnd = new Date(startOfDay);
+      dutyEnd.setHours(hours, minutes, 0, 0);
+
+      const tenMinutesBefore = new Date(dutyEnd.getTime() - 10 * 60000);
+      const oneMinuteAfter = new Date(dutyEnd.getTime() + 60000);
+
+      let body;
+
+      if (now >= tenMinutesBefore && now < dutyEnd) {
+        body = "Your duty ends in 10 minutes. Please remember to clock out.";
+      } else if (
+        now >= oneMinuteAfter &&
+        now < new Date(oneMinuteAfter.getTime() + 60000)
+      ) {
+        body = "Your duty ended 1 minute ago. Please remember to clock out.";
+      }
+
+      if (!body) continue;
+
+      const tokens = user.fcmTokens.map(({ token }) => token).filter(Boolean);
 
       if (!tokens.length) continue;
 
@@ -110,16 +126,13 @@ const otherServices = {
         tokens,
         notification: {
           title: `Hello ${user.firstname || "there"}, Time to Check Out!`,
-          body: "Please remember to clock out for today.",
+          body,
         },
         data: {
           type: "checkout_reminder",
           userId: user._id.toString(),
         },
       });
-
-      user.reminderSentOn = new Date();
-      await user.save();
     }
 
     return { message: "Checkout reminders processed." };

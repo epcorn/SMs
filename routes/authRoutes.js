@@ -6,12 +6,12 @@ import {
   loginUser,
   logout,
 } from "../controllers/userController.js";
-import { operatorAccess } from "../middleware/authMiddleware.js";
+import { authentication, operatorAccess } from "../middleware/authMiddleware.js";
 
 const authRoute = Router();
 
 authRoute.post("/login", loginUser);
-authRoute.post("/logout", logout);
+authRoute.post("/logout",authentication, logout);
 // authRoute.patch("/cp", operatorAccess, changePassword);
 
 //dashboard routes

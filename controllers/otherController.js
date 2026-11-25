@@ -35,6 +35,18 @@ export const testNotification = async (req, res, next) => {
       },
     });
 
+    console.log("FCM Response:", {
+      tokens,
+      successCount: response.successCount,
+      failureCount: response.failureCount,
+      responses: response.responses.map((r) => ({
+        success: r.success,
+        messageId: r.messageId,
+        error: r.error?.code,
+        errorMessage: r.error?.message,
+      })),
+    });
+
     return res.status(200).json({
       message: "Notification sent",
       successCount: response.successCount,
@@ -46,3 +58,4 @@ export const testNotification = async (req, res, next) => {
     });
   }
 };
+

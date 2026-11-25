@@ -1,41 +1,40 @@
+
 import { useEffect } from "react";
 import { onForegroundMessage, requestForToken } from "@/firebase";
 import { fetchFn } from "@/utils/queryClient";
 import { getCreateDeviceId, getDeviceLabel } from "@/utils/device";
 
 export default function useNotifications(userId) {
-  const deviceId = getCreateDeviceId();
-  const deviceName = getDeviceLabel();
   useEffect(() => {
+    if (!userId) return;
 
-    if (!userId) {
-      console.log("Skipping notifications: No userId provided yet.");
-      return;
-    }
+    const deviceId = getCreateDeviceId();
+    const deviceName = getDeviceLabel();
 
-    requestForToken().then((token) => {
-      if (token) {
+    requestForToken().then(async (token) => {
+      if (!token) return;
 
-        fetchFn("token/fcm-token", { method: "POST", body: { token, deviceId, deviceName } }).catch(console.error);
-      }
-    });
+      await fetchFn("token/fcm-token", {
+        method: "POST",
+        body: { token, deviceId, deviceName },
+      });
+    }).catch(console.error);
 
-    const unsubscribe = onForegroundMessage((payload) => {
-      console.log("Foreground message received:", payload);
+    const unsubscribe = onForegroundMessage(async (payload) => {
+      if (Notification.permission !== "granted") return;
 
-      const title = payload?.notification?.title || payload?.data?.title || "Duty Updated";
-      const body = payload?.notification?.body || payload?.data?.body || "Your shift schedule has changed.";
+      const registration = await navigator.serviceWorker.getRegistration("/");
+      if (!registration) return;
 
-      if (Notification.permission === "granted") {
-        new Notification(title, {
-          body: body,
+      registration.showNotification(
+        payload.notification?.title || "Duty Updated",
+        {
+          body: payload.notification?.body || "Your shift schedule has changed.",
           icon: "/vite.svg",
-        });
-      }
+        }
+      );
     });
 
-    return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
-    };
+    return unsubscribe;
   }, [userId]);
 }
