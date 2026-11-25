@@ -6,8 +6,8 @@ function DashboardTable({ presents, absents, halfday, checkouts, label }) {
 
   return (
     <div className="max-h-full h-full overflow-auto">
-      <table className="table table-pin-rows table-pin-cols w-full min-w-2xl">
-        <thead className="[&_th]:bg-gray-300">
+      <table className="table table-pin-rows w-full min-w-4xl">
+        <thead className="[&_th]:bg-theme-bg-light">
           <tr>
             <th>#</th>
             <th>Name</th>

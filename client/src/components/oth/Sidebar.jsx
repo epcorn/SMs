@@ -118,7 +118,7 @@ function Sidebar({ children }) {
         </nav>
 
         {/* Main Page Content rendered here */}
-        <main className="flex-1 overflow-y-auto min-h-0 p-0 w-full h-full bg-slate-50">
+        <main className="flex-1 overflow-y-auto min-h-0 p-0 w-full h-full bg-white">
           {children}
         </main>
       </div>
@@ -134,12 +134,12 @@ function Sidebar({ children }) {
         {/* Left Side Navigation Board */}
         <div className="flex min-h-full flex-col items-start bg-theme-bg text-theme-text w-64 border-r border-theme-hover/40">
           {/* Sidebar Header Title */}
-          <div className="px-6 py-5 border-b border-theme-hover w-full grid grid-cols-3 items-center">
+          <div className="px-6 py-3 border-b-2 border-[#e07000] w-full grid grid-cols-3 items-center">
             <img src={logo} alt="" className="" />
             <h3 className="col-span-2 font-extrabold text-2xl text-theme-text tracking-wide">
               SMs
             </h3>
-            <p className="col-span-full text-xs text-theme-text/80 mt-1 hidden lg:block">
+            <p className="col-span-full text-xs text-theme-text/80 mt-1 ">
               Squad Management System
             </p>
           </div>
@@ -159,7 +159,7 @@ function Sidebar({ children }) {
                     className={`flex focus-within:bg-theme-hover focus:text-theme-text items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm text-theme-text
                       ${isActive
                         ? "bg-theme-hover border-l-4 text-theme-text border-l-theme-text shadow-lg scale-[1.02]"
-                        : "hover:bg-theme-hover hover:text-theme-text"
+                        : "hover:bg-theme-hover/50 hover:text-theme-text"
                       }`}
                   >
                     {/* Keeps the icon matching text colors correctly */}
@@ -174,7 +174,7 @@ function Sidebar({ children }) {
 
             {/* Desktop profile accordion */}
             <div className="hidden lg:block w-full mt-auto px-0 pb-4">
-              <details className="collapse collapse-arrow rounded-xl border border-theme-hover/40 bg-theme-bg text-theme-text">
+              <details className="collapse collapse-arrow rounded-xl border border-theme-hover bg-theme-hover/60 text-theme-text">
                 <summary className="collapse-title min-h-0 px-1 py-2 hover:bg-theme-hover rounded-xl transition-colors">
                   <div className="flex items-center gap-1 pr-2">
                     <div className="avatar shrink-0">

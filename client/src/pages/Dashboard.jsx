@@ -21,7 +21,7 @@ function Dashboard() {
   // const { data: dutyData, } = useGetDuties({ date: currentDate });
 
   return (
-    <div className="h-dvh overflow-hidden p-4 sm:p-6 flex flex-col">
+    <div className="h-[calc(100dvh-5rem)] lg:h-dvh overflow-hidden px-4 sm:px-6 flex flex-col">
       <header className="my-3 shrink-0">
         <div className="flex justify-between">
           <h2 className="text-3xl font-bold">Dashboard</h2>
@@ -33,7 +33,7 @@ function Dashboard() {
         <DashboardStats gettingStats={gettingStats} statsData={statsData} />
       </div>
 
-      <div className="tabs tabs-md tabs-box tabs-border content-start flex-1 min-h-0 mt-5 bg-gray-300">
+      <div className="tabs tabs-md tabs-box tabs-border content-start flex-1 min-h-0 mt-5 bg-theme-bg">
         {TABS.map((t, i) => (
           <React.Fragment key={t.prop}>
             <input
@@ -43,7 +43,7 @@ function Dashboard() {
               aria-label={t.label}
               defaultChecked={i === 0}
             />
-            <div className="tab-content bg-base-100 border-base-300 p-0 rounded-b-box shadow-sm w-full h-[calc(100%-var(--tab-height))] min-h-0 overflow-hidden">
+            <div className="tab-content bg-white border-theme-bg p-0 rounded-b-box shadow-sm w-full min-h-0 overflow-hidden">
               <DashboardTable {...{ [t.prop]: userStats?.[t.key] }} label={t.name} />
             </div>
           </React.Fragment>

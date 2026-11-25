@@ -22,6 +22,13 @@ import ChangeDutyTime from "./ChangeDutyTime";
 import { useGetSiteQuery } from "@/hooks/siteHooks";
 import EmployeeDetailForm from "./EmployeeDetailForm";
 
+
+const badgeClr = {
+  admin: "badge-primary",
+  operator: "badge-info",
+  employee: "badge-outline"
+}
+
 function EmployeeList({
   response,
   responding,
@@ -59,10 +66,10 @@ function EmployeeList({
 
   return (
     <div className="flex-1 min-h-0 m-1 flex flex-col overflow-hidden shadow-lg">
-      <div className="flex-1 min-h-0 overflow-auto w-full">
-        <table className="table table-pin-rows w-full min-w-max">
+      <div className="flex-1 overflow-auto w-full max-h-[calc(100%-5rem)] md:h-full">
+        <table className="table table-pin-rows w-full min-w-max border-2 border-theme-bg">
           <thead>
-            <tr className="bg-gray-200">
+            <tr className="bg-theme-bg-light text-base">
               <th>#</th>
               <th>Name</th>
               <th>Email</th>
@@ -84,7 +91,13 @@ function EmployeeList({
                   <td className="px-4">
                     <div className="skeleton h-4 w-24"></div>
                   </td>
-                  <td className="px-4 flex gap-2" colSpan={3}>
+                  <td className="px-4 ">
+                    <div className="skeleton h-4 w-20"></div>
+                  </td>
+                  <td className="px-4 ">
+                    <div className="skeleton h-4 w-20"></div>
+                  </td>
+                  <td className="px-4 ">
                     <div className="skeleton h-4 w-20"></div>
                   </td>
                 </tr>
@@ -99,7 +112,7 @@ function EmployeeList({
               users?.map((user, i) => (
                 <tr
                   key={user?._id}
-                  className={`relative ${user.active ? "" : "opacity-40"}`}
+                  className={`relative ${user.active ? "" : "opacity-40"} text-base`}
                 >
                   <td>{i + 1}</td>
                   <td>
@@ -108,7 +121,7 @@ function EmployeeList({
                   <td>{user?.email}</td>
                   <td>{user?.site?.name}</td>
                   <td>
-                    <p className="badge badge-sm badge-accent capitalize">
+                    <p className={`badge badge-md badge-info ${badgeClr[user?.role.toLowerCase()]} capitalize`}>
                       {user?.role}
                     </p>
                   </td>
@@ -210,7 +223,7 @@ function EmployeeList({
       {/* Shared modal for Add/Edit Employee and row actions */}
       {modalState?.type && (activeUser || modalState.type === "add") && (
         <dialog ref={dialogRef} onClose={closeModal} className="modal">
-          <div className="modal-box max-w-4xl relative bg-base-100">
+          <div className="modal-box max-w-4xl relative">
             <button
               type="button"
               onClick={closeModal}

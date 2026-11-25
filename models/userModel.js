@@ -85,9 +85,9 @@ const yesNoField = {
 
 const userSchema = new mongoose.Schema(
   {
-    firstname: { type: String },
+    firstname: { type: String, required: [true, "firstname required"] },
     middlename: { type: String },
-    lastname: { type: String },
+    lastname: { type: String, required: [true, "lastname required"] },
     gender: {
       type: String,
       default: "",
@@ -109,7 +109,7 @@ const userSchema = new mongoose.Schema(
       ],
     },
     email: { type: String, unique: true },
-    phone: { type: String, unique: true },
+    phone: { type: String },
     password: { type: String, select: false },
     role: {
       type: String,

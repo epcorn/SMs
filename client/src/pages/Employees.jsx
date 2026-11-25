@@ -66,7 +66,7 @@ function Employees() {
         <div
           tabIndex={0}
           role="button"
-          className="btn btn-lg btn-circle btn-info"
+          className="btn btn-lg btn-circle bg-theme-bg"
         >
           <PlusIcon />
         </div>
@@ -119,7 +119,7 @@ function Employees() {
         </div>
       </div>
 
-      <div className="shrink-0 flex justify-end items-center gap-1 p-2">
+      <header className="shrink-0 flex justify-end items-center gap-1 p-2">
         <h3 className="text-2xl font-semibold mr-auto">Employees</h3>
         <div className="flex ml-auto items-center gap-3">
           <button
@@ -131,10 +131,10 @@ function Employees() {
             <SearchIcon />
           </button>
         </div>
-      </div>
+      </header>
 
       <div
-        className="dropdown dropdown-end menu bg-base-100 rounded-box shadow-md p-4 mt-2"
+        className="dropdown dropdown-end menu bg-theme-bg rounded-box shadow-md p-4 mt-2"
         popover="auto"
         id="popover-1"
         style={{ positionAnchor: "--anchor-1" }}

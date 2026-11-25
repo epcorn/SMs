@@ -25,11 +25,11 @@ function ShowSites({ show }) {
       <h3 className='font-bold text-2xl mb-4 text-base-content'>Show Sites</h3>
 
       {/* daisyUI Card container with border */}
-      <div className="card bg-base-100 border border-base-300 shadow-xl overflow-hidden h-full">
+      <div className="overflow-hidden h-full">
         <div className="overflow-x-auto h-full">
-          <table className='table table-zebra min-w-3xl w-full h-full'>
+          <table className='table table-zebra min-w-3xl w-full h-full border-2 border-theme-bg'>
             {/* Table Header */}
-            <thead className='bg-gray-300 text-base-content uppercase text-sm tracking-wider'>
+            <thead className='bg-theme-bg-light text-base-content uppercase text-sm tracking-wider'>
               <tr>
                 <th>#</th>
                 <th>Name</th>

@@ -124,9 +124,8 @@ const changePassword = async (req, res, next) => {
 };
 
 const logout = async (req, res, next) => {
-  console.log(req.body?.deviceId || req.query?.deviceId);
   try {
-    const deviceId = req.body?.deviceId || req.query?.deviceId;
+    const deviceId = req.body?.deviceId;
 
     if (req.user?.id && deviceId) {
       await User.findByIdAndUpdate(req.user.id, {
