@@ -86,10 +86,10 @@ const otherServices = {
     const { endOfDay, startOfDay } = startEndDate();
 
     const users = await User.find({
-      "fcmTokens.token": { $exists: true, $ne: "" },
+      "fcmTokens.0": { $exists: true },
       $or: [{ reminderSentOn: null }, { reminderSentOn: { $lt: startOfDay } }],
     })
-      .select("firstname +fcmTokens attendenceRecords")
+      .select("firstname +fcmTokens")
       .populate({
         path: "attendenceRecords",
         match: {
@@ -99,107 +99,30 @@ const otherServices = {
         },
       });
 
-    const usersToRemind = users.filter(
-      (user) => user.attendenceRecords && user.attendenceRecords.length > 0,
-    );
+    for (const user of users) {
+      if (!user.attendenceRecords?.length) continue;
 
-    if (usersToRemind.length === 0) {
-      return { message: "No users need a reminder today." };
+      const tokens = user.fcmTokens.map((item) => item.token).filter(Boolean);
+
+      if (!tokens.length) continue;
+
+      await getMessaging().sendEachForMulticast({
+        tokens,
+        notification: {
+          title: `Hello ${user.firstname || "there"}, Time to Check Out!`,
+          body: "Please remember to clock out for today.",
+        },
+        data: {
+          type: "checkout_reminder",
+          userId: user._id.toString(),
+        },
+      });
+
+      user.reminderSentOn = new Date();
+      await user.save();
     }
 
-    let successCount = 0;
-    let failureCount = 0;
-    const notifiedUserIds = [];
-
-    for (const user of usersToRemind) {
-      const validTokenEntries = (user.fcmTokens || []).filter(
-        (item) =>
-          typeof item?.token === "string" && item.token.trim().length > 0,
-      );
-
-      // Clean up any empty/malformed token entries while preserving { deviceId, token, ... } objects
-      if (validTokenEntries.length !== (user.fcmTokens || []).length) {
-        await User.updateOne(
-          { _id: user._id },
-          { $set: { fcmTokens: validTokenEntries } },
-        );
-      }
-
-      const validTokens = validTokenEntries.map((item) => item.token);
-      if (validTokens.length === 0) continue;
-
-      const userName = user.firstname || "there";
-
-      try {
-        const res = await getMessaging().sendEachForMulticast({
-          tokens: validTokens,
-          notification: {
-            title: `Hello ${userName}, Time to Check Out!`,
-            body: "It looks like you haven't checked out for today yet. Please remember to clock out.",
-          },
-          data: {
-            type: "checkout_reminder",
-            userId: user._id.toString(),
-          },
-        });
-
-        successCount += res.successCount;
-        failureCount += res.failureCount;
-
-        // Collect dead/403 tokens for cleanup
-        const dead = [];
-        res.responses.forEach((r, i) => {
-          if (!r.success) {
-            console.error(
-              "FCM send failed:",
-              user._id,
-              r.error?.code,
-              r.error?.message,
-            );
-            const code = r.error?.code;
-            const msg = r.error?.message || "";
-            if (
-              code === "messaging/registration-token-not-registered" ||
-              code === "messaging/invalid-registration-token" ||
-              code === "messaging/invalid-payload" ||
-              msg.includes("THIRD_PARTY_PERMISSION_DENIED")
-            ) {
-              dead.push(validTokens[i]);
-            }
-          }
-        });
-
-        if (dead.length) {
-          await User.updateOne(
-            { _id: user._id },
-            { $pull: { fcmTokens: { token: { $in: dead } } } },
-          );
-        }
-
-        // Mark as reminded if at least one device received it
-        if (res.successCount > 0) notifiedUserIds.push(user._id);
-      } catch (error) {
-        failureCount++;
-        console.error(
-          "Reminder failed for user",
-          user._id,
-          error.code || error.message,
-        );
-      }
-    }
-
-    if (notifiedUserIds.length > 0) {
-      await User.updateMany(
-        { _id: { $in: notifiedUserIds } },
-        { $set: { reminderSentOn: new Date() } },
-      );
-    }
-
-    return {
-      successCount,
-      failureCount,
-      message: `Processed reminders: ${successCount} sent, ${failureCount} failed.`,
-    };
+    return { message: "Checkout reminders processed." };
   },
 
   autoCheckOut: async () => {

@@ -46,8 +46,8 @@ export default function Attendence() {
   if (loadingAttdnc) {
     return (
       <div className="flex flex-col justify-center items-center gap-10 h-full">
-        <span className="bg-gray-400 rounded-full w-64 h-64"></span>
-        <span className="w-84 h-32 bg-gray-400 rounded-lg"></span>
+        <span className="skeleton bg-gray-200 rounded-full w-64 h-64"></span>
+        <span className="skeleton w-84 h-32 bg-gray-200 rounded-lg"></span>
       </div>
     );
   }
