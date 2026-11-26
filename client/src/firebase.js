@@ -1,6 +1,9 @@
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
+const EXPECTED_KEY_B64 =
+  "BFvAIhcFnJUO37L+1cu7dG2Igj/GIiWvqMxQyoK/6FQiJhR2M9E0Fn0Iq7aRmjPNwjdIpECli1MCNTYhuhl9ZCo=";
+
 const app = initializeApp({
   apiKey: "AIzaSyDhXRpuajlyPLuWN5uZbbMM20YrWs3FGlY",
   authDomain: "project-587c6976-454c-43a7-8f3.firebaseapp.com",
@@ -11,40 +14,41 @@ const app = initializeApp({
   measurementId: "G-P6RMZYW83F",
 });
 
+const toBase64 = (buffer) =>
+  buffer ? btoa(String.fromCharCode(...new Uint8Array(buffer))) : null;
+
 export const requestForToken = async () => {
   try {
     const vapidKey =
       "BFvAIhcFnJUO37L-1cu7dG2Igj_GIiWvqMxQyoK_6FQiJhR2M9E0Fn0Iq7aRmjPNwjdIpECli1MCNTYhuhl9ZCo";
-
-    console.log("Firebase project:", app.options.projectId);
-    console.log("VAPID key:", vapidKey);
 
     const registration = await navigator.serviceWorker.register(
       "/firebase-messaging-sw.js",
       { scope: "/" },
     );
 
-    const messaging = getMessaging(app);
-
-    const token = await getToken(messaging, {
-      vapidKey,
-      serviceWorkerRegistration: registration,
-    });
-
-    const subscription = await registration.pushManager.getSubscription();
-
+    const existingSub = await registration.pushManager.getSubscription();
+    if (
+      existingSub &&
+      toBase64(existingSub.options?.applicationServerKey) !== EXPECTED_KEY_B64
+    ) {
+      await existingSub.unsubscribe();
+    }
     console.log(
       "Actual applicationServerKey:",
-      subscription?.options?.applicationServerKey
+      existingSub?.options?.applicationServerKey
         ? btoa(
             String.fromCharCode(
-              ...new Uint8Array(subscription.options.applicationServerKey),
+              ...new Uint8Array(existingSub.options.applicationServerKey),
             ),
           )
         : null,
     );
-
-    return token;
+    const messaging = getMessaging(app);
+    return await getToken(messaging, {
+      vapidKey,
+      serviceWorkerRegistration: registration,
+    });
   } catch (error) {
     console.error("FCM error:", error);
     return null;
@@ -53,10 +57,5 @@ export const requestForToken = async () => {
 
 export const onForegroundMessage = (callback) => {
   const messaging = getMessaging(app);
-
-  return onMessage(messaging, (payload) => {
-    console.log("FCM MESSAGE RECEIVED:", payload);
-
-    callback(payload);
-  });
+  return onMessage(messaging, callback);
 };

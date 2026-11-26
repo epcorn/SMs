@@ -187,6 +187,14 @@ function EmployeeDetailForm({ user }) {
         </div>
       </section>
 
+      {/* Address */}
+      <section className="mb-5 break-inside-avoid bg-gray-100">
+        <h4 className="text-base  font-bold uppercase tracking-wider py-1.5 mb-3">
+          3. Medical Details
+        </h4>
+        
+      </section>
+
       {/* Education */}
       <section className="mb-5 break-inside-avoid bg-gray-100">
         <h4 className="text-base font-bold uppercase tracking-wider bg-gray-100 py-1.5 mb-3">
@@ -306,7 +314,7 @@ function EmployeeDetailForm({ user }) {
 
       <section className="mb-5 break-inside-avoid bg-gray-100">
         <h4 className="text-base font-semibold">6. General Questions</h4>
-        <div className="pl-5 *:flex *:flex-col">
+        <div className="pl-5 space-y-2 *:flex *:flex-col">
           <p>
             <strong>
               1. Do you have any ailments and have you been hospitalized
@@ -329,9 +337,6 @@ function EmployeeDetailForm({ user }) {
             <span className="ml-5 w-lg min-w-fit border-b">
               {political_conn?.status} - {political_conn?.text}
             </span>
-          </p>
-          <p>
-            <strong>4. Time required to join (If selected)</strong>
           </p>
         </div>
       </section>

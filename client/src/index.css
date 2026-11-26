@@ -7,10 +7,30 @@
   --font-inter: "Inter", sans-serif;
   --animate-toast-fade: toast-fade 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 
-  --color-theme-bg: #FF6600;
+  /* --color-theme-bg: #ea580c;
   --color-theme-bg-light: #f78851;
-  --color-theme-text: #ffffff; 
-  --color-theme-hover: #314084;
+  --color-theme-text: #ffffff;
+  --color-theme-hover: #0F172A; */
+
+  --color-theme-bg: #ff6600;
+  --color-theme-bg-light: #ffa07a;
+  --color-theme-text: #ffffff;
+  --color-theme-hover: #e9580c;
+
+  /* --color-theme-bg: #0284c7;
+--color-theme-bg-light: #38bdf8;
+--color-theme-text: #ffffff;
+--color-theme-hover: #c2410c; */
+
+  /* --color-theme-bg: #ffedd5;
+--color-theme-bg-light: #fff7ed;
+--color-theme-text: #0f172a;
+--color-theme-hover: #2563eb; */
+
+  /* --color-theme-bg: #ea580c;
+--color-theme-bg-light: #fb923c;
+--color-theme-text: #ffffff;
+--color-theme-hover: #1e3a8a; */
 
   /* --color-theme-bg: #1e3a8a;
   --color-theme-text: #ffffff;
