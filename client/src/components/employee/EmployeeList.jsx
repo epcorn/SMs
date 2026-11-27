@@ -66,7 +66,7 @@ function EmployeeList({
 
   return (
     <div className="flex-1 min-h-0 m-1 flex flex-col overflow-hidden shadow-lg">
-      <div className="flex-1 overflow-auto w-full max-h-[calc(100%-5rem)] md:h-full">
+      <div className="flex-1 overflow-auto w-full max-h-[calc(100%-4.5rem)] md:max-h-full">
         <table className="table table-pin-rows w-full min-w-max border-2 border-theme-bg">
           <thead>
             <tr className="bg-theme-bg-light text-base">

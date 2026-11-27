@@ -121,7 +121,7 @@ function Login() {
           </div>
 
           {/* Right Login Section */}
-          <div className="flex min-h-[620px] items-center justify-center bg-[#101827]/90 px-6 py-12 sm:px-12 lg:px-14">
+          <div className="flex min-h-[620px] items-center justify-center bg-orange-700 px-6 py-12 sm:px-12 lg:px-14">
 
             <div className="w-full max-w-sm">
 
@@ -140,7 +140,7 @@ function Login() {
 
               {/* Heading */}
               <div className="mb-9">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10">
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-400/20 bg-orange-800">
                   <Lock className="text-blue-300" size={23} />
                 </div>
 
@@ -157,72 +157,42 @@ function Login() {
                 </p>
               </div>
 
-              {/* Login Form */}
-              <form onSubmit={handleSubmit} className="space-y-6">
-
-                <div>
-                  <label className="mb-2 block text-xs font-semibold tracking-wide text-slate-300">
-                    EMAIL ADDRESS
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <fieldset className="fieldset">
+                  <legend className="fieldset-legend text-slate-300">EMAIL ADDRESS</legend>
+                  <label className="input bg-white/40 text-black border-2 w-full">
+                    <Mail size={18} className="opacity-50" />
+                    <input type="email" name="email" required placeholder="name@company.com" autoComplete="username" />
                   </label>
+                </fieldset>
 
-                  <div className="relative">
-                    <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-
-                    <input
-                      type="email"
-                      name="email"
-                      required
-                      placeholder="name@company.com"
-                      autoComplete="username"
-                      className="h-12 w-full rounded-xl border border-white/10 bg-white/[0.05] pl-12 pr-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-blue-400/60 focus:ring-4 focus:ring-blue-500/10"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-xs font-semibold tracking-wide text-slate-300">
-                    PASSWORD
-                  </label>
-
-                  <div className="relative">
-                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-
+                <fieldset className="fieldset">
+                  <legend className="fieldset-legend text-slate-300">PASSWORD</legend>
+                  <label className="input bg-white/40 text-black border-2 w-full">
+                    <Lock size={18} className="opacity-50" />
                     <input
                       type={showPassword ? "text" : "password"}
                       name="password"
                       required
                       placeholder="Enter your password"
                       autoComplete="current-password"
-                      className="h-12 w-full rounded-xl border border-white/10 bg-white/[0.05] pl-12 pr-12 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-blue-400/60 focus:ring-4 focus:ring-blue-500/10"
                     />
-
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                      className="btn btn-ghost btn-xs btn-circle opacity-60 hover:opacity-100"
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
-                  </div>
-                </div>
+                  </label>
+                </fieldset>
 
-                {status && (
-                  <div role="alert" className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                    {status}
-                  </div>
-                )}
+                {status && <div role="alert" className="alert alert-info text-sm">{status.message || status}</div>}
 
-                <button
-                  type="submit"
-                  disabled={loggingIn}
-                  className="group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-sm font-semibold text-white shadow-lg shadow-blue-900/30 transition hover:-translate-y-0.5 hover:from-blue-500 hover:to-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {loggingIn ? "Authenticating..." : "Sign In to Workspace"}
-                  {!loggingIn && (
-                    <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                  )}
-                </button>
+                <button type="submit" className="btn bg-theme-bg w-full border-warning-content/30 shadow-orange-950"
+                > Sign In </button>
+
               </form>
 
               {/* Footer */}

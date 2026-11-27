@@ -2,8 +2,15 @@ import { getMessaging } from "firebase-admin/messaging";
 import User from "../models/userModel.js";
 import { startEndDate } from "./emp.service.js";
 import Attendence from "../models/attendenceModel.js";
+import { CHECKPOINT_WINDOWS } from "../utils/helperFunction.js";
 
 const otherServices = {
+  validateTokens: function (tokens) {
+    const validEntries = (tokens || []).filter((item) => item.token);
+    const validTokens = validEntries.map((item) => item.token);
+
+    return validTokens;
+  },
   sendTestNotification: async (userId) => {
     if (!userId) {
       throw new Error("userId is required");
@@ -14,9 +21,7 @@ const otherServices = {
       throw new Error("User not found");
     }
 
-    const validEntries = (user.fcmTokens || []).filter((item) => item.token);
-
-    const validTokens = validEntries.map((item) => item.token);
+    const validTokens = this.validateTokens(user.fcmTokens);
     const userName = user.firstname || "there";
 
     const res = await getMessaging().sendEachForMulticast({
@@ -186,6 +191,65 @@ const otherServices = {
       updatedCount,
       message: `Auto-checked out ${updatedCount} users successfully.`,
     };
+  },
+
+  midEveReminder: async function () {
+    const { MID_DAY, MID_EVE } = CHECKPOINT_WINDOWS;
+
+    const toISTDateStr = (date) =>
+      new Date(date).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+
+    const today = toISTDateStr(new Date());
+    const startOfToday = new Date(`${today}T00:00:00+05:30`);
+    const endOfToday = new Date(`${today}T23:59:59.999+05:30`);
+
+    const records = await Attendence.find({
+      status: "Present",
+      createdAt: { $gte: startOfToday, $lte: endOfToday },
+    })
+      .populate({ path: "user", select: "fcmTokens firstname _id" })
+      .lean();
+
+    if (!records.length) return [];
+
+    const messaging = getMessaging();
+    const results = [];
+
+    for (const record of records) {
+      if (!record.user) continue;
+
+      const isMidDayToday =
+        record[MID_DAY.field] && toISTDateStr(record[MID_DAY.field]) === today;
+      const isMidEveToday =
+        record[MID_EVE.field] && toISTDateStr(record[MID_EVE.field]) === today;
+
+      // if (!isMidDayToday || isMidEveToday) continue;
+
+      const rawTokens = record.user.fcmTokens || [];
+      const tokens = [...new Set(this.validateTokens(rawTokens))];
+
+      if (!tokens.length) continue;
+
+      const res = await messaging.sendEachForMulticast({
+        tokens,
+        notification: {
+          title: MID_EVE.label,
+          body: `Hi ${record.user.firstname || "there"}, please mark your ${MID_EVE.label}.`,
+        },
+        data: {
+          type: "mid_eve_reminder",
+          userId: String(record.user._id),
+        },
+      });
+
+      results.push({
+        userId: String(record.user._id),
+        successCount: res.successCount,
+        failureCount: res.failureCount,
+      });
+    }
+
+    return { results };
   },
 };
 

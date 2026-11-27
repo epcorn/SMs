@@ -59,3 +59,11 @@ export const testNotification = async (req, res, next) => {
   }
 };
 
+export const midEveReminder = async (req, res, next) => {
+  try {
+    const data = await otherServices.midEveReminder();
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};

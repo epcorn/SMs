@@ -953,7 +953,7 @@ function AddEmp({
               {allowanceFields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="flex gap-2 items-center bg-base-200 rounded-box outline p-1">
+                  className="flex gap-2 items-center bg-base-200 rounded-box outline outline-gray-400 p-1">
                   <div className="flex gap-2 flex-1">
                     <InputField
                       name={`salaryDetails.allowance.${index}.name`}

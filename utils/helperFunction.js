@@ -127,3 +127,23 @@ function isWithinFiveMinutesBeforeEnd(now, dutyEndTime, referenceDate) {
   // True once current time has reached (endTime - 5 mins)
   return now >= fiveMinsBeforeEnd;
 }
+
+
+export const CHECKPOINT_WINDOWS = {
+  MID_DAY: {
+    field: "midDayTime",
+    label: "12:00 PM Check-In",
+    startHour: 11,
+    startMin: 45,
+    endHour: 12,
+    endMin: 30,
+  },
+  MID_EVE: {
+    field: "midEveningTime",
+    label: "3:00 PM Check-In",
+    startHour: 14,
+    startMin: 45,
+    endHour: 16,
+    endMin: 55,
+  },
+};

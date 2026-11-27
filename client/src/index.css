@@ -12,10 +12,11 @@
   --color-theme-text: #ffffff;
   --color-theme-hover: #0F172A; */
 
-  --color-theme-bg: #ff6600;
+  --color-theme-bg: #FF4700;
+  --color-theme-bg-hard: #bf2f00;
   --color-theme-bg-light: #ffa07a;
   --color-theme-text: #ffffff;
-  --color-theme-hover: #e9580c;
+  --color-theme-hover: #030460;
 
   /* --color-theme-bg: #0284c7;
 --color-theme-bg-light: #38bdf8;

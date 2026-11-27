@@ -3,7 +3,10 @@ import { createError } from "../middleware/errorMiddleware.js";
 import Attendence from "../models/attendenceModel.js";
 import Duty from "../models/dutyModel.js";
 import User from "../models/userModel.js";
-import { getDistanceInMeteres } from "../utils/helperFunction.js";
+import {
+  CHECKPOINT_WINDOWS,
+  getDistanceInMeteres,
+} from "../utils/helperFunction.js";
 
 export const startEndDate = (start) => {
   const startDate = start ? new Date(start) : new Date();
@@ -12,25 +15,6 @@ export const startEndDate = (start) => {
   const endOfDay = new Date(startDate.setUTCHours(23, 59, 59, 999));
 
   return { startOfDay, endOfDay };
-};
-
-const CHECKPOINT_WINDOWS = {
-  MID_DAY: {
-    field: "midDayTime",
-    label: "12:00 PM Check-In",
-    startHour: 11,
-    startMin: 45,
-    endHour: 12,
-    endMin: 30,
-  },
-  MID_EVE: {
-    field: "midEveningTime",
-    label: "3:00 PM Check-In",
-    startHour: 14,
-    startMin: 45,
-    endHour: 15,
-    endMin: 30,
-  },
 };
 
 function isWithinWindow(dateObj, config) {

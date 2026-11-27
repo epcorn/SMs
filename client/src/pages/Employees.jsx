@@ -66,13 +66,13 @@ function Employees() {
         <div
           tabIndex={0}
           role="button"
-          className="btn btn-lg btn-circle bg-theme-bg"
+          className="btn btn-lg btn-circle bg-theme-bg text-white"
         >
           <PlusIcon />
         </div>
 
         <div className="fab-close">
-          Close <span className="btn btn-circle btn-lg btn-error">✕</span>
+          Close <span className="btn btn-circle btn-lg bg-theme-hover text-white">✕</span>
         </div>
 
         <div className="bg-blue-300 pl-1 rounded-md flex items-center justify-between gap-3 w-fit">

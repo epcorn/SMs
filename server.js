@@ -17,12 +17,16 @@ import authRoute, { dashRoute } from "./routes/authRoutes.js";
 import { authentication } from "./middleware/authMiddleware.js";
 import empRouter from "./routes/empRoutes.js";
 import siteRouter from "./routes/siteRoutes.js";
-import User from "./models/userModel.js";
 import otherRouter from "./routes/otherRoutes.js";
-import { autoCheckoutUser, cronService, startReminderCron } from "./services/cron.service.js";
+import {
+  autoCheckoutUser,
+  cronService
+} from "./services/cron.service.js";
 import { saveFCMToken } from "./controllers/userController.js";
-import otherServices from "./services/other.service.js";
-import { testNotification } from "./controllers/otherController.js";
+import {
+  midEveReminder,
+  testNotification,
+} from "./controllers/otherController.js";
 
 dotenv.config();
 
@@ -48,7 +52,7 @@ app.use(
     origin: process.env.FRONTEND_URL || [
       "http://localhost:3000",
       "https://sms-lake-sigma.vercel.app",
-      "https://thumbnail-injection-characterized-compilation.trycloudflare.com"
+      "https://thumbnail-injection-characterized-compilation.trycloudflare.com",
     ],
     credentials: true,
   }),
@@ -74,18 +78,20 @@ if (!mongoUri) {
   throw new Error("MongoDB connection string is missing");
 }
 
-app.use(async (req, res, next) => {
-  try {
-    await connectDB(mongoUri);
-    next();
-  } catch (err) {
-    console.error("Database connection failed:", err.message);
-    res.status(500).json({
-      success: false,
-      message: "Database connection failed",
-    });
-  }
-});
+if (process.env.NODE_ENV !== "production") {
+  app.use(async (req, res, next) => {
+    try {
+      await connectDB(mongoUri);
+      next();
+    } catch (err) {
+      console.error("Database connection failed:", err.message);
+      res.status(500).json({
+        success: false,
+        message: "Database connection failed",
+      });
+    }
+  });
+}
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
@@ -105,17 +111,17 @@ app.get("/api/testreminders", testNotification);
 app.get("/api/cron/send-reminders", cronService);
 app.get("/api/cron/auto-checkout", autoCheckoutUser);
 
+app.get("/api/ene", midEveReminder);
+
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 8000;
 
 const startServer = async () => {
   try {
-    await connectDB(mongoUri);
-
-    console.log("MongoDB connected successfully");
-
     if (process.env.NODE_ENV !== "production") {
+      await connectDB(mongoUri);
+
       app.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);
       });

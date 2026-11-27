@@ -47,8 +47,8 @@ const links = [
 function Sidebar({ children }) {
 
   const { mutateAsync: logout, isPending: loggingOut } = useLogout();
-  const { data: me } = useGetMe()
-  
+  const { data: me, isPending } = useGetMe()
+
   const checkIn = me?.attendenceRecords?.[0]?.checkInTime || null;
   const checkOut = me?.attendenceRecords?.[0]?.checkOutTime || null;
   const totalWorkingHours = me?.attendenceRecords?.[0]?.totalWorkingHours || 0;
@@ -63,6 +63,8 @@ function Sidebar({ children }) {
       drawerCheckbox.checked = false;
     }
   };
+
+
 
   return (
     <div className="drawer lg:drawer-open h-screen">
@@ -144,41 +146,14 @@ function Sidebar({ children }) {
             </p>
           </div>
 
-          {/* Navigation Links */}
-          <ul className="menu w-full grow p-4 gap-1.5">
-            {links.map((li) => {
-              const isActive = activeLocation === li.link;
-              if (!li.role.includes(me?.role)) {
-                return;
-              }
-              return (
-                <li key={li.link}>
-                  <Link
-                    to={li.link}
-                    onClick={handleLinkClick}
-                    className={`flex focus-within:bg-theme-hover focus:text-theme-text items-center gap-4 py-3 px-4 rounded-xl transition-all duration-200 group font-semibold text-sm text-theme-text
-                      ${isActive
-                        ? "bg-theme-hover border-l-4 text-theme-text border-l-theme-text shadow-lg scale-[1.02]"
-                        : "hover:bg-theme-hover/50 hover:text-theme-text"
-                      }`}
-                  >
-                    {/* Keeps the icon matching text colors correctly */}
-                    <span className={`${isActive ? "[&_svg]:text-theme-text" : ""}`}>
-                      {li.icon}
-                    </span>
-                    <span>{li.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-
-            {/* Desktop profile accordion */}
-            <div className="hidden lg:block w-full mt-auto px-0 pb-4">
-              <details className="collapse collapse-arrow rounded-xl border border-theme-hover bg-theme-hover/60 text-theme-text">
-                <summary className="collapse-title min-h-0 px-1 py-2 hover:bg-theme-hover rounded-xl transition-colors">
+          {/* Desktop profile accordion */}
+          {isPending ? <div className="skeleton bg-theme-hover mt-2 rounded-none h-20 w-full"></div> :
+            <div className="hidden lg:block w-full rounded-none mt-2 px-0 pb-4">
+              <details className="collapse collapse-arrow pl-3 rounded-none bg-theme-bg-hard text-theme-text">
+                <summary className="collapse-title min-h-0 px-1 py-2 transition-colors">
                   <div className="flex items-center gap-1 pr-2">
                     <div className="avatar shrink-0">
-                      <div className="mask mask-hexagon-2 w-10">
+                      <div className="mask mask-hexagon-2 w-12">
                         <img
                           alt="User avatar"
                           src={
@@ -196,20 +171,15 @@ function Sidebar({ children }) {
                           .join(" ") || "Employee"}
                       </p>
                       <p className="truncate text-xs text-theme-text/80">
-                        View profile
+                        {me?.email}
                       </p>
                     </div>
                   </div>
                 </summary>
 
                 <div className="collapse-content px-3 text-theme-text">
-                  <div className="border-t border-theme-hover/40 pt-3">
-                    <p className="wrap-break-words text-sm text-theme-text">
-                      {me?.email || "N/A"}
-                    </p>
-                    <p className="mt-2 text-sm text-theme-text">
-                      Phone: {me?.phone || "N/A"}
-                    </p>
+                  <div className="border-t border-theme-hover pt-3">
+
                     <p className="mt-2 text-sm text-theme-text">
                       Check-in:{" "}
                       {checkIn
@@ -230,21 +200,46 @@ function Sidebar({ children }) {
                   </div>
                 </div>
               </details>
-            </div>
+            </div>}
+
+          {/* Navigation Links */}
+          <ul className="menu w-full grow py-4 pl-3 pr-0 gap-1.5">
+            {links.map((li) => {
+              const isActive = activeLocation === li.link;
+              if (!li.role.includes(me?.role)) {
+                return;
+              }
+              return (
+                <li key={li.link}>
+                  <Link
+                    to={li.link}
+                    onClick={handleLinkClick}
+                    className={`flex focus-within:bg-theme-hover focus:text-theme-text items-center gap-4 py-3 px-4 rounded-l-xl rounded-r-none transition-all duration-200 group font-semibold text-sm text-theme-text
+                      ${isActive
+                        ? "bg-theme-hover border-l-4 text-theme-text border-l-blue-700 shadow-md scale-[1.02]"
+                        : "hover:bg-theme-hover/50 hover:text-theme-text"
+                      }`}
+                  >
+                    {/* Keeps the icon matching text colors correctly */}
+                    <span className={`${isActive ? "[&_svg]:text-theme-text" : ""}`}>
+                      {li.icon}
+                    </span>
+                    <span>{li.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
 
             {/* Logout Action */}
-            <li className="mt-auto mb-6">
+            <li className="mt-auto mb-6 mr-3">
               <button
+                className="btn text-white bg-theme-hover border-0"
                 onClick={() => {
                   handleLinkClick();
                   logout();
                 }}
                 disabled={loggingOut}
-                className="flex items-center gap-4 py-3 px-4 hover:bg-theme-hover text-theme-text hover:text-theme-text rounded-xl transition-all duration-200 w-full text-left font-semibold text-sm group"
-              >
-                <LogOutIcon className="w-5 h-5 text-theme-text group-hover:scale-110 transition-transform" />
-                <span>Logout</span>
-              </button>
+              >Logout</button>
             </li>
           </ul>
         </div>
