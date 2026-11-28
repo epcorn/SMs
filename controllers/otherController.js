@@ -61,7 +61,8 @@ export const testNotification = async (req, res, next) => {
 
 export const midEveReminder = async (req, res, next) => {
   try {
-    const data = await otherServices.midEveReminder();
+    const checkpoint = req.query.checkpoint || "MID_EVE";
+    const data = await otherServices.midEveReminder(checkpoint);
     res.status(200).json(data);
   } catch (error) {
     next(error);

@@ -29,6 +29,10 @@ const attendenceHitorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  location: {
+    type: { type: String, default: "Point" },
+    coordinates: [Number],
+  },
 });
 
 const attendenceSchema = new mongoose.Schema(

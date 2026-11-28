@@ -1,20 +1,20 @@
 import mongoose from "mongoose";
 
-const connectDB = async (mongoUri) => {
-  if (mongoose.connection.readyState === 1) {
-    return mongoose.connection;
+const connectDB = async (uri) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      return;
+    }
+
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 10000,
+    });
+
+    console.log("MongoDB connected successfully", conn.connection.host);
+  } catch (error) {
+    console.error("MongoDB connection failed:", error.message);
+    throw error;
   }
-
-  await mongoose.connect(mongoUri, {
-    serverSelectionTimeoutMS: 10000,
-  });
-
-  console.log(
-    "MongoDB connected successfully:",
-    mongoose.connection.host
-  );
-
-  return mongoose.connection;
 };
 
 export default connectDB;

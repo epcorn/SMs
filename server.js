@@ -18,10 +18,7 @@ import { authentication } from "./middleware/authMiddleware.js";
 import empRouter from "./routes/empRoutes.js";
 import siteRouter from "./routes/siteRoutes.js";
 import otherRouter from "./routes/otherRoutes.js";
-import {
-  autoCheckoutUser,
-  cronService
-} from "./services/cron.service.js";
+import { autoCheckoutUser, cronService } from "./services/cron.service.js";
 import { saveFCMToken } from "./controllers/userController.js";
 import {
   midEveReminder,
@@ -73,25 +70,22 @@ const mongoUri =
   process.env.NODE_ENV === "production"
     ? process.env.MONGO_URI
     : process.env.MONGO_LOCAL;
-
+    
 if (!mongoUri) {
   throw new Error("MongoDB connection string is missing");
 }
 
-if (process.env.NODE_ENV !== "production") {
-  app.use(async (req, res, next) => {
-    try {
-      await connectDB(mongoUri);
-      next();
-    } catch (err) {
-      console.error("Database connection failed:", err.message);
-      res.status(500).json({
-        success: false,
-        message: "Database connection failed",
-      });
-    }
-  });
-}
+app.use(async (req, res, next) => {
+  try {
+    await connectDB(mongoUri);
+    next();
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      message: "Database connection unavailable",
+    });
+  }
+});
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ success: true, message: "API is running" });
@@ -111,7 +105,7 @@ app.get("/api/testreminders", testNotification);
 app.get("/api/cron/send-reminders", cronService);
 app.get("/api/cron/auto-checkout", autoCheckoutUser);
 
-app.get("/api/ene", midEveReminder);
+app.get("/api/reminder-checkin", midEveReminder);
 
 app.use(errorMiddleware);
 
@@ -121,7 +115,6 @@ const startServer = async () => {
   try {
     if (process.env.NODE_ENV !== "production") {
       await connectDB(mongoUri);
-
       app.listen(PORT, () => {
         console.log(`Server started on port ${PORT}`);
       });

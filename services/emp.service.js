@@ -142,6 +142,8 @@ const empServices = {
       throw createError("Already checked out for today", 400);
     }
 
+    const userLocation = await User.findById(user.id).select("location");
+    console.log("ln 146 smp seriveces", userLocation);
     // 2. MID_DAY (12:00 PM) & MID_EVE (3:00 PM)
     if (action === "MID_DAY" || action === "MID_EVE") {
       const config = CHECKPOINT_WINDOWS[action];
@@ -164,6 +166,7 @@ const empServices = {
         date: now,
         changedBy: user.id,
         reason: `${config.label} location verified`,
+        location: userLocation?.location,
       });
 
       await existAtt.save();
@@ -210,6 +213,7 @@ const empServices = {
         date: now,
         changedBy: user.id,
         reason: `${config.label} verified`,
+        location: userLocation?.location,
       });
 
       await existAtt.save();

@@ -147,7 +147,7 @@ function Sidebar({ children }) {
           </div>
 
           {/* Desktop profile accordion */}
-          {isPending ? <div className="skeleton bg-theme-hover mt-2 rounded-none h-20 w-full"></div> :
+          {isPending ? <div className="skeleton bg-theme-bg-light mt-2 rounded-none h-20 w-full"></div> :
             <div className="hidden lg:block w-full rounded-none mt-2 px-0 pb-4">
               <details className="collapse collapse-arrow pl-3 rounded-none bg-theme-bg-hard text-theme-text">
                 <summary className="collapse-title min-h-0 px-1 py-2 transition-colors">
@@ -280,7 +280,7 @@ function ProfileDetails({ me, checkIn, checkOut, workingHour }) {
       </div>
 
       <div className="space-y-2 pt-3 text-sm">
-        <p>
+        <p className="hidden">
           <span className="font-medium">Phone:</span>{" "}
           {me?.phone || "N/A"}
         </p>

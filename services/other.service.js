@@ -99,48 +99,89 @@ const otherServices = {
         },
       });
 
+    let sentCount = 0;
+
     for (const user of users) {
-      if (!user.attendenceRecords?.length) continue;
+      try {
+        if (!user.attendenceRecords?.length) continue;
 
-      const [hours, minutes] = user.duty.endTime.split(":").map(Number);
+        const [hours, minutes] = user.duty.endTime.split(":").map(Number);
 
-      const dutyEnd = new Date(startOfDay);
-      dutyEnd.setHours(hours, minutes, 0, 0);
+        const dutyEnd = new Date(startOfDay);
+        dutyEnd.setHours(hours, minutes, 0, 0);
 
-      const tenMinutesBefore = new Date(dutyEnd.getTime() - 10 * 60000);
-      const oneMinuteAfter = new Date(dutyEnd.getTime() + 60000);
+        const tenMinutesBefore = new Date(dutyEnd.getTime() - 10 * 60000);
+        const oneMinuteAfter = new Date(dutyEnd.getTime() + 60000);
 
-      let body;
+        let body;
 
-      if (now >= tenMinutesBefore && now < dutyEnd) {
-        body = "Your duty ends in 10 minutes. Please remember to clock out.";
-      } else if (
-        now >= oneMinuteAfter &&
-        now < new Date(oneMinuteAfter.getTime() + 60000)
-      ) {
-        body = "Your duty ended 1 minute ago. Please remember to clock out.";
+        if (now >= tenMinutesBefore && now < dutyEnd) {
+          body = "Your duty ends in 10 minutes. Please remember to clock out.";
+        } else if (
+          now >= oneMinuteAfter &&
+          now < new Date(oneMinuteAfter.getTime() + 60000)
+        ) {
+          body = "Your duty ended 1 minute ago. Please remember to clock out.";
+        }
+
+        if (!body) continue;
+
+        const tokens = [
+          ...new Set(user.fcmTokens.map(({ token }) => token).filter(Boolean)),
+        ];
+
+        if (!tokens.length) continue;
+
+        const response = await getMessaging().sendEachForMulticast({
+          tokens,
+          notification: {
+            title: `Hello ${user.firstname || "there"}, Time to Check Out!`,
+            body,
+          },
+          data: {
+            type: "checkout_reminder",
+            userId: user._id.toString(),
+          },
+        });
+
+        sentCount += response.successCount;
+
+        const deadTokens = response.responses
+          .map((result, index) =>
+            !result.success &&
+            [
+              "messaging/registration-token-not-registered",
+              "messaging/invalid-registration-token",
+            ].includes(result.error?.code)
+              ? tokens[index]
+              : null,
+          )
+          .filter(Boolean);
+
+        if (deadTokens.length) {
+          await User.updateOne(
+            { _id: user._id },
+            {
+              $pull: {
+                fcmTokens: { token: { $in: deadTokens } },
+              },
+            },
+          );
+        }
+      } catch (error) {
+        console.error(`Reminder failed for user ${user._id}:`, error.message);
       }
-
-      if (!body) continue;
-
-      const tokens = user.fcmTokens.map(({ token }) => token).filter(Boolean);
-
-      if (!tokens.length) continue;
-
-      await getMessaging().sendEachForMulticast({
-        tokens,
-        notification: {
-          title: `Hello ${user.firstname || "there"}, Time to Check Out!`,
-          body,
-        },
-        data: {
-          type: "checkout_reminder",
-          userId: user._id.toString(),
-        },
-      });
     }
 
-    return { message: "Checkout reminders processed." };
+    return {
+      success: sentCount > 0,
+      message:
+        sentCount > 0
+          ? "Checkout reminders sent successfully."
+          : "No users have notifications to send.",
+      totalUsers: users.length,
+      sentCount,
+    };
   },
 
   autoCheckOut: async () => {
@@ -189,67 +230,106 @@ const otherServices = {
     return {
       success: true,
       updatedCount,
+      attRecords,
       message: `Auto-checked out ${updatedCount} users successfully.`,
     };
   },
 
-  midEveReminder: async function () {
-    const { MID_DAY, MID_EVE } = CHECKPOINT_WINDOWS;
+  midEveReminder: async function (checkpointType = "MID_EVE") {
+    const checkpoint = CHECKPOINT_WINDOWS[checkpointType];
+
+    if (!checkpoint) {
+      throw new Error("Invalid checkpoint type");
+    }
 
     const toISTDateStr = (date) =>
-      new Date(date).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+      new Date(date).toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata",
+      });
 
     const today = toISTDateStr(new Date());
+
     const startOfToday = new Date(`${today}T00:00:00+05:30`);
     const endOfToday = new Date(`${today}T23:59:59.999+05:30`);
 
     const records = await Attendence.find({
       status: "Present",
-      createdAt: { $gte: startOfToday, $lte: endOfToday },
+      createdAt: {
+        $gte: startOfToday,
+        $lte: endOfToday,
+      },
     })
-      .populate({ path: "user", select: "fcmTokens firstname _id" })
+      .populate({
+        path: "user",
+        select: "fcmTokens firstname _id",
+      })
       .lean();
 
-    if (!records.length) return [];
+    if (!records.length) {
+      return {
+        message: "No attendance records found.",
+        sentCount: 0,
+        results: [],
+      };
+    }
 
     const messaging = getMessaging();
     const results = [];
+    let sentCount = 0;
 
     for (const record of records) {
-      if (!record.user) continue;
+      try {
+        if (!record.user) continue;
 
-      const isMidDayToday =
-        record[MID_DAY.field] && toISTDateStr(record[MID_DAY.field]) === today;
-      const isMidEveToday =
-        record[MID_EVE.field] && toISTDateStr(record[MID_EVE.field]) === today;
+        const alreadyMarked =
+          record[checkpoint.field] &&
+          toISTDateStr(record[checkpoint.field]) === today;
 
-      // if (!isMidDayToday || isMidEveToday) continue;
+        if (alreadyMarked) continue;
 
-      const rawTokens = record.user.fcmTokens || [];
-      const tokens = [...new Set(this.validateTokens(rawTokens))];
+        const rawTokens = record.user.fcmTokens || [];
 
-      if (!tokens.length) continue;
+        const tokens = [...new Set(this.validateTokens(rawTokens))];
 
-      const res = await messaging.sendEachForMulticast({
-        tokens,
-        notification: {
-          title: MID_EVE.label,
-          body: `Hi ${record.user.firstname || "there"}, please mark your ${MID_EVE.label}.`,
-        },
-        data: {
-          type: "mid_eve_reminder",
+        if (!tokens.length) continue;
+
+        const response = await messaging.sendEachForMulticast({
+          tokens,
+          notification: {
+            title: checkpoint.label,
+            body: `Hi ${record.user.firstname || "there"}, please mark your ${checkpoint.label}.`,
+          },
+          data: {
+            type:
+              checkpointType === "MID_DAY"
+                ? "mid_day_reminder"
+                : "mid_eve_reminder",
+            userId: String(record.user._id),
+          },
+        });
+
+        sentCount += response.successCount;
+
+        results.push({
           userId: String(record.user._id),
-        },
-      });
-
-      results.push({
-        userId: String(record.user._id),
-        successCount: res.successCount,
-        failureCount: res.failureCount,
-      });
+          successCount: response.successCount,
+          failureCount: response.failureCount,
+        });
+      } catch (error) {
+        console.error(
+          `Reminder failed for user ${record.user?._id}:`,
+          error.message,
+        );
+      }
     }
 
-    return { results };
+    return {
+      message: sentCount
+        ? `${checkpoint.label} reminders sent successfully.`
+        : "No users have notifications to send.",
+      sentCount,
+      results,
+    };
   },
 };
 

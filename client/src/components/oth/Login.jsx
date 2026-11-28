@@ -1,4 +1,3 @@
-
 import { useLoginMutation } from "@/hooks/authHooks";
 import useAuthStore from "@/store/authStore";
 import { useEffect, useState } from "react";
@@ -18,16 +17,13 @@ function Login() {
   const [status, setStatus] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { mutateAsync: login, isPending: loggingIn } =
-    useLoginMutation();
+  const { mutateAsync: login, isPending: loggingIn } = useLoginMutation();
 
   const authState = useAuthStore((state) => state.user);
   const currentUser = authState?.user || authState;
 
   useEffect(() => {
-    if (currentUser?.role)
-      navigate("/attendence", { replace: true });
-
+    if (currentUser?.role) navigate("/attendence", { replace: true });
   }, [currentUser, navigate]);
 
   const handleSubmit = async (e) => {
@@ -42,25 +38,20 @@ function Login() {
 
       setStatus(res.msg);
 
-      navigate(
-        res.user.role === "employee"
-          ? "/attendence"
-          : "/attendence",
-        { replace: true }
-      );
+      navigate(res.user.role === "employee" ? "/attendence" : "/attendence", {
+        replace: true,
+      });
     } catch (error) {
       setStatus(
         error?.msg ||
-        error?.message ||
-        "Invalid email or password. Please try again."
+          error?.message ||
+          "Invalid email or password. Please try again.",
       );
     }
   };
 
-
   return (
     <div className="relative isolate min-h-screen w-full overflow-hidden bg-[#080E1B] text-white">
-
       {/* Full-screen Background */}
       <div
         className="fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat"
@@ -75,12 +66,9 @@ function Login() {
 
       {/* Main Layout */}
       <div className="relative flex min-h-screen w-full items-center justify-center px-4 py-8 sm:px-8">
-
         <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-white/15 bg-[#101827]/85 shadow-[0_30px_100px_rgba(0,0,0,0.55)] backdrop-blur-xl lg:min-h-[620px] lg:grid-cols-2">
-
           {/* Left Image Section */}
           <div className="relative hidden min-h-[620px] overflow-hidden lg:block">
-
             <img
               src="/bg/team.jpg"
               alt="Professional team"
@@ -108,23 +96,19 @@ function Login() {
 
               <h1 className="text-4xl font-semibold leading-tight text-white">
                 Everything your team needs,
-                <span className="block text-blue-300">
-                  all in one place.
-                </span>
+                <span className="block text-blue-300">all in one place.</span>
               </h1>
 
               <p className="mt-4 max-w-sm text-sm leading-6 text-white/70">
-                Simplifying attendance, employee management
-                and everyday operations.
+                Simplifying attendance, employee management and everyday
+                operations.
               </p>
             </div>
           </div>
 
           {/* Right Login Section */}
           <div className="flex min-h-[620px] items-center justify-center bg-orange-700 px-6 py-12 sm:px-12 lg:px-14">
-
             <div className="w-full max-w-sm">
-
               {/* Mobile Branding */}
               <div className="mb-10 flex items-center gap-3 lg:hidden">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-blue-300/20 bg-blue-500/15">
@@ -159,15 +143,25 @@ function Login() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <fieldset className="fieldset">
-                  <legend className="fieldset-legend text-slate-300">EMAIL ADDRESS</legend>
+                  <legend className="fieldset-legend text-slate-300">
+                    EMAIL ADDRESS
+                  </legend>
                   <label className="input bg-white/40 text-black border-2 w-full">
                     <Mail size={18} className="opacity-50" />
-                    <input type="email" name="email" required placeholder="name@company.com" autoComplete="username" />
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="name@company.com"
+                      autoComplete="username"
+                    />
                   </label>
                 </fieldset>
 
                 <fieldset className="fieldset">
-                  <legend className="fieldset-legend text-slate-300">PASSWORD</legend>
+                  <legend className="fieldset-legend text-slate-300">
+                    PASSWORD
+                  </legend>
                   <label className="input bg-white/40 text-black border-2 w-full">
                     <Lock size={18} className="opacity-50" />
                     <input
@@ -181,18 +175,26 @@ function Login() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="btn btn-ghost btn-xs btn-circle opacity-60 hover:opacity-100"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }>
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </label>
                 </fieldset>
 
-                {status && <div role="alert" className="alert alert-info text-sm">{status.message || status}</div>}
+                {status && (
+                  <div role="alert" className="alert alert-info text-sm">
+                    {status.message || status}
+                  </div>
+                )}
 
-                <button type="submit" className="btn bg-theme-bg w-full border-warning-content/30 shadow-orange-950"
-                > Sign In </button>
-
+                <button
+                  type="submit"
+                  className="btn bg-theme-bg w-full border-warning-content/30 shadow-orange-950">
+                  {" "}
+                  Sign In{" "}
+                </button>
               </form>
 
               {/* Footer */}
@@ -205,17 +207,16 @@ function Login() {
                 </div>
 
                 <p className="mt-5 text-center text-[10px] tracking-wide text-slate-600">
-                  © {new Date().getFullYear()} Squad Management System. All rights reserved.
+                  © {new Date().getFullYear()} Squad Management System. All
+                  rights reserved.
                 </p>
               </div>
-
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-
 }
 
 export default Login;

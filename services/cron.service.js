@@ -8,7 +8,6 @@ export const cronService = async (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {
-    console.log("Running production reminder notification via API trigger...");
     const result = await otherServices.reminderNotification();
     return res.status(200).json({ success: true, result });
   } catch (error) {

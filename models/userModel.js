@@ -182,7 +182,7 @@ const userSchema = new mongoose.Schema(
 
     location: {
       type: { type: String, default: "Point" },
-      coordinates: [Number],
+      coordinates: { type: [Number], default: undefined },
     },
 
     //for push notification

@@ -63,7 +63,7 @@ const useGpsStore = create((set, get) => ({
           set({ error: err.message });
           reject(err);
         },
-        { enableHighAccuracy: false, maximumAge: 60000, timeout: 50000 }
+        { enableHighAccuracy: true, maximumAge: 60000, timeout: 50000 }
       );
 
       set({ watchId: id });

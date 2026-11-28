@@ -45,7 +45,7 @@ function App() {
 
     sendCoords();
   }, [location, user?.user?.id, setCoords]);
-  
+
   useEffect(() => {
     startTracking();
     return () => stopTracking();
