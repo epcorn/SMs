@@ -2,7 +2,7 @@
 import React, { useState } from "react"
 import DashboardStats from "@/components/admin/DashboardStats"
 import DashboardTable from "@/components/admin/DashboardTable"
-import { useGetDashboardStats, useGetDashboardUserStats } from "@/hooks/authHooks"
+import { useGetDashboardStats, useGetDashboardUserStats, useGetMonthlyReports } from "@/hooks/authHooks"
 import { useGetDuties } from "@/hooks/empHooks"
 import { dateFormat } from "@/utils/helperfn"
 
@@ -18,6 +18,7 @@ function Dashboard() {
   // const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
   const { data: userStats, } = useGetDashboardUserStats(date);
   const { data: statsData, isPending: gettingStats } = useGetDashboardStats(date);
+  const { mutateAsync: reports } = useGetMonthlyReports();
   // const { data: dutyData, } = useGetDuties({ date: currentDate });
 
   return (
@@ -25,6 +26,10 @@ function Dashboard() {
       <header className="my-3 shrink-0">
         <div className="flex justify-between">
           <h2 className="text-3xl font-bold">Dashboard</h2>
+          <button className="btn bg-theme-hover" onClick={async () => await reports()}>
+            <span className="text-white">Report</span>
+          </button>
+
           <input type="date" className="input w-fit" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
       </header>

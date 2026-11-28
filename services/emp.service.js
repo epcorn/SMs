@@ -143,8 +143,7 @@ const empServices = {
     }
 
     const userLocation = await User.findById(user.id).select("location");
-    console.log("ln 146 smp seriveces", userLocation);
-    // 2. MID_DAY (12:00 PM) & MID_EVE (3:00 PM)
+
     if (action === "MID_DAY" || action === "MID_EVE") {
       const config = CHECKPOINT_WINDOWS[action];
 
@@ -208,7 +207,7 @@ const empServices = {
 
       existAtt[config.field] = now;
       existAtt.history.push({
-        action, // "MID_DAY" or "MID_EVE"
+        action,
         status: existAtt.status,
         date: now,
         changedBy: user.id,

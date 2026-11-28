@@ -13,7 +13,7 @@ import { authentication } from "../middleware/authMiddleware.js";
 
 const userRouter = Router();
 userRouter.post("/refresh", handleRefresh);
-userRouter.get("/report", getMonthlyAttandenceReport);
+userRouter.post("/report", getMonthlyAttandenceReport);
 
 userRouter.use(authentication);
 userRouter.get("/me", getMe);
